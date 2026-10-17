@@ -1,0 +1,18 @@
+# Local development services. Production runs on Railway (ADR-0012).
+services:
+  falkordb:
+    # Pinned tag: never use `latest` in configs (SPEC section 4).
+    image: falkordb/falkordb:v4.22.1
+    ports:
+      - "6379:6379"  # Redis protocol (falkordb-py connects here)
+      - "3000:3000"  # FalkorDB Browser UI
+    volumes:
+      - falkordb-data:/var/lib/falkordb/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "PING"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  falkordb-data:

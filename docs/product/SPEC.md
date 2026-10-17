@@ -219,7 +219,7 @@ def experts_for(graph: OrgGraph, component: str, limit: int = 5) -> ToolResult:
 ## 9. Module requirements
 
 ### `graph-core`
-- Connect using `FALKORDB_URL`; one graph per org named `org:<OrgName>`.
+- Connect using `FALKORDB_URL`; one graph per org named `org:<login lowercased>` via `graph_name_for()`.
 - Idempotent bootstrap creates every index in [graph-model.md](../architecture/graph-model.md).
 - A read-only query helper (`ro_query`, using `GRAPH.RO_QUERY`) that every tool and the fallback must use.
 
@@ -320,7 +320,7 @@ No coverage percentage target. Every module seam in §9 has at least one test, a
 
 The spec is done when all of these are true and verified:
 
-1. **Ingestion:** `org:FalkorDB` holds the 9 repos × 12 months; a second run adds 0 nodes and 0 edges.
+1. **Ingestion:** `org:falkordb` holds the 9 repos × 12 months; a second run adds 0 nodes and 0 edges.
 2. **Hero questions:** for each of US-1–US-5, 3 example questions return correct answers (checked by hand against GitHub) with an evidence path whose every edge exists in the graph (automated test).
 3. **Decisions:** at least 30 Decisions extracted from FalkorDB repos; 10 spot-checked by a teammate as accurate.
 4. **Triage:** a dry run on a real FalkorDB issue returns a component, at least 1 related issue, an Expert and a draft reply. Filing an issue on the sandbox produces a label, an assignee or mention, and a comment **within 30 seconds**, through the webhook.

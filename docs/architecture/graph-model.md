@@ -4,11 +4,11 @@
 
 ## Graphs
 
-FalkorDB holds **one graph per org** (multigraph):
+FalkorDB holds **one graph per org** (multigraph). Names come from `graph_name_for(org)` and are **always lowercase**, because GitHub logins are case-insensitive and `FalkorDB` / `falkordb` must never become two graphs (decided in AEV-17):
 
 | Graph | Contents |
 |---|---|
-| `org:FalkorDB` | The 9 demo repos, last 12 months ([ADR-0004](../adr/0004-product-scope-and-data.md)) |
+| `org:falkordb` | The 9 demo repos, last 12 months ([ADR-0004](../adr/0004-product-scope-and-data.md)) |
 | `org:aevion-sandbox` | `hineshmiyani/aevion-sandbox`, for the live triage demo |
 
 ## Diagram
@@ -83,6 +83,10 @@ All times are **epoch milliseconds** (integers). `key` is the MERGE key and is u
 | `AFFECTS` | Decision → Component | | |
 | `SUPERSEDES` | Decision → Decision | `at` | Time chain for "what did we believe before?" |
 
+## Graph lifecycle
+
+FalkorDB's read-only command (`GRAPH.RO_QUERY`) **fails on a graph that doesn't exist yet** ("Invalid graph operation on empty key"); only `GRAPH.QUERY` creates one. So every org graph is created by `bootstrap()` (`OrgGraph.ensure_exists()` plus indexes) before any tool reads from it, and a read on a missing graph raises `GraphNotFoundError`. Found and tested in AEV-17.
+
 ## Indexes
 
 ```cypher
@@ -102,8 +106,9 @@ CALL db.idx.fulltext.createNodeIndex('Decision', 'summary', 'rationale')
 
 "Who knows component X?" is answered live ([ADR-0011](../adr/0011-graph-data-model.md) §3). The weights are design constants: merged PR authored 3, review 2, comment 0.5, with exponential recency decay (half-life ~180 days). The **evidence** is the list of PRs behind each score.
 
+**Verified on FalkorDB v4.22.1** (AEV-17, `tests/integration/test_falkordb_features.py`): `timestamp()`, `exp()`, `CASE type(r)`, list slicing and the full query below run as written.
+
 ```cypher
-// Sketch only: verify function support against FalkorDB during implementation.
 MATCH (c:Component {key: $component})<-[:IN_COMPONENT]-(:File)<-[:MODIFIES]-(pr:PullRequest)
 WHERE pr.merged_at IS NOT NULL
 MATCH (p:Person)-[r:AUTHORED|REVIEWED]->(pr)
