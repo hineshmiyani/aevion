@@ -13,7 +13,8 @@ Three people will work in parallel for about 1.5 days. A markdown checklist in t
 3. **Branch names:** `<type>/<task-id>`, for example `feat/AEV-12`.
 4. **Commit subjects:** `<type>: <task-id> - <message>`, with a bullet-point body.
 5. **Types:** `feat`, `bugfix`, `hotfix`, `chore`, `docs`, `style`, `refactor`, `test`, `perf`, `ci`, `build`.
-6. **No AI attribution** in code, commits or PRs. AI use is disclosed only in `docs/process/ai-usage-disclosure.md` (hackathon Rule 11).
+6. **Merge commits only** (added 2026-10-17, AEV-41): task PRs are merged with a two-parent merge commit whose subject follows the commit format plus `(#n)`. Squash merging is disabled on the repo and rebase merging must not be used, because both cut the link between a task branch and `develop`. The first nine merges were rebuilt as merge commits the same day.
+7. **No AI attribution** in code, commits or PRs. AI use is disclosed only in `docs/process/ai-usage-disclosure.md` (hackathon Rule 11).
 
 `tasks/plan.md` remains the plan document. Addy Osmani's planning skill supports an external tracker when the project's agent rules name one, so `CLAUDE.md` names the Notion database.
 

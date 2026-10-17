@@ -51,6 +51,10 @@ feat: AEV-12 - Load PR review comments into the graph
 - Title: same format as the commit subject, for example `feat: AEV-12 - Load PR review comments into the graph`.
 - Body: fill in the PR template, including the Notion task link.
 - At least one teammate reviews before merge. After merge, set the task to **Done** and paste the PR link into its **PR** field.
+- **Merge with "Create a merge commit"** (squash merging is disabled on the repo; don't use "Rebase and merge" either). Edit the merge commit title to the PR title format, for example `feat: AEV-12 - Load PR review comments into the graph (#12)`. From the CLI:
+  ```bash
+  gh pr merge 12 --merge --subject "feat: AEV-12 - Load PR review comments into the graph (#12)"
+  ```
 - **Keep the branch after merging.** Don't click "Delete branch" or pass `--delete-branch`, and don't delete it locally. Task branches stay as history.
 
 ## No AI attribution
