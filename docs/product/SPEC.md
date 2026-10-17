@@ -205,7 +205,7 @@ def experts_for(graph: OrgGraph, component: str, limit: int = 5) -> ToolResult:
 
 | Method + path | Request | Response | Module |
 |---|---|---|---|
-| `POST /api/ask` | `{org, question}` | `{answer, tool_calls: [{tool, args}], evidence: EvidencePath, cypher: [string], model, cached}` | `api` → `agent` |
+| `POST /api/ask` | `{org, question}` | `{answer, citations: [{n, node_id}], tool_calls: [{tool, args}], evidence: EvidencePath, cypher: [string], model, cached}` | `api` → `agent` |
 | `POST /api/tools/{tool}` | tool parameters | `ToolResult` | `api` → `tools` |
 | `POST /api/triage` | `{org, issue_key, mode: "dry_run" \| "apply"}` | `{duplicates, component, expert, draft_reply, actions: [{type, status}], evidence}` | `api` → `triage` |
 | `GET /api/graph/neighborhood` | `?org&key&depth≤2` | `EvidencePath` | `api` → `graph-core` |
@@ -213,6 +213,8 @@ def experts_for(graph: OrgGraph, component: str, limit: int = 5) -> ToolResult:
 | `GET /healthz` | — | `{falkordb: "ok", graphs: [...]}` | `api` |
 
 `EvidencePath` = `{nodes: [{id, label, title, url?}], edges: [{source, target, type}]}`. Every edge in it must exist in the graph.
+
+`answer` is plain text with `**bold**`, `` `code` `` and `[n]` citation markers; `citations` maps each `n` to an evidence node id, numbered in reading order (added in AEV-28).
 
 ---
 
