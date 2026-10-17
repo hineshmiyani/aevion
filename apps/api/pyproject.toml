@@ -13,9 +13,13 @@ requires-python = ">=3.13"
 dependencies = [
     "falkordb>=1.8.0",
     "fastapi>=0.143.3",
+    "httpx>=0.28.1",
     "pydantic-settings>=2.16.0",
     "uvicorn[standard]>=0.54.0",
 ]
+
+[project.scripts]
+aevion = "aevion.cli:main"
 
 [build-system]
 requires = ["uv_build>=0.13.1,<0.14.0"]

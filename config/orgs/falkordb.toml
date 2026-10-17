@@ -1,0 +1,36 @@
+# Demo dataset (ADR-0004): 9 FalkorDB repos, last 12 months.
+org = "FalkorDB"
+since_months = 12
+component_depth = 2  # directory levels that form a Component (SPEC OQ-4)
+
+# Logins treated as bots in addition to GitHub's own Bot accounts.
+bot_logins = ["dependabot", "renovate", "github-actions", "codecov", "coderabbitai"]
+
+[[repos]]
+name = "FalkorDB"
+
+[[repos]]
+name = "GraphRAG-SDK"
+
+[[repos]]
+name = "QueryWeaver"
+
+[[repos]]
+name = "code-graph"
+
+[[repos]]
+name = "falkordb-browser"
+
+[[repos]]
+name = "falkordb-py"
+component_depth = 1  # flat package: falkordb/, tests/, docs/
+
+[[repos]]
+name = "falkordb-ts"
+
+[[repos]]
+name = "FalkorDB-MCPServer"
+
+[[repos]]
+name = "docs"
+component_depth = 1
