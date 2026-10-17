@@ -8,9 +8,13 @@ bot_logins = ["dependabot", "renovate", "github-actions", "codecov", "coderabbit
 
 [[repos]]
 name = "FalkorDB"
+# graph/src holds a whole subsystem; split it one level deeper
+component_depth_overrides = { "graph/src" = 3 }
 
 [[repos]]
 name = "GraphRAG-SDK"
+# code lives at graphrag_sdk/src/graphrag_sdk/<area> (ingestion, retrieval, ...)
+component_depth_overrides = { "graphrag_sdk/src/graphrag_sdk" = 4, "graphrag_sdk/tests" = 3 }
 
 [[repos]]
 name = "QueryWeaver"

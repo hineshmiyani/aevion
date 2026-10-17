@@ -37,7 +37,12 @@ def ingest_repo(graph: OrgGraph, client: GitHubClient, config: OrgConfig, name: 
         batch = Batch()
         for node in page["pullRequests"]["nodes"]:
             pr = pull_request_from(
-                node, report.repo, repo_config.component_depth, config.bot_logins, batch
+                node,
+                report.repo,
+                repo_config.component_depth,
+                config.bot_logins,
+                batch,
+                repo_config.depth_overrides,
             )
             report.file_changes += len(pr.files)
         load_batch(graph, batch)

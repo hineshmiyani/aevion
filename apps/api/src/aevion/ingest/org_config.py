@@ -1,7 +1,7 @@
 """Per-org ingestion config, read from config/orgs/<org>.toml."""
 
 import tomllib
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
@@ -10,6 +10,7 @@ from pathlib import Path
 class RepoConfig:
     name: str
     component_depth: int
+    depth_overrides: dict[str, int] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -39,7 +40,13 @@ def load_org_config(path: Path) -> OrgConfig:
         org=data["org"],
         since_months=int(data.get("since_months", 12)),
         repos=tuple(
-            RepoConfig(name=r["name"], component_depth=int(r.get("component_depth", default_depth)))
+            RepoConfig(
+                name=r["name"],
+                component_depth=int(r.get("component_depth", default_depth)),
+                depth_overrides={
+                    k: int(v) for k, v in r.get("component_depth_overrides", {}).items()
+                },
+            )
             for r in data["repos"]
         ),
         bot_logins=frozenset(login.lower() for login in data.get("bot_logins", [])),

@@ -162,6 +162,7 @@ def pull_request_from(
     component_depth: int,
     bot_logins: frozenset[str],
     batch: Batch,
+    depth_overrides: dict[str, int] | None = None,
 ) -> PullRequestRec:
     key = f"{repo}#{node['number']}"
     author = person_from(node.get("author"), bot_logins)
@@ -193,8 +194,8 @@ def pull_request_from(
             file_key=f"{repo}:{f['path']}",
             path=f["path"],
             is_doc=is_doc(f["path"]),
-            component_key=component_key(repo, f["path"], component_depth),
-            component_path=component_path(f["path"], component_depth),
+            component_key=component_key(repo, f["path"], component_depth, depth_overrides),
+            component_path=component_path(f["path"], component_depth, depth_overrides),
             additions=int(f.get("additions") or 0),
             deletions=int(f.get("deletions") or 0),
         )
