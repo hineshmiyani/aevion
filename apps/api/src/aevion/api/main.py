@@ -6,10 +6,11 @@ from fastapi import Depends, FastAPI
 from fastapi.responses import JSONResponse
 
 from aevion.api.deps import get_db
-from aevion.api.routes import tools
+from aevion.api.routes import ask, tools
 
 app = FastAPI(title="Aevion API", version="0.1.0")
 app.include_router(tools.router)
+app.include_router(ask.router)
 
 __all__ = ["app", "get_db"]
 
