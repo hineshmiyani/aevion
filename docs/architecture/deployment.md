@@ -35,10 +35,14 @@ Secrets live in the services' environment, set from the local `.env` through std
 
 ## Deploying
 
+- **Web:** the Vercel project is connected to the GitHub repo. A push to `main` deploys production; every PR gets a preview build, which shows as the `Vercel` check. Project settings: root directory `apps/web`, install `npx --yes pnpm@12.14.0 install --frozen-lockfile`, build `npx --yes pnpm@12.14.0 run build`, Node 24.x.
+- **API:** deployed from the CLI:
+
 ```bash
-railway up --service api --detach          # from the repo root
-(cd apps/web && vercel deploy --prod --yes)
+railway up --service api --detach
 ```
+
+Why the pinned commands: git builds start at the repo root, which has no `package.json`, so Vercel's Corepack detection never sees `"packageManager": "pnpm@12.14.0"` in `apps/web` and falls back to an old pnpm that can't read pnpm 12's lockfile (`ERR_INVALID_THIS`). The first CLI deploys worked only because they uploaded `apps/web` as the root.
 
 ## Loading the graph
 
@@ -61,4 +65,5 @@ After a re-ingest or `aevion warm-cache --refresh`, repeat the copy.
 ## Lessons from the first deploy
 
 - **Plans that look fine locally can time out in production.** FalkorDB's default query `TIMEOUT` is 1 s. The triage query that found fixing PRs took 0.8 s locally because FalkorDB planned it from a scan of every File; on Railway it timed out. Splitting the pattern with `WITH` made it start from the `Issue.key` index (5 ms). See the note in [cypher-queries.md](cypher-queries.md).
+- Vercel's git integration, switched on by `vercel link`, built the release PR from the repo root and failed twice: no Next.js at the root, then the wrong pnpm. Fixed with the root directory and pinned commands above.
 - The Railway CLI's `volume add -s <service>` crashed; linking the service first (`railway service link <name>`) and then `railway volume add` worked.
