@@ -2,7 +2,7 @@
 
 > Team **Aevion**'s entry for [Graph Hacks: Context for AI Agents](https://www.wemakedevs.org/hackathons/falkordb) (WeMakeDevs × FalkorDB, Oct 15–18, 2026).
 
-**Status:** design phase. Product direction and core decisions are locked ([ADRs 0001–0009](docs/adr/)); graph schema and deployment are next ([docs/grilling/](docs/grilling/)).
+**Status:** design phase. Product, graph model and deployment are locked ([ADRs 0001–0012](docs/adr/), [graph model](docs/architecture/graph-model.md)). The spec is next.
 
 ## What we're building
 
