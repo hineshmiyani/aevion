@@ -9,7 +9,7 @@ FalkorDB holds **one graph per org** (multigraph). Names come from `graph_name_f
 | Graph | Contents |
 |---|---|
 | `org:falkordb` | The 9 demo repos, last 12 months ([ADR-0004](../adr/0004-product-scope-and-data.md)) |
-| `org:aevion-sandbox` | `hineshmiyani/aevion-sandbox`, for the live triage demo |
+| `org:aevion-sandbox` | `hineshmiyani/aevion-sandbox`, for the live triage demo. Filled by the webhook (issues, comments) and holds a `TriageRun` per triaged issue. The *reasoning* for a sandbox issue runs on `org:falkordb` |
 
 ## Diagram
 
@@ -43,6 +43,7 @@ graph LR
   Decision -- MADE_BY --> Person
   Decision -- AFFECTS --> Component
   Decision -- SUPERSEDES --> Decision
+  TriageRun -- FOR --> Issue
 ```
 
 ## Node labels
@@ -61,6 +62,7 @@ All times are **epoch milliseconds** (integers). `key` is the MERGE key and is u
 | `Label` | `key` (`FalkorDB/FalkorDB:bug`) | `name`, `color`, `repo` | GitHub API |
 | `Release` | `key` (`FalkorDB/FalkorDB@v4.8.0`) | `tag`, `name`, `published_at`, `url`, `pr_keys` | GitHub API (last 12 months) |
 | `Team` | `key` (`FalkorDB/falkordb-core`) | `name` | CODEOWNERS team owners (membership isn't public, so teams aren't expanded to people) |
+| `TriageRun` | `issue_key` | `at`, `result` (the full triage response as JSON: proposals, action statuses, evidence) | Sandbox graph only: one per triaged issue, so a redelivered webhook or a second apply never comments twice |
 | `Decision` | `id` (content hash) | `summary`, `rationale`, `alternatives`, `decided_at`, `confidence`, `model`, `source_url` | LLM extraction ([ADR-0010](../adr/0010-llm-model-bake-off.md)) |
 
 ## Relationship types
@@ -85,6 +87,7 @@ All times are **epoch milliseconds** (integers). `key` is the MERGE key and is u
 | `MADE_BY` | Decision → Person | | |
 | `AFFECTS` | Decision → Component | | |
 | `SUPERSEDES` | Decision → Decision | `at` | Time chain for "what did we believe before?" |
+| `FOR` | TriageRun → Issue | | Sandbox graph only |
 
 ## Graph lifecycle
 
@@ -104,6 +107,7 @@ CREATE INDEX FOR (c:Comment) ON (c.id)
 CREATE INDEX FOR (f:File) ON (f.key)
 CREATE INDEX FOR (c:Component) ON (c.key)
 CREATE INDEX FOR (d:Decision) ON (d.id)
+CREATE INDEX FOR (t:TriageRun) ON (t.issue_key)
 CREATE INDEX FOR (pr:PullRequest) ON (pr.merged_at)
 CALL db.idx.fulltext.createNodeIndex('Issue', 'title', 'body_excerpt')
 CALL db.idx.fulltext.createNodeIndex('Decision', 'summary', 'rationale')

@@ -26,6 +26,7 @@ INDEXES: tuple[Index, ...] = (
     Index("File", ("key",)),
     Index("Component", ("key",)),
     Index("Decision", ("id",)),
+    Index("TriageRun", ("issue_key",)),
     Index("Issue", ("title", "body_excerpt"), "FULLTEXT"),
     Index("Decision", ("summary", "rationale"), "FULLTEXT"),
 )

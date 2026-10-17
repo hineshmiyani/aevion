@@ -6,12 +6,13 @@ from fastapi import Depends, FastAPI
 from fastapi.responses import JSONResponse
 
 from aevion.api.deps import get_db
-from aevion.api.routes import ask, tools, triage
+from aevion.api.routes import ask, tools, triage, webhooks
 
 app = FastAPI(title="Aevion API", version="0.1.0")
 app.include_router(tools.router)
 app.include_router(ask.router)
 app.include_router(triage.router)
+app.include_router(webhooks.router)
 
 __all__ = ["app", "get_db"]
 

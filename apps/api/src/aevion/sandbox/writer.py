@@ -5,6 +5,7 @@ sandbox token, a fine-grained token that GitHub itself limits to that repo. Two 
 bug in one still can't touch FalkorDB's repos.
 """
 
+import os
 import time
 from typing import Any
 
@@ -33,6 +34,9 @@ class SandboxWriter:
             raise WriteNotAllowedError(f"{repo} is not an allowed sandbox repo")
         if not token:
             raise WriteNotAllowedError("SANDBOX_GITHUB_TOKEN is not set")
+        if transport is None and "PYTEST_CURRENT_TEST" in os.environ:
+            # Tests must never reach the real GitHub, even with a real token in .env.
+            raise WriteNotAllowedError("tests must give SandboxWriter a mock transport")
         self.repo = repo
         self._pause_s = pause_s
         self._http = httpx.Client(
@@ -73,6 +77,10 @@ class SandboxWriter:
             if "pull_request" not in item:
                 found.append(item)
         return found
+
+    def issue(self, number: int) -> dict[str, Any]:
+        item: dict[str, Any] = self._get(f"/issues/{number}", {})
+        return item
 
     def create_issue(self, title: str, body: str) -> dict[str, Any]:
         return self._write("POST", "/issues", {"title": title, "body": body})

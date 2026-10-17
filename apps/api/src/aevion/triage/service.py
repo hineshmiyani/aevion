@@ -18,7 +18,7 @@ from pydantic import BaseModel, Field
 from aevion.graph.client import OrgGraph
 from aevion.llm.client import LLMClient, LLMError
 from aevion.sandbox.safety import defuse_mentions, profile_url
-from aevion.tools.evidence import EvidencePath
+from aevion.tools.evidence import EvidencePath, ToolResult
 from aevion.tools.triage import TriageCandidatesArgs, triage_candidates
 
 Mode = Literal["dry_run", "apply"]
@@ -94,14 +94,23 @@ def triage(
     client: LLMClient | None = None,
     model: str | None = None,
 ) -> TriageResponse:
+    """A dry run on an issue that is in `graph`. Applying on the sandbox is sandbox/apply.py."""
     check_mode(issue_key, mode, allowed_repos)
     if mode == "apply":
-        raise NotImplementedError("applying triage on the sandbox arrives with the webhook")
+        raise NotImplementedError("apply runs through sandbox.apply, with the sandbox writer")
 
     result = triage_candidates(graph, TriageCandidatesArgs(issue=issue_key))
     if not result.rows:
         raise IssueNotFoundError(issue_key)
+    return plan(result, mode, client=client, model=model)
+
+
+def plan(
+    result: ToolResult, mode: Mode, *, client: LLMClient | None, model: str | None
+) -> TriageResponse:
+    """Turn a triage_candidates result into proposals and a drafted reply."""
     row = result.rows[0]
+    issue_key = row["issue"]["key"]
 
     duplicates = [s for s in row["similar"] if s["likely_duplicate"]]
     related = [s for s in row["similar"] if not s["likely_duplicate"]][:3]
@@ -116,7 +125,7 @@ def triage(
         "expert": expert and {"login": expert["login"], "url": profile_url(expert["login"])},
     }
     reply, used_model = _draft(client, model, facts)
-    reply = resolve_bare_refs(defuse_mentions(reply), issue_key, duplicates + related)
+    reply = resolve_bare_refs(defuse_mentions(reply), row["issue"]["repo"], duplicates + related)
 
     return TriageResponse(
         issue=row["issue"],
@@ -133,10 +142,10 @@ def triage(
     )
 
 
-def resolve_bare_refs(text: str, issue_key: str, known: list[dict[str, Any]]) -> str:
+def resolve_bare_refs(text: str, repo: str, known: list[dict[str, Any]]) -> str:
     """A bare `#123` autolinks to issue 123 of whatever repo the comment is posted in, which
-    on the sandbox is the wrong one. Link it to the item we meant, or stop it linking."""
-    repo = repo_of(issue_key)
+    on the sandbox is the wrong one. Link it to the item we meant (preferring `repo`, the repo
+    the issue is about), or stop it linking."""
     urls: dict[str, tuple[str, str]] = {}
     for item in known:
         refs = [(item["key"], item["url"])] + [(k, _url(k)) for k in item["fixed_by"]]

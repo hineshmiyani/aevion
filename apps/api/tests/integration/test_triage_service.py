@@ -12,6 +12,7 @@ from fastapi.testclient import TestClient
 
 from aevion.api.main import app, get_db
 from aevion.api.routes.ask import get_llm
+from aevion.api.routes.webhooks import get_writer
 from aevion.graph.client import OrgGraph
 from aevion.graph.naming import graph_name_for
 from aevion.graph.schema import bootstrap
@@ -57,7 +58,7 @@ def test_mentions_are_defused_but_code_and_emails_are_left_alone() -> None:
 def test_bare_refs_link_to_the_item_meant_or_stop_linking() -> None:
     known = [{"key": "FalkorDB/FalkorDB#90", "url": "u90", "fixed_by": ["FalkorDB/FalkorDB#101"]}]
     text = resolve_bare_refs(
-        "See #90, fixed by #101; also #7 and [x#5](y).", "FalkorDB/FalkorDB#1", known
+        "See #90, fixed by #101; also #7 and [x#5](y).", "FalkorDB/FalkorDB", known
     )
     assert text == (
         "See [FalkorDB/FalkorDB#90](u90), fixed by "
@@ -114,8 +115,9 @@ def test_triage_endpoint(
 
         real_repo_apply = {"org": org, "issue_key": f"{REPO}#95", "mode": "apply"}
         assert http.post("/api/triage", json=real_repo_apply).status_code == 403
+        app.dependency_overrides[get_writer] = lambda: None  # no token: apply can't run
         sandbox_apply = {"org": org, "issue_key": "hineshmiyani/aevion-sandbox#1", "mode": "apply"}
-        assert http.post("/api/triage", json=sandbox_apply).status_code == 501
+        assert http.post("/api/triage", json=sandbox_apply).status_code == 503
         missing = {"org": org, "issue_key": f"{REPO}#4040"}
         assert http.post("/api/triage", json=missing).status_code == 404
         assert http.post("/api/triage", json={"org": org, "issue_key": "nope"}).status_code == 422
