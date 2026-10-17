@@ -26,6 +26,9 @@ class Settings(BaseSettings):
     llm_budget_usd: float = 12.0  # hard stop; the OpenRouter key has its own credit limit too
     llm_data_dir: Path = REPO_ROOT / "data" / "llm"
 
+    # ADR-0005: the only repos triage may write to. Everything else gets a dry run.
+    triage_apply_repos: frozenset[str] = frozenset({"hineshmiyani/aevion-sandbox"})
+
     def resolved_github_token(self) -> str:
         if self.github_token:
             return self.github_token

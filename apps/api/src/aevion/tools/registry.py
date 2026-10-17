@@ -14,6 +14,7 @@ from aevion.tools.evidence import ToolResult
 from aevion.tools.experts import ExpertsForArgs, experts_for
 from aevion.tools.history import AreaHistoryArgs, area_history
 from aevion.tools.related import RelatedWorkArgs, related_work
+from aevion.tools.triage import TriageCandidatesArgs, triage_candidates
 
 
 @dataclass(frozen=True)
@@ -70,6 +71,13 @@ TOOLS: dict[str, Tool] = {
             "releases, and who drove the work.",
             CatchUpArgs,
             catch_up,  # type: ignore[arg-type]
+        ),
+        _tool(
+            "triage_candidates",
+            "Triage an issue: similar issues (likely duplicates), the Components that fixes for "
+            "issues like it changed, and the Experts for the top Component.",
+            TriageCandidatesArgs,
+            triage_candidates,  # type: ignore[arg-type]
         ),
     )
 }

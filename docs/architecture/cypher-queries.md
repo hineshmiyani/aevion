@@ -204,10 +204,60 @@ MERGE (new)-[s:SUPERSEDES]->(old)
 SET s.at = new.decided_at
 ```
 
+## `triage_candidates`: what is this issue about, and who should look? (US-6)
+
+Module: `tools/triage.py` · API: `POST /api/tools/triage_candidates` `{org, issue, limit?}`, and `POST /api/triage` `{org, issue_key, mode}` (`triage/service.py`)
+
+A new issue has no edges of its own yet, so the graph answers **by analogy**: issues like this one, the code that fixed them, and the people who know that code.
+
+**1. Similar issues.** Full-text candidates from the issue title's keywords, then re-ranked in Python by title coverage (as in `decision_trail`). A title coverage of 0.6 or more marks a *likely duplicate*:
+
+```cypher
+CALL db.idx.fulltext.queryNodes('Issue', $query) YIELD node, score
+WITH node, score WHERE node.key <> $key
+MATCH (node)-[:IN_REPO]->(r:Repo)
+OPTIONAL MATCH (pr:PullRequest)-[:FIXES]->(node)
+RETURN node.key AS key, node.title AS title, node.body_excerpt AS body, node.state AS state,
+       node.url AS url, r.full_name AS repo, score, collect(pr.key) AS fixed_by
+ORDER BY score DESC
+LIMIT $pool
+```
+
+**2. Component votes.** The Components that the similar issues' fixing PRs changed. A PR's vote is split across the Components it touched (weight / √n), so a focused fix counts for more than a sweeping refactor. Tests, CI, build, docs and root folders never vote, and only the issue's own repo can win:
+
+```cypher
+UNWIND $issues AS issue_key
+MATCH (i:Issue {key: issue_key})<-[:FIXES]-(pr:PullRequest)-[:MODIFIES]->(f:File)
+      -[:IN_COMPONENT]->(c:Component)
+WHERE NOT f.is_doc
+RETURN issue_key AS issue, pr.key AS pr, pr.title AS pr_title, pr.url AS pr_url,
+       f.key AS file, f.path AS path, c.key AS component, c.name AS name
+LIMIT 600
+```
+
+Two more votes: files the issue names (`op_merge.c`, `src/graph/graph.c`) matched to real `File` nodes, and Components whose path words match the title's keywords ("UDF" → `src/udf`). Path words in more than 10% of a repo's Components (like `graph` in FalkorDB) are too common to vote:
+
+```cypher
+UNWIND $paths AS mentioned
+MATCH (f:File)-[:IN_COMPONENT]->(c:Component)
+WHERE f.repo = $repo AND (f.path = mentioned OR f.path ENDS WITH ('/' + mentioned))
+RETURN mentioned, f.key AS file, f.path AS path, c.key AS component, c.name AS name
+LIMIT 20
+```
+
+Each pick gets a **strength** (strong ≥ 1.0 votes, moderate ≥ 0.4, else weak). A weak pick isn't proposed as a label, and the draft reply says the area is a guess.
+
+**3. Expert.** `experts_for` on the winning Component, minus the issue's author.
+
+**The reply never pings anyone** ([ADR-0013](../adr/0013-triage-never-pings-real-people.md)): the Expert is a real FalkorDB maintainer, so they're named as a profile link, `@login` in model output is defused, and bare `#123` references are linked to the item meant (or escaped), because on the sandbox they would autolink to the wrong issue.
+
+**Measured on the real graph:** the tool runs in about 1 s; a full dry run with the drafted reply in 4 to 6 s.
+
 ## FalkorDB Cypher notes
 
 - `ORDER BY` can't contain an aggregation directly (`ORDER BY count(x)` fails with "failed to map aggregation expression"); aggregate into an alias in `WITH`/`RETURN` and order by the alias.
 - `GRAPH.RO_QUERY` fails on a graph that doesn't exist yet; `bootstrap()` creates every org graph first.
+- `x ENDS WITH '/' + y` parses as `(x ENDS WITH '/') + y` and fails with "Type mismatch: expected Boolean but was String". Parenthesise the concatenation: `x ENDS WITH ('/' + y)`.
 
 ## Ingestion writes
 

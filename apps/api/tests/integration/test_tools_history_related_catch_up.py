@@ -107,6 +107,7 @@ def test_registry_exposes_the_tools() -> None:
         "area_history",
         "related_work",
         "catch_up",
+        "triage_candidates",
     ]
 
 

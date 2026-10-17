@@ -38,6 +38,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/ask": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ask Route */
+        post: operations["ask_route_api_ask_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/triage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Triage Route */
+        post: operations["triage_route_api_triage_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/healthz": {
         parameters: {
             query?: never;
@@ -59,6 +93,39 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AskRequest */
+        AskRequest: {
+            /** Org */
+            org: string;
+            /** Question */
+            question: string;
+        };
+        /**
+         * AskResponse
+         * @description The /api/ask contract (SPEC section 8).
+         */
+        AskResponse: {
+            /** Answer */
+            answer: string;
+            /** Citations */
+            citations?: components["schemas"]["Citation"][];
+            /** Tool Calls */
+            tool_calls?: components["schemas"]["ToolCallRecord"][];
+            evidence?: components["schemas"]["EvidencePath"];
+            /** Cypher */
+            cypher?: string[];
+            /** Model */
+            model: string;
+            /** Cached */
+            cached: boolean;
+        };
+        /** Citation */
+        Citation: {
+            /** N */
+            n: number;
+            /** Node Id */
+            node_id: string;
+        };
         /** EvidenceEdge */
         EvidenceEdge: {
             /** Source */
@@ -91,6 +158,15 @@ export interface components {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
+        /** ToolCallRecord */
+        ToolCallRecord: {
+            /** Tool */
+            tool: string;
+            /** Args */
+            args: {
+                [key: string]: unknown;
+            };
+        };
         /**
          * ToolResult
          * @description What every Cypher tool returns: rows for the agent, evidence and Cypher for the user.
@@ -109,6 +185,79 @@ export interface components {
             evidence: components["schemas"]["EvidencePath"];
             /** Cypher */
             cypher: string[];
+        };
+        /** TriageAction */
+        TriageAction: {
+            /**
+             * Type
+             * @enum {string}
+             */
+            type: "label" | "assign_or_mention" | "comment";
+            /** Value */
+            value: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "proposed" | "skipped" | "done" | "failed";
+            /** Detail */
+            detail?: string | null;
+        };
+        /** TriageRequest */
+        TriageRequest: {
+            /** Org */
+            org: string;
+            /**
+             * Issue Key
+             * @description e.g. 'FalkorDB/FalkorDB#3357'
+             */
+            issue_key: string;
+            /**
+             * Mode
+             * @default dry_run
+             * @enum {string}
+             */
+            mode: "dry_run" | "apply";
+        };
+        /**
+         * TriageResponse
+         * @description The /api/triage contract (SPEC section 8).
+         */
+        TriageResponse: {
+            /** Issue */
+            issue: {
+                [key: string]: unknown;
+            };
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "dry_run" | "apply";
+            /** Duplicates */
+            duplicates?: {
+                [key: string]: unknown;
+            }[];
+            /** Related */
+            related?: {
+                [key: string]: unknown;
+            }[];
+            /** Component */
+            component?: {
+                [key: string]: unknown;
+            } | null;
+            /** Expert */
+            expert?: {
+                [key: string]: unknown;
+            } | null;
+            /** Draft Reply */
+            draft_reply: string;
+            /** Actions */
+            actions?: components["schemas"]["TriageAction"][];
+            evidence?: components["schemas"]["EvidencePath"];
+            /** Cypher */
+            cypher?: string[];
+            /** Model */
+            model?: string | null;
         };
         /** ValidationError */
         ValidationError: {
@@ -178,6 +327,72 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ToolResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ask_route_api_ask_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AskRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AskResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    triage_route_api_triage_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TriageRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TriageResponse"];
                 };
             };
             /** @description Validation Error */
