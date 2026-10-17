@@ -35,10 +35,16 @@ Every planning, design and process document lives here, grouped by purpose. Code
 | hackathon | [brief.md](hackathon/brief.md) | Done |
 | hackathon | [submission-checklist.md](hackathon/submission-checklist.md) | Living |
 | research | [track-analysis.md](research/track-analysis.md) | Done |
-| grilling | [round-01.md](grilling/round-01.md) | **Awaiting answers** |
+| grilling | [round-01.md](grilling/round-01.md) | Answered |
 | adr | [0001-company-brain-direction.md](adr/0001-company-brain-direction.md) | Accepted |
 | adr | [0002-hybrid-ai-skills-workflow.md](adr/0002-hybrid-ai-skills-workflow.md) | Accepted (partly superseded by 0003) |
 | adr | [0003-notion-task-tracking-and-git-conventions.md](adr/0003-notion-task-tracking-and-git-conventions.md) | Accepted |
+| adr | [0004-product-scope-and-data.md](adr/0004-product-scope-and-data.md) | Accepted |
+| adr | [0005-triage-agent-writes-only-to-sandbox.md](adr/0005-triage-agent-writes-only-to-sandbox.md) | Accepted |
+| adr | [0006-graph-freshness.md](adr/0006-graph-freshness.md) | Accepted |
+| adr | [0007-graph-query-strategy.md](adr/0007-graph-query-strategy.md) | Accepted |
+| adr | [0008-tech-stack.md](adr/0008-tech-stack.md) | Accepted |
+| adr | [0009-llm-via-openrouter.md](adr/0009-llm-via-openrouter.md) | Accepted |
 | process | [ai-workflow.md](process/ai-workflow.md) | Done |
 | process | [ai-usage-disclosure.md](process/ai-usage-disclosure.md) | Living |
 | product | SPEC.md | Not started (after grilling) |
