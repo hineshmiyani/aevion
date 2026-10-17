@@ -1,6 +1,6 @@
 # Spec: Aevion, a Company Brain on FalkorDB
 
-**Status:** Draft v1, awaiting team approval · **Task:** AEV-6 · **Date:** 2026-10-17 · **Deadline:** 2026-10-18 23:59 IST
+**Status:** Approved v1 (2026-10-17) · **Task:** AEV-6 · **Date:** 2026-10-17 · **Deadline:** 2026-10-18 23:59 IST
 
 **Sources:** ADRs [0001](../adr/0001-company-brain-direction.md)–[0012](../adr/0012-deployment-and-sandbox.md), [GLOSSARY.md](../../GLOSSARY.md), [graph-model.md](../architecture/graph-model.md), [storyboard.md](../demo/storyboard.md). If this spec and an ADR disagree, the ADR wins until this spec is updated.
 
