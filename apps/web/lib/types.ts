@@ -27,3 +27,64 @@ export type AskResponse = {
 export type AskRequest = { org: string; question: string };
 
 export type AskFailure = { error: string; retryAfterSeconds?: number };
+
+// Triage (/api/triage). The API's dict fields are untyped in OpenAPI; these are their shapes,
+// as built by apps/api/src/aevion/tools/triage.py and triage/service.py.
+export type TriageMode = components["schemas"]["TriageRequest"]["mode"];
+export type TriageAction = components["schemas"]["TriageAction"];
+
+export type TriageIssue = {
+  key: string;
+  title: string;
+  state: string;
+  url: string;
+  repo: string;
+  author: string | null;
+  context_repo?: string; // sandbox issues: the repo whose code they were triaged against
+  context_reason?: string[];
+};
+
+export type SimilarIssue = {
+  key: string;
+  title: string;
+  state: string;
+  url: string;
+  repo: string;
+  match: number; // share of this issue's title keywords the similar title covers
+  fixed_by: string[];
+  likely_duplicate: boolean;
+};
+
+export type ComponentPick = {
+  key: string;
+  name: string;
+  votes: number;
+  strength: "strong" | "moderate" | "weak";
+  via: string[];
+};
+
+export type ExpertPick = {
+  login: string;
+  url: string;
+  score: number;
+  authored_prs: number;
+  reviewed_prs: number;
+  comments: number;
+};
+
+export type TriageResponse = {
+  issue: TriageIssue;
+  mode: TriageMode;
+  duplicates: SimilarIssue[];
+  related: SimilarIssue[];
+  component: ComponentPick | null;
+  expert: ExpertPick | null;
+  draft_reply: string;
+  actions: TriageAction[];
+  evidence: EvidencePath;
+  cypher: string[];
+  model: string | null;
+  sample?: boolean;
+};
+
+export type TriageRequest = { org: string; issue_key: string; mode: TriageMode };

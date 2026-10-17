@@ -1,5 +1,6 @@
 // POST /api/ask: forwards to the Aevion API (AEVION_API_URL, read at request time), or
 // serves the built-in sample answer when no API is configured.
+import { visitorHeaders } from "@/lib/proxy";
 import { sampleAnswer } from "@/lib/sample-answer";
 import type { AskFailure, AskRequest } from "@/lib/types";
 
@@ -12,14 +13,6 @@ function failure(status: number, error: string, retryAfterSeconds?: number) {
     status,
     headers: retryAfterSeconds ? { "Retry-After": String(retryAfterSeconds) } : undefined,
   });
-}
-
-// The API rate-limits per visitor, but sees this server's IP for everyone. Pass the visitor's
-// IP along, with the shared secret that tells the API to trust it.
-function visitorHeaders(request: Request): Record<string, string> {
-  const secret = process.env.AEVION_PROXY_SECRET;
-  const ip = request.headers.get("x-real-ip") ?? request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
-  return secret && ip ? { "X-Aevion-Client-IP": ip, "X-Aevion-Proxy-Secret": secret } : {};
 }
 
 export async function POST(request: Request) {
