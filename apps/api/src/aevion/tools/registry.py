@@ -8,8 +8,11 @@ from dataclasses import dataclass
 from pydantic import BaseModel
 
 from aevion.graph.client import OrgGraph
+from aevion.tools.catch_up import CatchUpArgs, catch_up
 from aevion.tools.evidence import ToolResult
 from aevion.tools.experts import ExpertsForArgs, experts_for
+from aevion.tools.history import AreaHistoryArgs, area_history
+from aevion.tools.related import RelatedWorkArgs, related_work
 
 
 @dataclass(frozen=True)
@@ -38,6 +41,27 @@ TOOLS: dict[str, Tool] = {
             "reviews and comments in that part of the codebase, with the PRs as evidence.",
             ExpertsForArgs,
             experts_for,  # type: ignore[arg-type]
+        ),
+        _tool(
+            "area_history",
+            "What's the history of a Component? Recent merged PRs, open issues tied to that code, "
+            "and the people most active there.",
+            AreaHistoryArgs,
+            area_history,  # type: ignore[arg-type]
+        ),
+        _tool(
+            "related_work",
+            "What else does an issue or PR touch? Linked issues and PRs, the files and Components "
+            "involved, and other PRs changing the same files.",
+            RelatedWorkArgs,
+            related_work,  # type: ignore[arg-type]
+        ),
+        _tool(
+            "catch_up",
+            "Catch me up on a Component or repo since a date: merged PRs, issues they closed, "
+            "releases, and who drove the work.",
+            CatchUpArgs,
+            catch_up,  # type: ignore[arg-type]
         ),
     )
 }

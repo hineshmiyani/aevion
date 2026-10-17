@@ -231,6 +231,31 @@ def load_batch(graph: OrgGraph, batch: Batch) -> None:
     _run(graph, UPSERT_ISSUE_COMMENTS, [c for c in comments if c["thread_key"] not in pr_keys])
 
 
+UNLINK_FILE_COMPONENTS = """
+MATCH (f:File {repo: $repo})-[r:IN_COMPONENT]->(:Component)
+DELETE r
+"""
+
+PRUNE_ORPHAN_COMPONENTS = """
+MATCH (c:Component {repo: $repo})
+WHERE NOT ()-[:IN_COMPONENT]->(c) AND NOT ()-[:OWNS]->(c)
+DETACH DELETE c
+"""
+
+
+def unlink_file_components(graph: OrgGraph, repo: str) -> None:
+    """Before re-ingesting with a new component depth: drop File→Component links only."""
+    graph.query(UNLINK_FILE_COMPONENTS, {"repo": repo})
+
+
+def prune_orphan_components(graph: OrgGraph, repo: str) -> int:
+    """After re-ingesting: delete Components nothing links to any more."""
+    before = graph.ro_query("MATCH (c:Component {repo: $repo}) RETURN count(c)", {"repo": repo})
+    graph.query(PRUNE_ORPHAN_COMPONENTS, {"repo": repo})
+    after = graph.ro_query("MATCH (c:Component {repo: $repo}) RETURN count(c)", {"repo": repo})
+    return int(before.rows[0][0]) - int(after.rows[0][0])
+
+
 def link_references(graph: OrgGraph) -> None:
     """Create FIXES / REFERENCES edges from the stored key lists. Idempotent."""
     for query in LINK_QUERIES:

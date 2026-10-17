@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field
 
 from aevion.graph.client import OrgGraph
 from aevion.tools.evidence import EvidenceBuilder, ToolResult
+from aevion.tools.scope import MATCH_COMPONENTS, as_dicts, resolve_components
 
 AUTHORED_WEIGHT = 3.0
 REVIEWED_WEIGHT = 2.0
@@ -29,16 +30,6 @@ class ExpertsForArgs(BaseModel):
     )
     limit: int = Field(default=5, ge=1, le=20)
 
-
-# Components matching an exact key, or a path fragment (optionally within one repo).
-MATCH_COMPONENTS = """
-MATCH (c:Component)
-WHERE (c.key = $component OR toLower(c.path_prefix) CONTAINS toLower($component))
-  AND ($repo IS NULL OR c.repo = $repo)
-RETURN c.key, c.name, c.repo
-ORDER BY c.key = $component DESC, size(c.path_prefix)
-LIMIT 5
-"""
 
 # Merged PRs in those Components, scored per person by role and recency.
 SCORE_PR_ACTIVITY = """
@@ -66,9 +57,7 @@ RETURN p.login AS login, cm.id AS comment, cm.url AS url, pr.key AS pr,
 
 
 def experts_for(graph: OrgGraph, args: ExpertsForArgs) -> ToolResult:
-    components = graph.ro_query(
-        MATCH_COMPONENTS, {"component": args.component, "repo": args.repo}
-    ).rows
+    components = resolve_components(graph, args.component, args.repo)
     component_keys = [row[0] for row in components]
     params = {
         "components": component_keys,
@@ -77,8 +66,8 @@ def experts_for(graph: OrgGraph, args: ExpertsForArgs) -> ToolResult:
         "reviewed": REVIEWED_WEIGHT,
         "comment": COMMENT_WEIGHT,
     }
-    pr_rows = _as_dicts(graph.ro_query(SCORE_PR_ACTIVITY, params)) if component_keys else []
-    comment_rows = _as_dicts(graph.ro_query(SCORE_COMMENTS, params)) if component_keys else []
+    pr_rows = as_dicts(graph.ro_query(SCORE_PR_ACTIVITY, params)) if component_keys else []
+    comment_rows = as_dicts(graph.ro_query(SCORE_COMMENTS, params)) if component_keys else []
 
     people: dict[str, dict[str, Any]] = {}
     for row in pr_rows:
@@ -137,7 +126,3 @@ def _person(people: dict[str, dict[str, Any]], login: str) -> dict[str, Any]:
         login,
         {"login": login, "score": 0.0, "authored": 0, "reviewed": 0, "comments": 0, "_prs": []},
     )
-
-
-def _as_dicts(result: Any) -> list[dict[str, Any]]:
-    return [dict(zip(result.columns, row, strict=True)) for row in result.rows]

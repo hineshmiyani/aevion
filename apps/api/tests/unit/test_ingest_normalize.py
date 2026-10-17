@@ -118,3 +118,21 @@ def test_issue_normalisation(issue_page: dict[str, Any]) -> None:
     assert batch.issues[2].author is None  # deleted user
     assert batch.issues[2].ref_keys == (f"{REPO}#90",)
     assert [c.id for c in batch.comments] == ["ic:601"]
+
+
+def test_depth_overrides_use_the_longest_matching_prefix() -> None:
+    overrides = {"graphrag_sdk/src/graphrag_sdk": 4, "graphrag_sdk": 2}
+    deep = "graphrag_sdk/src/graphrag_sdk/ingestion/structured_pipeline.py"
+    assert component_path(deep, 2, overrides) == "graphrag_sdk/src/graphrag_sdk/ingestion"
+    assert component_path("graphrag_sdk/tests/test_x.py", 2, overrides) == "graphrag_sdk/tests"
+    assert component_path("docs/extraction.mdx", 2, overrides) == "docs"
+    # a prefix must match whole directory names, not part of one
+    assert (
+        component_path("graphrag_sdk_extra/a/b.py", 1, {"graphrag_sdk": 3}) == "graphrag_sdk_extra"
+    )
+
+
+def test_org_config_reads_depth_overrides() -> None:
+    config = load_org_config(Path(REPO_ROOT / "config" / "orgs" / "falkordb.toml"))
+    assert config.repo("GraphRAG-SDK").depth_overrides["graphrag_sdk/src/graphrag_sdk"] == 4
+    assert config.repo("falkordb-py").depth_overrides == {}
