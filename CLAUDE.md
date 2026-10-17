@@ -36,6 +36,7 @@ Every change belongs to a Notion task. Use its ID everywhere:
 - **Commit body:** bullet points (`- `), one per meaningful change.
 - **PR title:** same format as the commit subject. Link the Notion task in the PR body.
 - **Types:** `feat`, `bugfix`, `hotfix`, `chore`, `docs`, `style`, `refactor`, `test`, `perf`, `ci`, `build`.
+- **Never delete branches after merging**, local or remote: no `--delete-branch`, no `git branch -D`, no "Delete branch" button. Task branches stay as history.
 - If no task exists for the work, create one in Aevion Tasks first.
 
 ## No AI attribution anywhere
