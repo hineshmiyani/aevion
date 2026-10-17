@@ -1,41 +1,19 @@
 """Loading normalised pull requests and issues: correct graph shape and idempotent re-runs."""
 
-from collections.abc import Callable
 from typing import Any
 
 import pytest
 
 from aevion.graph.client import OrgGraph
-from aevion.graph.schema import bootstrap
-from aevion.ingest.loader import graph_counts, link_references, load_batch, upsert_repo
-from aevion.ingest.normalize import Batch, issue_from, pull_request_from
+from aevion.ingest.loader import graph_counts
+from tests.integration.conftest import load_fixture_pages
 
 pytestmark = pytest.mark.integration
 
-BOTS = frozenset({"dependabot"})
-
-
-def _load(graph: OrgGraph, pr_page: dict[str, Any], issue_page: dict[str, Any]) -> None:
-    repo = upsert_repo(graph, pr_page)
-    batch = Batch()
-    for node in pr_page["pullRequests"]["nodes"]:
-        pull_request_from(node, repo, 1, BOTS, batch)
-    load_batch(graph, batch)
-    batch = Batch()
-    for node in issue_page["issues"]["nodes"]:
-        issue_from(node, repo, BOTS, batch)
-    load_batch(graph, batch)
-    link_references(graph)
-
 
 @pytest.fixture
-def loaded(
-    make_graph: Callable[[], OrgGraph], pr_page: dict[str, Any], issue_page: dict[str, Any]
-) -> OrgGraph:
-    graph = make_graph()
-    bootstrap(graph)
-    _load(graph, pr_page, issue_page)
-    return graph
+def loaded(fixture_graph: OrgGraph) -> OrgGraph:
+    return fixture_graph
 
 
 def _one(graph: OrgGraph, cypher: str) -> Any:
@@ -46,7 +24,7 @@ def test_second_load_adds_nothing(
     loaded: OrgGraph, pr_page: dict[str, Any], issue_page: dict[str, Any]
 ) -> None:
     first = graph_counts(loaded)
-    _load(loaded, pr_page, issue_page)
+    load_fixture_pages(loaded, pr_page, issue_page)
     assert graph_counts(loaded) == first
     assert first["nodes"] > 0
 

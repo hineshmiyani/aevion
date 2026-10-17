@@ -1,25 +1,17 @@
 """Aevion HTTP API. Routes are added per module (SPEC section 8)."""
 
-from functools import lru_cache
 from typing import Annotated, Any
 
-from falkordb import FalkorDB
 from fastapi import Depends, FastAPI
 from fastapi.responses import JSONResponse
 
-from aevion.config import Settings
-from aevion.graph.client import connect
+from aevion.api.deps import get_db
+from aevion.api.routes import tools
 
 app = FastAPI(title="Aevion API", version="0.1.0")
+app.include_router(tools.router)
 
-
-@lru_cache(maxsize=1)
-def _db() -> FalkorDB:
-    return connect(Settings())
-
-
-def get_db() -> FalkorDB:
-    return _db()
+__all__ = ["app", "get_db"]
 
 
 @app.get("/healthz")
