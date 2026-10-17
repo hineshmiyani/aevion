@@ -100,8 +100,14 @@ def test_catch_up_needs_a_scope() -> None:
         CatchUpArgs(since="2026-10-01")
 
 
-def test_registry_exposes_four_tools() -> None:
-    assert list(TOOLS) == ["experts_for", "area_history", "related_work", "catch_up"]
+def test_registry_exposes_the_tools() -> None:
+    assert list(TOOLS) == [
+        "experts_for",
+        "decision_trail",
+        "area_history",
+        "related_work",
+        "catch_up",
+    ]
 
 
 def test_area_history_lists_each_open_issue_once(fixture_graph: OrgGraph) -> None:

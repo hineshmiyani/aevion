@@ -9,6 +9,7 @@ from pydantic import BaseModel
 
 from aevion.graph.client import OrgGraph
 from aevion.tools.catch_up import CatchUpArgs, catch_up
+from aevion.tools.decisions import DecisionTrailArgs, decision_trail
 from aevion.tools.evidence import ToolResult
 from aevion.tools.experts import ExpertsForArgs, experts_for
 from aevion.tools.history import AreaHistoryArgs, area_history
@@ -41,6 +42,13 @@ TOOLS: dict[str, Tool] = {
             "reviews and comments in that part of the codebase, with the PRs as evidence.",
             ExpertsForArgs,
             experts_for,  # type: ignore[arg-type]
+        ),
+        _tool(
+            "decision_trail",
+            "Why was something decided? Finds Decisions extracted from PR and issue threads, with "
+            "the thread, the comments that show it, who made it, and what it replaced.",
+            DecisionTrailArgs,
+            decision_trail,  # type: ignore[arg-type]
         ),
         _tool(
             "area_history",

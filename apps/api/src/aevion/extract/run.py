@@ -7,7 +7,7 @@ import httpx
 
 from aevion.extract.candidates import candidates, load_thread
 from aevion.extract.extractor import DecisionRec, estimate_tokens, extract_decisions
-from aevion.extract.loader import load_decisions
+from aevion.extract.loader import link_supersedes, load_decisions
 from aevion.graph.client import OrgGraph
 from aevion.llm.client import BudgetExceededError, LLMClient, LLMError
 
@@ -87,5 +87,6 @@ def run_extraction(
             report.invalid_json += int(result.invalid_json)
 
     load_decisions(graph, found)  # one write pass, after all model calls
+    link_supersedes(graph)
     report.decisions = len(found)
     return report
