@@ -17,6 +17,7 @@ from pydantic import BaseModel, Field
 
 from aevion.graph.client import OrgGraph
 from aevion.llm.client import LLMClient, LLMError
+from aevion.sandbox.safety import defuse_mentions, profile_url
 from aevion.tools.evidence import EvidencePath
 from aevion.tools.triage import TriageCandidatesArgs, triage_candidates
 
@@ -25,7 +26,6 @@ ActionStatus = Literal["proposed", "skipped", "done", "failed"]
 
 MAX_REPLY_WORDS = 140
 _BARE_REF = re.compile(r"(?<![\w/\[\\])#(\d+)\b")
-_MENTION = re.compile(r"(?<![\w/`])@([A-Za-z0-9](?:[A-Za-z0-9-]{0,38}))")
 
 REPLY_PROMPT = """You draft the first reply on a GitHub issue for a maintainer team's triage
 assistant. Use only the facts in the JSON you are given; never invent issues, people or code.
@@ -113,7 +113,7 @@ def triage(
         "likely_duplicates": [_brief(s) for s in duplicates],
         "related": [_brief(s) for s in related],
         "area": component and {"path": component["name"], "strength": component["strength"]},
-        "expert": expert and {"login": expert["login"], "url": _profile(expert["login"])},
+        "expert": expert and {"login": expert["login"], "url": profile_url(expert["login"])},
     }
     reply, used_model = _draft(client, model, facts)
     reply = resolve_bare_refs(defuse_mentions(reply), issue_key, duplicates + related)
@@ -124,18 +124,13 @@ def triage(
         duplicates=duplicates,
         related=related,
         component=component,
-        expert=expert and {**expert, "url": _profile(expert["login"])},
+        expert=expert and {**expert, "url": profile_url(expert["login"])},
         draft_reply=reply,
         actions=_actions(component, expert, reply),
         evidence=result.evidence,
         cypher=result.cypher,
         model=used_model,
     )
-
-
-def defuse_mentions(text: str) -> str:
-    """`@login` → `[login](profile)`: same person, same link, no notification."""
-    return _MENTION.sub(lambda m: f"[{m.group(1)}]({_profile(m.group(1))})", text)
 
 
 def resolve_bare_refs(text: str, issue_key: str, known: list[dict[str, Any]]) -> str:
@@ -251,7 +246,3 @@ def _url(key: str) -> str:
     """GitHub redirects /pull/N to /issues/N and back, so either works for any item."""
     repo, number = key.rsplit("#", 1)
     return f"https://github.com/{repo}/pull/{number}"
-
-
-def _profile(login: str) -> str:
-    return f"https://github.com/{login}"
