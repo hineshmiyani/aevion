@@ -20,7 +20,10 @@ class OrgConfig:
     bot_logins: frozenset[str]
 
     def since(self, now: datetime | None = None) -> datetime:
-        return (now or datetime.now(UTC)) - timedelta(days=30 * self.since_months)
+        """Start of the ingestion window, truncated to midnight UTC so it is stable within a
+        day (raw-cache keys include it)."""
+        start = (now or datetime.now(UTC)) - timedelta(days=30 * self.since_months)
+        return start.replace(hour=0, minute=0, second=0, microsecond=0)
 
     def repo(self, name: str) -> RepoConfig:
         for repo in self.repos:

@@ -7,7 +7,7 @@ import pytest
 
 from aevion.config import REPO_ROOT
 from aevion.ingest.components import component_path, is_doc
-from aevion.ingest.normalize import Batch, person_from, pull_request_from, to_epoch_ms
+from aevion.ingest.normalize import Batch, issue_from, person_from, pull_request_from, to_epoch_ms
 from aevion.ingest.org_config import load_org_config
 
 BOTS = frozenset({"dependabot"})
@@ -78,7 +78,7 @@ def test_one_review_per_person_keeps_latest_state(pr_page: dict[str, Any]) -> No
 
 def test_people_are_deduplicated(pr_page: dict[str, Any]) -> None:
     people = _normalise(pr_page).people
-    assert sorted(people) == ["alice", "bob", "coderabbitai", "dependabot"]
+    assert sorted(people) == ["alice", "bob", "carol", "coderabbitai", "dependabot"]
     assert people["dependabot"].is_bot and people["coderabbitai"].is_bot
 
 
@@ -88,3 +88,33 @@ def test_org_config_loads_demo_dataset() -> None:
     assert len(config.repos) == 9
     assert config.repo("falkordb-py").component_depth == 1
     assert config.repo("FalkorDB").component_depth == 2
+
+
+def test_pull_request_references_and_fixes(pr_page: dict[str, Any]) -> None:
+    pr = _normalise(pr_page).pull_requests[0]
+    assert pr.fix_keys == (f"{REPO}#90",)  # body "Fixes #90" + closingIssuesReferences
+    # from a human comment; the bot comment's "#999" and the bot review's "#77" are ignored
+    assert pr.ref_keys == ("FalkorDB/FalkorDB#1200", f"{REPO}#95")
+    assert pr.labels == (f"{REPO}:enhancement",)
+
+
+def test_comments_skip_bots_and_empty_reviews(pr_page: dict[str, Any]) -> None:
+    comments = {c.id: c for c in _normalise(pr_page).comments}
+    assert sorted(comments) == ["ic:501", "rc:21", "rv:11"]
+    assert comments["rc:21"].kind == "review_thread"
+    assert comments["rc:21"].author == "bob"
+    assert {c.thread_key for c in comments.values()} == {f"{REPO}#101"}
+
+
+def test_issue_normalisation(issue_page: dict[str, Any]) -> None:
+    batch = Batch()
+    for node in issue_page["issues"]["nodes"]:
+        issue_from(node, REPO, BOTS, batch)
+    issue = batch.issues[0]
+    assert issue.key == f"{REPO}#90"
+    assert issue.assignees == ("alice",)
+    assert issue.labels == (f"{REPO}:bug",)
+    assert issue.ref_keys == ("FalkorDB/FalkorDB#1200", f"{REPO}#101")
+    assert batch.issues[2].author is None  # deleted user
+    assert batch.issues[2].ref_keys == (f"{REPO}#90",)
+    assert [c.id for c in batch.comments] == ["ic:601"]

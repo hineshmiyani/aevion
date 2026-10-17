@@ -14,7 +14,9 @@ class Index:
 
 
 INDEXES: tuple[Index, ...] = (
+    Index("Repo", ("full_name",)),
     Index("Person", ("login",)),
+    Index("Label", ("key",)),
     Index("Issue", ("key",)),
     Index("PullRequest", ("key",)),
     Index("PullRequest", ("merged_at",)),

@@ -10,9 +10,9 @@ from aevion.graph.client import OrgGraph, connect
 from aevion.graph.naming import graph_name_for
 from aevion.graph.schema import bootstrap
 from aevion.ingest.github import GitHubClient
-from aevion.ingest.loader import graph_counts
+from aevion.ingest.loader import graph_counts, link_references
 from aevion.ingest.org_config import load_org_config
-from aevion.ingest.pipeline import ingest_pull_requests
+from aevion.ingest.pipeline import ingest_repo
 
 DEFAULT_ORG_CONFIG = REPO_ROOT / "config" / "orgs" / "falkordb.toml"
 
@@ -44,11 +44,12 @@ def _ingest(org_config_path: Path, repos: list[str] | None, use_cache: bool) -> 
     before = graph_counts(graph)
     try:
         for name in repos or [r.name for r in config.repos]:
-            report = ingest_pull_requests(graph, client, config, name)
+            report = ingest_repo(graph, client, config, name)
             print(
-                f"{report.repo}: {report.pull_requests} PRs, {report.people} people, "
-                f"{report.file_changes} file changes"
+                f"{report.repo}: {report.pull_requests} PRs, {report.issues} issues, "
+                f"{report.comments} comments, {report.file_changes} file changes"
             )
+        link_references(graph)
     finally:
         client.close()
     after = graph_counts(graph)
