@@ -1,6 +1,6 @@
 // One shape per node type, so the evidence trail never relies on colour alone.
 
-const SHAPES: Record<string, React.ReactNode> = {
+export const NODE_SHAPES: Record<string, React.ReactNode> = {
   Person: <circle cx="7" cy="7" r="5.25" />,
   PullRequest: <rect x="2" y="2" width="10" height="10" rx="1.5" />,
   Issue: <rect x="3.1" y="3.1" width="7.8" height="7.8" transform="rotate(45 7 7)" />,
@@ -36,7 +36,7 @@ export function NodeGlyph({ label, className = "" }: { label: string; className?
       stroke="currentColor"
       strokeWidth={outlineOnly ? 1.6 : 0}
     >
-      {SHAPES[label] ?? <circle cx="7" cy="7" r="4" />}
+      {NODE_SHAPES[label] ?? <circle cx="7" cy="7" r="4" />}
     </svg>
   );
 }

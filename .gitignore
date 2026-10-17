@@ -24,6 +24,8 @@ out/
 dist/
 build/
 *.tsbuildinfo
+test-results/
+playwright-report/
 
 # Local data: raw GitHub responses, LLM cache and spend ledger (never commit)
 data/
