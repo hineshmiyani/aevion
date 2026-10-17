@@ -52,7 +52,8 @@ Every planning, design and process document lives here, grouped by purpose. Code
 | adr | [0012-deployment-and-sandbox.md](adr/0012-deployment-and-sandbox.md) | Accepted |
 | process | [ai-workflow.md](process/ai-workflow.md) | Done |
 | process | [ai-usage-disclosure.md](process/ai-usage-disclosure.md) | Living |
-| product | [SPEC.md](product/SPEC.md) | Draft v1, awaiting team approval |
+| product | [SPEC.md](product/SPEC.md) | Approved v1 |
+| tasks | [plan.md](../tasks/plan.md) | v1; tasks tracked in Notion |
 | architecture | [graph-model.md](architecture/graph-model.md) | v1 design |
 | architecture | system-design.md, cypher-queries.md | Not started |
 | demo | [storyboard.md](demo/storyboard.md) | v1 |
