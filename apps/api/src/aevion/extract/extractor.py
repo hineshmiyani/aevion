@@ -4,7 +4,7 @@ validated against the thread before it reaches the graph:
 - people must have taken part in the thread,
 - evidence comment ids must be real comments of the thread,
 - Components must be ones the thread's PRs touched,
-- low-confidence decisions (< 0.5) are dropped.
+- low-confidence decisions (< 0.5) and malformed entries are dropped.
 """
 
 import hashlib
@@ -19,6 +19,10 @@ from aevion.llm.client import ChatResult, LLMClient
 
 MIN_CONFIDENCE = 0.5
 MAX_DECISIONS_PER_THREAD = 2
+# max_tokens covers the model's hidden reasoning as well as the JSON. 700 fits most threads;
+# a reply cut off at that limit is retried once with room to finish. The first budget stays
+# fixed so cached replies keep their cache keys.
+TOKEN_BUDGETS = (700, 2400)
 
 SYSTEM_PROMPT = """You read one GitHub pull request or issue thread from an open-source project
 and record the engineering DECISIONS it contains.
@@ -54,7 +58,8 @@ class _RawDecision(BaseModel):
 
 
 class _RawResponse(BaseModel):
-    decisions: list[_RawDecision] = Field(default_factory=list)
+    # Items are validated one by one below, so one malformed entry doesn't sink the others.
+    decisions: list[dict[str, Any]] = Field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -79,20 +84,29 @@ class ExtractionResult:
     decisions: list[DecisionRec] = field(default_factory=list)
     dropped: int = 0
     invalid_json: bool = False
+    retried: bool = False  # the first reply hit max_tokens
+    truncated: bool = False  # even the larger budget wasn't enough
 
 
 def extract_decisions(client: LLMClient, model: str, thread: Thread) -> ExtractionResult:
-    result = client.chat(
-        model,
-        [
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": thread.as_prompt_text()},
-        ],
-        max_tokens=700,
-        response_format={"type": "json_object"},
-        purpose="extract",
-    )
-    return parse_decisions(result, thread)
+    messages = [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "user", "content": thread.as_prompt_text()},
+    ]
+    for budget in TOKEN_BUDGETS:
+        result = client.chat(
+            model,
+            messages,
+            max_tokens=budget,
+            response_format={"type": "json_object"},
+            purpose="extract",
+        )
+        if result.finish_reason != "length":
+            break
+    out = parse_decisions(result, thread)
+    out.retried = budget != TOKEN_BUDGETS[0]
+    out.truncated = result.finish_reason == "length"
+    return out
 
 
 def parse_decisions(result: ChatResult, thread: Thread) -> ExtractionResult:
@@ -104,7 +118,12 @@ def parse_decisions(result: ChatResult, thread: Thread) -> ExtractionResult:
         return out
 
     comment_ids = {c["id"] for c in thread.comments}
-    for item in raw.decisions[:MAX_DECISIONS_PER_THREAD]:
+    for entry in raw.decisions[:MAX_DECISIONS_PER_THREAD]:
+        try:
+            item = _RawDecision.model_validate(entry)
+        except ValidationError:
+            out.dropped += 1
+            continue
         if item.confidence < MIN_CONFIDENCE:
             out.dropped += 1
             continue

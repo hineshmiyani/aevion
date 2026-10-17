@@ -164,10 +164,13 @@ CALL db.idx.fulltext.queryNodes('Decision', $query) YIELD node, score
 OPTIONAL MATCH (node)-[:AFFECTS]->(c:Component)
 WITH node, score, collect(c.key) AS affects
 WHERE size($components) = 0 OR any(k IN affects WHERE k IN $components)
-RETURN node.id AS id, score
+RETURN node.id AS id, score, node.confidence AS confidence,
+       node.summary + ' ' + node.rationale AS text
 ORDER BY score DESC
-LIMIT $limit
+LIMIT $pool
 ```
+
+**Re-rank the pool (50 candidates) in Python.** The index's TF-IDF score rewards short text that repeats one query word: for "Why did FalkorDB gate main on a merge queue?" it ranked *"CI jobs set timeouts and merge queue entries are not cancelled"* above *"Gate main with a merge queue…"*. So candidates are ordered by **keyword coverage** (the share of the question's distinct keywords, lightly stemmed, that the decision contains), then by `score × confidence`. FalkorDB still does the finding; Python only orders a small pool. Measured on the real graph (534 decisions): 8–20 ms.
 
 **Walk each decision's trail**: thread, the issues it fixed, people, Components:
 

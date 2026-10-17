@@ -124,7 +124,9 @@ def _extract(args: argparse.Namespace) -> int:
     report = run_extraction(graph, llm_client(settings), model, args.repo, args.limit, args.workers)
     print(
         f"{report.threads} threads → {report.decisions} decisions "
-        f"({report.dropped_low_confidence} low-confidence dropped, {report.invalid_json} bad JSON, "
+        f"({report.dropped_low_confidence} low-confidence or malformed dropped, "
+        f"{report.invalid_json} bad JSON, "
+        f"{report.retried} retried for length, {report.truncated} still truncated, "
         f"{len(report.errors)} errors{', stopped on budget' if report.stopped_on_budget else ''})"
     )
     for error in report.errors[:5]:
