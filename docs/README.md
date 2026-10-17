@@ -17,7 +17,7 @@ Every planning, design and process document lives here, grouped by purpose. Code
 │   ├── product/               SPEC.md: what we build and how we know it's done
 │   ├── architecture/          System design, graph data model, Cypher reference
 │   └── process/               AI workflow and AI-usage disclosure
-├── tasks/                     plan.md + todo.md (implementation plan, task list)
+├── tasks/                     plan.md (implementation plan; tasks themselves live in Notion)
 └── apps/ · infra/             Code (created once the stack is locked)
 ```
 
@@ -37,7 +37,8 @@ Every planning, design and process document lives here, grouped by purpose. Code
 | research | [track-analysis.md](research/track-analysis.md) | Done |
 | grilling | [round-01.md](grilling/round-01.md) | **Awaiting answers** |
 | adr | [0001-company-brain-direction.md](adr/0001-company-brain-direction.md) | Accepted |
-| adr | [0002-hybrid-ai-skills-workflow.md](adr/0002-hybrid-ai-skills-workflow.md) | Accepted |
+| adr | [0002-hybrid-ai-skills-workflow.md](adr/0002-hybrid-ai-skills-workflow.md) | Accepted (partly superseded by 0003) |
+| adr | [0003-notion-task-tracking-and-git-conventions.md](adr/0003-notion-task-tracking-and-git-conventions.md) | Accepted |
 | process | [ai-workflow.md](process/ai-workflow.md) | Done |
 | process | [ai-usage-disclosure.md](process/ai-usage-disclosure.md) | Living |
 | product | SPEC.md | Not started (after grilling) |

@@ -21,7 +21,8 @@ An agent that understands how an open-source company works. It loads a GitHub or
 | Weigh in on open design decisions | [docs/grilling/](docs/grilling/) |
 | Read decisions we've locked | [docs/adr/](docs/adr/) |
 | Learn our domain vocabulary | [GLOSSARY.md](GLOSSARY.md) |
-| Start contributing | [CONTRIBUTING.md](CONTRIBUTING.md) |
+| Pick up a task | [Aevion Tasks board (Notion)](https://app.notion.com/p/374521bfeac54306bed66e0764812cda) |
+| Learn our branch and commit conventions | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | See the full docs map | [docs/README.md](docs/README.md) |
 
 ## Team
