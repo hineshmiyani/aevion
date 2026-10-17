@@ -17,6 +17,8 @@ A second leak has the same shape. When a public issue or comment references anot
 - Everything posted on the sandbox (seeded copies, triage replies) writes references to other repos' issues and PRs as **code spans**, which GitHub doesn't turn into references (`sandbox/safety.py`, `inert_references`). Text copied from an issue has its bare `#123` qualified with the original repo first, so it can be made inert too. Clickable links to FalkorDB stay in Aevion's own UI.
 - The seeded copies name their original in code (`FalkorDB/FalkorDB#3357` and its URL), and their hidden marker spells the key without `#`.
 
+- Before posting, the apply step re-scans the final comment (`foreign_references`). If anything outside code could still notify someone or reference another repo, the comment is not posted and the action is marked failed. This caught nothing in production, but the first version of the link rule had a gap (link text in code split the link in two), so the rule is not trusted alone.
+
 ## Consequences
 
 - The demo still shows *who* to ask, with a working link, without notifying anyone.

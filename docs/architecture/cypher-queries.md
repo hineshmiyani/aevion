@@ -246,6 +246,8 @@ RETURN mentioned, f.key AS file, f.path AS path, c.key AS component, c.name AS n
 LIMIT 20
 ```
 
+If nothing votes, the repo's code areas by merged-PR activity are the fallback: a repo with a single code area (falkordb-py's `falkordb`) is a strong pick, otherwise its busiest area is a weak one.
+
 Each pick gets a **strength** (strong ≥ 1.0 votes, moderate ≥ 0.4, else weak). A weak pick isn't proposed as a label, and the draft reply says the area is a guess.
 
 **3. Expert.** `experts_for` on the winning Component, minus the issue's author.

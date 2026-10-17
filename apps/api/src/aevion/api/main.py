@@ -1,5 +1,6 @@
 """Aevion HTTP API. Routes are added per module (SPEC section 8)."""
 
+import logging
 from typing import Annotated, Any
 
 from fastapi import Depends, FastAPI
@@ -9,6 +10,14 @@ from fastapi.responses import JSONResponse
 from aevion.api.deps import get_db
 from aevion.api.routes import ask, tools, triage, webhooks
 from aevion.config import Settings
+
+# Uvicorn only configures its own loggers; show ours (webhook triage outcomes and timings) too.
+_log = logging.getLogger("aevion")
+if not _log.handlers:
+    _handler = logging.StreamHandler()
+    _handler.setFormatter(logging.Formatter("%(levelname)s:     %(name)s - %(message)s"))
+    _log.addHandler(_handler)
+    _log.setLevel(logging.INFO)
 
 app = FastAPI(title="Aevion API", version="0.1.0")
 app.add_middleware(

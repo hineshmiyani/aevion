@@ -18,7 +18,7 @@ from aevion.graph.client import OrgGraph
 from aevion.ingest.loader import load_batch, upsert_repo
 from aevion.ingest.normalize import Batch, issue_from
 from aevion.llm.client import LLMClient
-from aevion.sandbox.safety import profile_url, safe_for_sandbox
+from aevion.sandbox.safety import foreign_references, profile_url, safe_for_sandbox
 from aevion.sandbox.seed import original_of
 from aevion.sandbox.writer import SandboxWriter
 from aevion.tools.triage import infer_repo, triage_issue
@@ -185,7 +185,13 @@ def _apply(
                 "detail": "not a collaborator here, so named in the comment by profile link (no @)",
             }
         )
-    posted = writer.comment(number, comment_body(response, writer.repo))
+    body = comment_body(response, writer.repo)
+    if leaks := foreign_references(body, writer.repo):
+        # Belt and braces: never post anything that could ping someone or touch another repo.
+        return action.model_copy(
+            update={"status": "failed", "detail": f"not posted: unsafe references {leaks[:3]}"}
+        )
+    posted = writer.comment(number, body)
     return action.model_copy(
         update={
             "status": "done",
