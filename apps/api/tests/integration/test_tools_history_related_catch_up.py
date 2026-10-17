@@ -123,3 +123,11 @@ def test_area_history_lists_each_open_issue_once(fixture_graph: OrgGraph) -> Non
     )
     result = area_history(fixture_graph, AreaHistoryArgs(component="falkordb", repo=REPO, days=365))
     assert [i["key"] for i in _row(result)["open_issues"]] == [f"{REPO}#95"]
+
+
+def test_catch_up_makes_every_closed_issue_citable(fixture_graph: OrgGraph) -> None:
+    # limit=1 still shows PR 101; the point is that issue 90 is in the evidence via its fixer.
+    result = catch_up(fixture_graph, CatchUpArgs(repo=REPO, since="2026-08-01", limit=1))
+    ids = {n.id for n in result.evidence.nodes}
+    assert f"Issue:{REPO}#90" in ids
+    assert missing_edges(fixture_graph, result.evidence) == []

@@ -154,3 +154,10 @@ def test_ask_endpoint(
     finally:
         app.dependency_overrides.clear()
         graph.delete()
+
+
+def test_system_prompt_lists_the_real_repos(fixture_graph: OrgGraph, tmp_path: Path) -> None:
+    model = ScriptedModel(final("Nothing to add."))
+    ask(fixture_graph, client_for(model, tmp_path), "m", "FalkorDB", "Which repos?")
+    system = model.requests[0]["messages"][0]["content"]
+    assert "FalkorDB/falkordb-py" in system and "{repos}" not in system

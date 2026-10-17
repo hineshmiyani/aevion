@@ -34,7 +34,7 @@ UNWIND $prs AS pr_key
 MATCH (pr:PullRequest {key: pr_key})-[:FIXES]->(i:Issue)
 WHERE i.closed_at >= $since
 RETURN DISTINCT i.key AS key, i.title AS title, i.url AS url, i.closed_at AS closed_at,
-       pr.key AS fixed_by
+       pr.key AS fixed_by, pr.title AS fixed_by_title, pr.url AS fixed_by_url
 """
 
 RELEASES = """
@@ -99,14 +99,23 @@ def catch_up(graph: OrgGraph, args: CatchUpArgs) -> ToolResult:
         pr_id = evidence.node("PullRequest", pr["key"], title=pr["title"], url=pr["url"])
         if pr["author"]:
             evidence.edge(evidence.node("Person", pr["author"]), "AUTHORED", pr_id)
-    shown_keys = {pr["key"] for pr in shown}
+    # Every returned issue and release is citable: issues with the PR that fixed them
+    # (even when that PR isn't a highlight), releases with their repo.
     for issue in issues:
-        if issue["fixed_by"] in shown_keys:
-            evidence.edge(
-                f"PullRequest:{issue['fixed_by']}",
-                "FIXES",
-                evidence.node("Issue", issue["key"], title=issue["title"], url=issue["url"]),
-            )
+        fixer = evidence.node(
+            "PullRequest",
+            issue["fixed_by"],
+            title=issue["fixed_by_title"],
+            url=issue["fixed_by_url"],
+        )
+        evidence.edge(
+            fixer,
+            "FIXES",
+            evidence.node("Issue", issue["key"], title=issue["title"], url=issue["url"]),
+        )
+    for release in releases:
+        rel = evidence.node("Release", release["key"], title=release["tag"], url=release["url"])
+        evidence.edge(rel, "IN_REPO", evidence.node("Repo", release["repo"]))
 
     row = {
         "since": args.since,
