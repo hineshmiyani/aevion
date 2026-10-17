@@ -44,7 +44,8 @@ Every planning, design and process document lives here, grouped by purpose. Code
 | adr | [0006-graph-freshness.md](adr/0006-graph-freshness.md) | Accepted |
 | adr | [0007-graph-query-strategy.md](adr/0007-graph-query-strategy.md) | Accepted |
 | adr | [0008-tech-stack.md](adr/0008-tech-stack.md) | Accepted |
-| adr | [0009-llm-via-openrouter.md](adr/0009-llm-via-openrouter.md) | Accepted |
+| adr | [0009-llm-via-openrouter.md](adr/0009-llm-via-openrouter.md) | Accepted (model choice superseded by 0010) |
+| adr | [0010-llm-model-bake-off.md](adr/0010-llm-model-bake-off.md) | Accepted |
 | process | [ai-workflow.md](process/ai-workflow.md) | Done |
 | process | [ai-usage-disclosure.md](process/ai-usage-disclosure.md) | Living |
 | product | SPEC.md | Not started (after grilling) |

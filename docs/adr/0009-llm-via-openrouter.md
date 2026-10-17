@@ -1,6 +1,6 @@
 # ADR-0009: Claude Sonnet 5.5 + Haiku 5.5 through OpenRouter, on a $16 budget
 
-**Status:** Accepted · **Date:** 2026-10-17 · **Decided by:** the team (Hinesh, Jignesh, Jaydeep, Het) · **Source:** [grilling round 1](../grilling/round-01.md), Q9
+**Status:** Accepted; model choice superseded by [ADR-0010](0010-llm-model-bake-off.md) (OpenRouter access and guardrails still apply) · **Date:** 2026-10-17 · **Decided by:** the team (Hinesh, Jignesh, Jaydeep, Het) · **Source:** [grilling round 1](../grilling/round-01.md), Q9
 
 ## Decision
 
@@ -30,7 +30,7 @@ Together that fits in $16, but not with careless development or an unprotected p
 1. **Deterministic edges first.** Authorship, reviews, file changes, `#123` / `fixes #123` references and CODEOWNERS come from GitHub data with no LLM. Only threads likely to contain decisions go to Haiku.
 2. **Cache every LLM result** by content hash, so re-running ingestion is free.
 3. **Dry-run cost estimate** before any full extraction run: count tokens, print the projected cost, and require confirmation.
-4. **Develop against Haiku.** Switch the agent to Sonnet for the demo and final testing.
+4. **Develop against cheap models.** See ADR-0010 for how the demo model is chosen.
 5. **Protect the public deployment:** rate-limit per IP, cap answer length, and pre-compute the demo's hero answers so judges clicking around can't drain the credit.
 6. **Set a credit limit on the OpenRouter key** so a bug can't spend everything.
 
