@@ -207,7 +207,7 @@ def experts_for(graph: OrgGraph, component: str, limit: int = 5) -> ToolResult:
 |---|---|---|---|
 | `POST /api/ask` | `{org, question}` | `{answer, citations: [{n, node_id}], tool_calls: [{tool, args}], evidence: EvidencePath, cypher: [string], model, cached}` | `api` → `agent` |
 | `POST /api/tools/{tool}` | tool parameters | `ToolResult` | `api` → `tools` |
-| `POST /api/triage` | `{org, issue_key, mode: "dry_run" \| "apply"}` | `{duplicates, component, expert, draft_reply, actions: [{type, status}], evidence}` | `api` → `triage` |
+| `POST /api/triage` | `{org, issue_key, mode: "dry_run" \| "apply"}` | `{issue, mode, duplicates, related, component, expert, draft_reply, actions: [{type, value, status, detail}], evidence, cypher, model}`; `403` for apply outside the allow-list | `api` → `triage` |
 | `GET /api/graph/neighborhood` | `?org&key&depth≤2` | `EvidencePath` | `api` → `graph-core` |
 | `POST /webhooks/github` | GitHub webhook payload (HMAC-verified) | `202` | `sync` |
 | `GET /healthz` | — | `{falkordb: "ok", graphs: [...]}` | `api` |
@@ -254,7 +254,7 @@ def experts_for(graph: OrgGraph, component: str, limit: int = 5) -> ToolResult:
 
 ### `triage`
 - `dry_run` works on any repo; `apply` is rejected unless the repo is on the allow-list (`hineshmiyani/aevion-sandbox`) **and** the sandbox token is used.
-- Apply actions: add a component label, assign the Expert (if they're a collaborator, otherwise mention them), post the draft reply with its evidence links.
+- Apply actions: add a component label, assign the Expert (if they're a collaborator, otherwise link their profile without an @-mention, [ADR-0013](../adr/0013-triage-never-pings-real-people.md)), post the draft reply with its evidence links.
 
 ### `mcp`
 - Exposes the six tools with JSON schemas; the org is chosen with `--org`.

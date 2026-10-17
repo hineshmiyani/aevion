@@ -69,7 +69,14 @@ def client_for(model: ScriptedModel, tmp_path: Path, budget: float = 1.0) -> LLM
 
 def test_tool_specs_cover_every_tool() -> None:
     names = [spec["function"]["name"] for spec in tool_specs()]
-    assert names == ["experts_for", "decision_trail", "area_history", "related_work", "catch_up"]
+    assert names == [
+        "experts_for",
+        "decision_trail",
+        "area_history",
+        "related_work",
+        "catch_up",
+        "triage_candidates",
+    ]
     assert all(spec["function"]["parameters"]["type"] == "object" for spec in tool_specs())
 
 

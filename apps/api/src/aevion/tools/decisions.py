@@ -7,7 +7,6 @@ fixed, the comments that evidence it, the people who made it, the Components it 
 any SUPERSEDES chain, so an answer can say what we believed before and what replaced it.
 """
 
-import re
 from typing import Any
 
 from pydantic import BaseModel, Field, model_validator
@@ -15,44 +14,7 @@ from pydantic import BaseModel, Field, model_validator
 from aevion.graph.client import OrgGraph
 from aevion.tools.evidence import EvidenceBuilder, ToolResult
 from aevion.tools.scope import as_dicts, iso, resolve_components
-
-_STOPWORDS = frozenset(
-    [
-        "a",
-        "an",
-        "and",
-        "are",
-        "as",
-        "at",
-        "be",
-        "by",
-        "did",
-        "do",
-        "does",
-        "for",
-        "from",
-        "how",
-        "in",
-        "is",
-        "it",
-        "of",
-        "on",
-        "or",
-        "the",
-        "this",
-        "to",
-        "was",
-        "we",
-        "were",
-        "what",
-        "when",
-        "where",
-        "which",
-        "who",
-        "why",
-        "with",
-    ]
-)
+from aevion.tools.text import coverage, keyword_stems, keywords
 
 # The index finds candidates; it can't rank them well on its own. Its TF-IDF score rewards
 # short text that repeats one query word, so "merge queue entries aren't cancelled" outscores
@@ -124,22 +86,9 @@ class DecisionTrailArgs(BaseModel):
         return self
 
 
-def keywords(topic: str) -> list[str]:
-    words = re.findall(r"[a-z0-9]+", topic.lower())
-    return list(dict.fromkeys(w for w in words if len(w) > 2 and w not in _STOPWORDS))
-
-
 def fulltext_query(topic: str) -> str | None:
     """User words → a safe full-text OR query. FalkorDB's index stems, so 'queues' finds 'queue'."""
     return "|".join(keywords(topic)) or None
-
-
-def _stem(word: str) -> str:
-    """Crude suffix stripping, enough to agree with the index's stemmer on common forms."""
-    for suffix in ("ing", "ed", "es", "s"):
-        if word.endswith(suffix) and len(word) - len(suffix) >= 3:
-            return word[: -len(suffix)]
-    return word
 
 
 def _rank(topic: str, candidates: list[list[Any]], limit: int) -> list[str]:
@@ -148,13 +97,11 @@ def _rank(topic: str, candidates: list[list[Any]], limit: int) -> list[str]:
     Coverage is the share of the topic's distinct keywords that appear in the decision, so a
     decision about every part of the question beats one that repeats a single word of it.
     """
-    wanted = {_stem(w) for w in keywords(topic)}
+    wanted = keyword_stems(topic)
 
     def key(row: list[Any]) -> tuple[float, float]:
         _id, score, confidence, text = row
-        present = {_stem(w) for w in re.findall(r"[a-z0-9]+", (text or "").lower())}
-        coverage = len(wanted & present) / len(wanted) if wanted else 0.0
-        return (-round(coverage, 2), -float(score) * float(confidence or 0))
+        return (-round(coverage(wanted, text), 2), -float(score) * float(confidence or 0))
 
     return [row[0] for row in sorted(candidates, key=key)[:limit]]
 

@@ -50,6 +50,7 @@ Every planning, design and process document lives here, grouped by purpose. Code
 | adr | [0010-llm-model-bake-off.md](adr/0010-llm-model-bake-off.md) | Accepted |
 | adr | [0011-graph-data-model.md](adr/0011-graph-data-model.md) | Accepted |
 | adr | [0012-deployment-and-sandbox.md](adr/0012-deployment-and-sandbox.md) | Accepted |
+| adr | [0013-triage-never-pings-real-people.md](adr/0013-triage-never-pings-real-people.md) | Accepted |
 | process | [ai-workflow.md](process/ai-workflow.md) | Done |
 | process | [ai-usage-disclosure.md](process/ai-usage-disclosure.md) | Living |
 | product | [SPEC.md](product/SPEC.md) | Approved v1 |
