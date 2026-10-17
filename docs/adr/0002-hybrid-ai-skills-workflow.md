@@ -1,6 +1,6 @@
 # ADR-0002: Hybrid AI skills workflow (Matt Pocock + Addy Osmani)
 
-**Status:** Accepted · **Date:** 2026-10-17 · **Decided by:** Hinesh Miyani (team lead)
+**Status:** Accepted; task list location superseded by [ADR-0003](0003-notion-task-tracking-and-git-conventions.md) · **Date:** 2026-10-17 · **Decided by:** Hinesh Miyani (team lead)
 
 ## Context
 
