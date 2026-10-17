@@ -55,6 +55,7 @@ Every planning, design and process document lives here, grouped by purpose. Code
 | product | [SPEC.md](product/SPEC.md) | Approved v1 |
 | tasks | [plan.md](../tasks/plan.md) | v1; tasks tracked in Notion |
 | architecture | [graph-model.md](architecture/graph-model.md) | v1 design |
-| architecture | system-design.md, cypher-queries.md | Not started |
+| architecture | [cypher-queries.md](architecture/cypher-queries.md) | Living (experts_for) |
+| architecture | system-design.md | Not started |
 | demo | [storyboard.md](demo/storyboard.md) | v1 |
 | root | [GLOSSARY.md](../GLOSSARY.md) | Living |
