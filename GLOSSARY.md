@@ -4,7 +4,7 @@ The domain language for Aevion. Use these terms exactly in code, docs, UI and th
 
 | Term | Meaning | Avoid |
 |---|---|---|
-| **Org graph** | One FalkorDB graph holding everything Aevion knows about one GitHub organisation (for example `org:FalkorDB`). | "database", "tenant DB" |
+| **Org graph** | One FalkorDB graph holding everything Aevion knows about one GitHub organisation (for example `org:falkordb`; names are always lowercase). | "database", "tenant DB" |
 | **Component** | A part of a repo that people can know about: a directory prefix (for example `src/execution_plan`), with GitHub labels mapped onto it. The X in "who knows X". | "module", "area", "topic" |
 | **Expert** | A person ranked highly for a Component by the live expertise query: weighted, recent merged PRs they authored or reviewed. Expertise is computed at question time, never stored. | "owner" (that is CODEOWNERS) |
 | **Owner** | A person listed for a Component in CODEOWNERS, with a validity time range. Different from Expert. | |

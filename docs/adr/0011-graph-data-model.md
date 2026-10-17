@@ -11,6 +11,8 @@
 5. **One FalkorDB graph per org** (multigraph): `org:FalkorDB` for the real org, `org:aevion-sandbox` for the triage demo.
 6. **Minimal time model.** `OWNS` edges (from CODEOWNERS history) carry `valid_from` / `valid_to`; Decisions link through `SUPERSEDES`. Issue and PR state changes are timestamp properties. All times are stored as **epoch milliseconds** (integers) for simple arithmetic in Cypher.
 
+**Amendment (2026-10-17, AEV-17):** graph names are lowercased (`org:falkordb`), because GitHub logins are case-insensitive. See [graph-model.md](../architecture/graph-model.md#graphs).
+
 ## Why
 
 - Paths and labels match how maintainers think about a codebase, and cost nothing to build.
