@@ -44,6 +44,8 @@ graph LR
   Decision -- AFFECTS --> Component
   Decision -- SUPERSEDES --> Decision
   TriageRun -- FOR --> Issue
+  CachedAnswer -- CITES --> Person
+  CachedAnswer -- CITES --> PullRequest
 ```
 
 ## Node labels
@@ -62,6 +64,7 @@ All times are **epoch milliseconds** (integers). `key` is the MERGE key and is u
 | `Label` | `key` (`FalkorDB/FalkorDB:bug`) | `name`, `color`, `repo` | GitHub API |
 | `Release` | `key` (`FalkorDB/FalkorDB@v4.8.0`) | `tag`, `name`, `published_at`, `url`, `pr_keys` | GitHub API (last 12 months) |
 | `Team` | `key` (`FalkorDB/falkordb-core`) | `name` | CODEOWNERS team owners (membership isn't public, so teams aren't expanded to people) |
+| `CachedAnswer` | `key` (hash of the normalised question) | `question`, `response` (the full /api/ask response as JSON), `model`, `created_at` | `aevion warm-cache`: the five hero questions only ([SPEC OQ-6](../product/SPEC.md)) |
 | `TriageRun` | `issue_key` | `at`, `result` (the full triage response as JSON: proposals, action statuses, evidence) | Sandbox graph only: one per triaged issue, so a redelivered webhook or a second apply never comments twice |
 | `Decision` | `id` (content hash) | `summary`, `rationale`, `alternatives`, `decided_at`, `confidence`, `model`, `source_url` | LLM extraction ([ADR-0010](../adr/0010-llm-model-bake-off.md)) |
 
@@ -88,6 +91,7 @@ All times are **epoch milliseconds** (integers). `key` is the MERGE key and is u
 | `AFFECTS` | Decision → Component | | |
 | `SUPERSEDES` | Decision → Decision | `at` | Time chain for "what did we believe before?" |
 | `FOR` | TriageRun → Issue | | Sandbox graph only |
+| `CITES` | CachedAnswer → any cited node | | One per citation, so the graph knows which cached answers lean on a PR or person |
 
 ## Graph lifecycle
 
@@ -108,6 +112,7 @@ CREATE INDEX FOR (f:File) ON (f.key)
 CREATE INDEX FOR (c:Component) ON (c.key)
 CREATE INDEX FOR (d:Decision) ON (d.id)
 CREATE INDEX FOR (t:TriageRun) ON (t.issue_key)
+CREATE INDEX FOR (a:CachedAnswer) ON (a.key)
 CREATE INDEX FOR (pr:PullRequest) ON (pr.merged_at)
 CALL db.idx.fulltext.createNodeIndex('Issue', 'title', 'body_excerpt')
 CALL db.idx.fulltext.createNodeIndex('Decision', 'summary', 'rationale')

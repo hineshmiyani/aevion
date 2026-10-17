@@ -18,6 +18,7 @@ The browser only calls this app's own `POST /api/ask` route, which forwards to t
 | Variable | Read at | Meaning |
 |---|---|---|
 | `AEVION_API_URL` | request time (server only) | Base URL of the FastAPI service, e.g. `http://localhost:8000`. **Unset → a built-in sample answer** recorded from the real FalkorDB graph, so the UI works without the backend. |
+| `AEVION_PROXY_SECRET` | request time (server only) | Shared with the API's `PROXY_SECRET`. The proxy then forwards each visitor's IP so the API's per-visitor rate limit works behind Vercel; without it every visitor shares one limit. |
 
 Types for API shapes are generated from FastAPI's OpenAPI schema. With the API running:
 

@@ -273,6 +273,31 @@ Only `issues.opened` triggers a triage; edits, closes and comments are ingested 
 
 **Webhook setup** (on deploy, AEV-14): in the sandbox repo's Settings → Webhooks, payload URL `https://<api-host>/webhooks/github`, content type `application/json`, the `GITHUB_WEBHOOK_SECRET` from the API's environment, and the events *Issues* and *Issue comments*.
 
+## Cached hero answers (SPEC OQ-6, AEV-35)
+
+Module: `agent/cache.py` · CLI: `aevion warm-cache [--refresh]`
+
+The five hero questions are answered once and stored in the org graph, so FalkorDB stays the only datastore. A question's key is a hash of its normalised text (case, spacing and a trailing `?` don't matter). `/api/ask` looks the key up before anything else: a hit costs no model call and doesn't count toward the rate limit.
+
+```cypher
+MERGE (a:CachedAnswer {key: $key})
+SET a.question = $question, a.response = $response, a.model = $model, a.created_at = $at
+WITH a
+OPTIONAL MATCH (a)-[old:CITES]->()
+DELETE old
+```
+
+Then one `CITES` edge per citation, one statement per label (a label can't be a parameter):
+
+```cypher
+MATCH (a:CachedAnswer {key: $key})
+UNWIND $keys AS node_key
+MATCH (n:PullRequest {key: node_key})
+MERGE (a)-[:CITES]->(n)
+```
+
+So the graph can answer "which cached answers rely on this PR?" (`MATCH (a:CachedAnswer)-[:CITES]->(:PullRequest {key: $k}) RETURN a.question`), and `--refresh` rebuilds them after a re-ingest. **Measured:** 14 ms per cached answer over HTTP (SPEC target: under 200 ms); the five hero answers carry 71 citations.
+
 ## FalkorDB Cypher notes
 
 - `ORDER BY` can't contain an aggregation directly (`ORDER BY count(x)` fails with "failed to map aggregation expression"); aggregate into an alias in `WITH`/`RETURN` and order by the alias.

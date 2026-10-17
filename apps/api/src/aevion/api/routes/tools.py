@@ -2,16 +2,20 @@
 
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Body, Depends, HTTPException
+from fastapi import APIRouter, Body, Depends, HTTPException, Request
 from pydantic import ValidationError
 
 from aevion.api.deps import get_db
+from aevion.api.limits import TOOL_RULES, RateLimiter, enforce
+from aevion.config import Settings
 from aevion.graph.client import GraphNotFoundError, OrgGraph
 from aevion.graph.naming import graph_name_for
 from aevion.tools.evidence import ToolResult
 from aevion.tools.registry import TOOLS
 
 router = APIRouter(prefix="/api/tools", tags=["tools"])
+tool_limiter = RateLimiter(TOOL_RULES)
+_proxy_secret = Settings().proxy_secret
 
 
 @router.get("")
@@ -29,9 +33,11 @@ def list_tools() -> list[dict[str, Any]]:
 @router.post("/{tool_name}", response_model=ToolResult)
 def call_tool(
     tool_name: str,
+    request: Request,
     db: Annotated[Any, Depends(get_db)],
     payload: Annotated[dict[str, Any], Body()],
 ) -> ToolResult:
+    enforce(tool_limiter, request, _proxy_secret)
     tool = TOOLS.get(tool_name)
     if tool is None:
         raise HTTPException(status_code=404, detail=f"Unknown tool {tool_name!r}")

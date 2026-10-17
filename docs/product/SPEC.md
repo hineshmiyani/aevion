@@ -344,4 +344,4 @@ The spec is done when all of these are true and verified:
 | OQ-3 | Final work split | all | Confirm with Jignesh and Jaydeep (Notion task) |
 | OQ-4 | ~~Component depth per repo (default 2)~~ **Resolved (AEV-22):** depth 2, plus per-prefix overrides for nested layouts (GraphRAG-SDK `graphrag_sdk/src/graphrag_sdk` = 4, FalkorDB `graph/src` = 3) | `ingest` | Done |
 | OQ-5 | Railway credit available? | deployment | Check before the provisioning task |
-| OQ-6 | Where cached hero answers live | `api` | Proposed: in the org graph as `(:CachedAnswer)` nodes, so FalkorDB stays the only datastore |
+| OQ-6 | Where cached hero answers live | `api` | **Resolved (AEV-35):** in the org graph as `(:CachedAnswer)` nodes with `CITES` edges to the evidence, so FalkorDB stays the only datastore |
