@@ -46,11 +46,16 @@ def main(argv: list[str] | None = None) -> int:
     extract.add_argument("--max-usd", type=float, default=1.0, help="Refuse runs priced above this")
     extract.add_argument("--workers", type=int, default=8)
 
+    mcp = commands.add_parser("mcp", help="Serve the graph tools over MCP (stdio)")
+    mcp.add_argument("--org", default="FalkorDB")
+
     commands.add_parser("cost", help="Show LLM spend from the ledger")
     check = commands.add_parser("llm-check", help="Make one tiny live LLM call and print its cost")
     check.add_argument("--model", help="Model ID (default: AGENT_MODEL)")
 
     args = parser.parse_args(argv)
+    if args.command == "mcp":
+        return _mcp(args.org)
     if args.command == "extract":
         return _extract(args)
     if args.command == "cost":
@@ -124,6 +129,14 @@ def _extract(args: argparse.Namespace) -> int:
     )
     for error in report.errors[:5]:
         print("  error:", error)
+    return 0
+
+
+def _mcp(org: str) -> int:
+    from aevion.mcp.server import build_server  # MCP SDK loads only for this command
+
+    graph = OrgGraph(connect(Settings()), graph_name_for(org))
+    build_server(graph, org).run("stdio")
     return 0
 
 
