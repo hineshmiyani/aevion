@@ -16,6 +16,7 @@ Every planning, design and process document lives here, grouped by purpose. Code
 │   ├── adr/                   Accepted decisions (Architecture Decision Records)
 │   ├── product/               SPEC.md: what we build and how we know it's done
 │   ├── architecture/          System design, graph data model, Cypher reference
+│   ├── demo/                  Demo video storyboard
 │   └── process/               AI workflow and AI-usage disclosure
 ├── tasks/                     plan.md (implementation plan; tasks themselves live in Notion)
 └── apps/ · infra/             Code (created once the stack is locked)
@@ -36,6 +37,7 @@ Every planning, design and process document lives here, grouped by purpose. Code
 | hackathon | [submission-checklist.md](hackathon/submission-checklist.md) | Living |
 | research | [track-analysis.md](research/track-analysis.md) | Done |
 | grilling | [round-01.md](grilling/round-01.md) | Answered |
+| grilling | [round-02.md](grilling/round-02.md) | Answered (work split provisional) |
 | adr | [0001-company-brain-direction.md](adr/0001-company-brain-direction.md) | Accepted |
 | adr | [0002-hybrid-ai-skills-workflow.md](adr/0002-hybrid-ai-skills-workflow.md) | Accepted (partly superseded by 0003) |
 | adr | [0003-notion-task-tracking-and-git-conventions.md](adr/0003-notion-task-tracking-and-git-conventions.md) | Accepted |
@@ -46,7 +48,12 @@ Every planning, design and process document lives here, grouped by purpose. Code
 | adr | [0008-tech-stack.md](adr/0008-tech-stack.md) | Accepted |
 | adr | [0009-llm-via-openrouter.md](adr/0009-llm-via-openrouter.md) | Accepted (model choice superseded by 0010) |
 | adr | [0010-llm-model-bake-off.md](adr/0010-llm-model-bake-off.md) | Accepted |
+| adr | [0011-graph-data-model.md](adr/0011-graph-data-model.md) | Accepted |
+| adr | [0012-deployment-and-sandbox.md](adr/0012-deployment-and-sandbox.md) | Accepted |
 | process | [ai-workflow.md](process/ai-workflow.md) | Done |
 | process | [ai-usage-disclosure.md](process/ai-usage-disclosure.md) | Living |
 | product | SPEC.md | Not started (after grilling) |
-| architecture | graph-model.md, system-design.md, cypher-queries.md | Not started |
+| architecture | [graph-model.md](architecture/graph-model.md) | v1 design |
+| architecture | system-design.md, cypher-queries.md | Not started |
+| demo | [storyboard.md](demo/storyboard.md) | v1 |
+| root | [GLOSSARY.md](../GLOSSARY.md) | Living |

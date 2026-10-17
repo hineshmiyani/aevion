@@ -15,7 +15,8 @@ This is team Aevion's entry for the FalkorDB "Graph Hacks" hackathon. Read [docs
 - **Implementation plan:** `tasks/plan.md`.
 - **Task list:** the Notion database **Aevion Tasks** (https://app.notion.com/p/374521bfeac54306bed66e0764812cda, data source `collection://77ec23de-d639-46a0-be78-7b31ae9a0ac4`). This is our external task tracker: do **not** create `tasks/todo.md`. Each task gets an auto-generated ID like `AEV-12`.
 - **Architecture Decision Records:** `docs/adr/NNNN-kebab-title.md`, numbered sequentially. Use this location for all ADRs, including skills that default to `docs/decisions/`.
-- **Domain vocabulary:** `GLOSSARY.md` at the repo root.
+- **Domain vocabulary:** `GLOSSARY.md` at the repo root. Use its terms exactly (Component, Expert, Owner, Decision, Evidence path, Tool, Triage, Sandbox).
+- **Demo video plan:** `docs/demo/storyboard.md`.
 - **Open design questions:** `docs/grilling/round-NN.md`.
 - **Architecture docs:** `docs/architecture/`. The graph data model and Cypher query reference must stay in sync with the code, because the README must include them.
 
