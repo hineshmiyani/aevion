@@ -28,6 +28,9 @@ class Settings(BaseSettings):
 
     # ADR-0005: the only repos triage may write to. Everything else gets a dry run.
     triage_apply_repos: frozenset[str] = frozenset({"hineshmiyani/aevion-sandbox"})
+    sandbox_repo: str = "hineshmiyani/aevion-sandbox"
+    # Fine-grained token that GitHub limits to the sandbox repo (issues read/write only).
+    sandbox_github_token: str | None = None
 
     def resolved_github_token(self) -> str:
         if self.github_token:

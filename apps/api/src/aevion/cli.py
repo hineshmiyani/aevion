@@ -53,6 +53,11 @@ def main(argv: list[str] | None = None) -> int:
     check = commands.add_parser("llm-check", help="Make one tiny live LLM call and print its cost")
     check.add_argument("--model", help="Model ID (default: AGENT_MODEL)")
 
+    seed = commands.add_parser("sandbox-seed", help="Copy open FalkorDB issues into the sandbox")
+    seed.add_argument("--org", default="FalkorDB")
+    seed.add_argument("--count", type=int, default=30)
+    seed.add_argument("--dry-run", action="store_true", help="Show the selection; write nothing")
+
     args = parser.parse_args(argv)
     if args.command == "mcp":
         return _mcp(args.org)
@@ -62,6 +67,8 @@ def main(argv: list[str] | None = None) -> int:
         return _cost()
     if args.command == "llm-check":
         return _llm_check(args.model)
+    if args.command == "sandbox-seed":
+        return _sandbox_seed(args.org, args.count, args.dry_run)
     if args.command == "ingest":
         return _ingest(args.org_config, args.repos, args.cache, args.reset_components)
     return 1
@@ -180,3 +187,27 @@ def _llm_check(model: str | None) -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
+
+
+def _sandbox_seed(org: str, count: int, dry_run: bool) -> int:
+    from aevion.sandbox.seed import seed
+    from aevion.sandbox.writer import SandboxWriter
+
+    settings = Settings()
+    graph = OrgGraph(connect(settings), graph_name_for(org))
+    writer = (
+        None
+        if dry_run
+        else SandboxWriter(
+            settings.sandbox_github_token or "", settings.sandbox_repo, settings.triage_apply_repos
+        )
+    )
+    report, chosen = seed(graph, writer, count, dry_run=dry_run)
+    for issue in chosen:
+        print(f"  {issue['key']:<34} {issue['title'][:70]}")
+    print(
+        f"{report.selected} selected, {report.created} created, "
+        f"{report.already_there} already in {settings.sandbox_repo}"
+        + (" (dry run)" if dry_run else "")
+    )
+    return 0
