@@ -227,8 +227,9 @@ LIMIT $pool
 
 ```cypher
 UNWIND $issues AS issue_key
-MATCH (i:Issue {key: issue_key})<-[:FIXES]-(pr:PullRequest)-[:MODIFIES]->(f:File)
-      -[:IN_COMPONENT]->(c:Component)
+MATCH (i:Issue {key: issue_key})<-[:FIXES]-(pr:PullRequest)
+WITH issue_key, pr
+MATCH (pr)-[:MODIFIES]->(f:File)-[:IN_COMPONENT]->(c:Component)
 WHERE NOT f.is_doc
 RETURN issue_key AS issue, pr.key AS pr, pr.title AS pr_title, pr.url AS pr_url,
        f.key AS file, f.path AS path, c.key AS component, c.name AS name
@@ -302,6 +303,7 @@ So the graph can answer "which cached answers rely on this PR?" (`MATCH (a:Cache
 
 - `ORDER BY` can't contain an aggregation directly (`ORDER BY count(x)` fails with "failed to map aggregation expression"); aggregate into an alias in `WITH`/`RETURN` and order by the alias.
 - `GRAPH.RO_QUERY` fails on a graph that doesn't exist yet; `bootstrap()` creates every org graph first.
+- One long pattern is planned as a whole, and FalkorDB may start it from a filtered label scan instead of an index. `FIX_COMPONENTS` written as a single `MATCH` scanned every `File` (0.8 s, over the 1 s server `TIMEOUT` on Railway); a `WITH` after the indexed `Issue` hop made it start from the index (5 ms). Check `GRAPH.EXPLAIN` for `Node By Label Scan` on big labels.
 - `x ENDS WITH '/' + y` parses as `(x ENDS WITH '/') + y` and fails with "Type mismatch: expected Boolean but was String". Parenthesise the concatenation: `x ENDS WITH ('/' + y)`.
 
 ## Ingestion writes

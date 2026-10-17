@@ -1,0 +1,9 @@
+# Only the API is built on Railway; keep the upload small.
+apps/web
+docs
+tasks
+data
+**/node_modules
+**/.venv
+**/__pycache__
+apps/api/tests

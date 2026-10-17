@@ -18,6 +18,7 @@ __pycache__/
 .mypy_cache/
 
 # Node
+.vercel/
 node_modules/
 .next/
 out/
