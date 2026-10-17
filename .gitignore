@@ -25,6 +25,6 @@ dist/
 build/
 *.tsbuildinfo
 
-# Local data
-data/raw/
+# Local data: raw GitHub responses, LLM cache and spend ledger (never commit)
+data/
 *.rdb
