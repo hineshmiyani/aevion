@@ -27,6 +27,9 @@ This is team Aevion's entry for the FalkorDB "Graph Hacks" hackathon. Read [docs
 
 Every change belongs to a Notion task. Use its ID everywhere:
 
+- **Branching model:** `main` ← `develop` ← task branches. Never branch from `main`, and never open a task PR against `main`.
+  - `develop` is the integration branch. **Create every task branch from the latest `develop`** (`git switch develop && git pull && git switch -c <type>/<task-id>`), and **target every task PR at `develop`**.
+  - `main` only receives `develop` through a release PR, and is what we demo and submit.
 - **Branch:** `<type>/<task-id>`, for example `feat/AEV-12`.
 - **Commit subject:** `<type>: <task-id> - <message>`, for example `feat: AEV-12 - Load PR review comments into the graph`.
 - **Commit body:** bullet points (`- `), one per meaningful change.

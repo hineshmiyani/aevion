@@ -14,16 +14,22 @@ Team-internal guide for Aevion. Keep it short; we have a deadline.
 
 ## Branches
 
-Format: `<type>/<task-id>`
-
 ```
-feat/AEV-12
-bugfix/AEV-19
-docs/AEV-2
+main      ← release PRs from develop only; what we demo and submit
+  └── develop   ← integration branch; every task PR targets this
+        ├── feat/AEV-12
+        ├── bugfix/AEV-19
+        └── docs/AEV-2
 ```
 
-- `main` is always demo-able. Never push directly to it; merge through a PR.
-- One branch per task.
+- **Always branch from the latest `develop`**, never from `main`:
+  ```bash
+  git switch develop && git pull
+  git switch -c feat/AEV-12
+  ```
+- **Every task PR targets `develop`.** `develop` reaches `main` only through a release PR, once it's demo-able.
+- Never push directly to `main` or `develop`; merge through a PR.
+- Branch name format: `<type>/<task-id>`, one branch per task.
 
 ## Commits
 
@@ -41,6 +47,7 @@ feat: AEV-12 - Load PR review comments into the graph
 
 ## Pull requests
 
+- Base branch: **`develop`** (only release PRs target `main`).
 - Title: same format as the commit subject, for example `feat: AEV-12 - Load PR review comments into the graph`.
 - Body: fill in the PR template, including the Notion task link.
 - At least one teammate reviews before merge. After merge, set the task to **Done** and paste the PR link into its **PR** field.

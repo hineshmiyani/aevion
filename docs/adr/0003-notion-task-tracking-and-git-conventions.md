@@ -9,10 +9,11 @@ Three people will work in parallel for about 1.5 days. A markdown checklist in t
 ## Decision
 
 1. **Tasks live in the Notion database "Aevion Tasks"**, used like JIRA: Status (Backlog → To Do → In Progress → In Review → Done, plus Blocked), Type, Priority, Assignee, Area, Phase, Estimate, Due, Acceptance criteria, and PR link. Each task gets an auto-generated ID with prefix `AEV` (for example `AEV-12`).
-2. **Branch names:** `<type>/<task-id>`, for example `feat/AEV-12`.
-3. **Commit subjects:** `<type>: <task-id> - <message>`, with a bullet-point body.
-4. **Types:** `feat`, `bugfix`, `hotfix`, `chore`, `docs`, `style`, `refactor`, `test`, `perf`, `ci`, `build`.
-5. **No AI attribution** in code, commits or PRs. AI use is disclosed only in `docs/process/ai-usage-disclosure.md` (hackathon Rule 11).
+2. **Branching model:** `main` ← `develop` ← task branches. Task branches are created from `develop` and their PRs target `develop`. `main` only receives `develop` through release PRs, and is what we demo and submit.
+3. **Branch names:** `<type>/<task-id>`, for example `feat/AEV-12`.
+4. **Commit subjects:** `<type>: <task-id> - <message>`, with a bullet-point body.
+5. **Types:** `feat`, `bugfix`, `hotfix`, `chore`, `docs`, `style`, `refactor`, `test`, `perf`, `ci`, `build`.
+6. **No AI attribution** in code, commits or PRs. AI use is disclosed only in `docs/process/ai-usage-disclosure.md` (hackathon Rule 11).
 
 `tasks/plan.md` remains the plan document. Addy Osmani's planning skill supports an external tracker when the project's agent rules name one, so `CLAUDE.md` names the Notion database.
 

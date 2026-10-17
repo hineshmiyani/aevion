@@ -12,8 +12,9 @@
 
 ## Checklist
 
+- [ ] Branched from `develop` and this PR targets `develop` (release PRs: `develop` → `main`)
 - [ ] Branch is `<type>/<task-id>` and commits are `<type>: <task-id> - <message>`
-- [ ] Works locally; `main` stays demo-able
+- [ ] Works locally; `develop` stays runnable
 - [ ] Graph schema changes reflected in `docs/architecture/graph-model.md`
 - [ ] New or changed Cypher reflected in `docs/architecture/cypher-queries.md`
 - [ ] New env vars added to `.env.example`
