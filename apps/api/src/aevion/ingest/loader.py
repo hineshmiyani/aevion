@@ -116,6 +116,33 @@ SET a.at = row.created_at
 UPSERT_PR_COMMENTS = _UPSERT_COMMENTS.format(label="PullRequest")
 UPSERT_ISSUE_COMMENTS = _UPSERT_COMMENTS.format(label="Issue")
 
+UPSERT_RELEASES = """
+UNWIND $rows AS row
+MATCH (r:Repo {full_name: row.repo})
+MERGE (rel:Release {key: row.key})
+SET rel.tag = row.tag, rel.name = row.name, rel.url = row.url,
+    rel.published_at = row.published_at, rel.pr_keys = row.pr_keys
+MERGE (rel)-[:IN_REPO]->(r)
+"""
+
+_UPSERT_OWNS = """
+UNWIND $rows AS row
+MATCH (r:Repo {{full_name: row.repo}})
+MERGE (c:Component {{key: row.component_key}})
+SET c.name = coalesce(c.name, row.component_path), c.repo = row.repo,
+    c.path_prefix = coalesce(c.path_prefix, row.component_path),
+    c.source = coalesce(c.source, 'codeowners')
+MERGE (c)-[:IN_REPO]->(r)
+MERGE (o:{label} {{{key}: row.owner}})
+{on_owner}
+MERGE (o)-[own:OWNS {{valid_from: row.valid_from}}]->(c)
+SET own.valid_to = row.valid_to, own.source = 'CODEOWNERS'
+"""
+UPSERT_PERSON_OWNS = _UPSERT_OWNS.format(
+    label="Person", key="login", on_owner="SET o.is_bot = coalesce(o.is_bot, false)"
+)
+UPSERT_TEAM_OWNS = _UPSERT_OWNS.format(label="Team", key="key", on_owner="SET o.name = row.owner")
+
 _LINK = """
 MATCH (s:{source}) WHERE size(s.{keys}) > 0
 UNWIND s.{keys} AS k
@@ -124,6 +151,7 @@ MERGE (s)-[:{edge}]->(t)
 """
 LINK_QUERIES = (
     _LINK.format(source="PullRequest", keys="fix_keys", target="Issue", edge="FIXES"),
+    _LINK.format(source="Release", keys="pr_keys", target="PullRequest", edge="INCLUDES"),
     *(
         _LINK.format(source=source, keys="ref_keys", target=target, edge="REFERENCES")
         for source in ("PullRequest", "Issue")
@@ -191,6 +219,11 @@ def load_batch(graph: OrgGraph, batch: Batch) -> None:
         graph, UPSERT_ISSUE_LABELS, [{"key": i.key, "label": lb} for i in issues for lb in i.labels]
     )
     _run(graph, UPSERT_ASSIGNED, [{"key": i.key, "login": a} for i in issues for a in i.assignees])
+
+    _run(graph, UPSERT_RELEASES, [asdict(r) for r in batch.releases])
+    owns = [asdict(o) for o in batch.ownerships]
+    _run(graph, UPSERT_PERSON_OWNS, [o for o in owns if o["kind"] == "person"])
+    _run(graph, UPSERT_TEAM_OWNS, [o for o in owns if o["kind"] == "team"])
 
     pr_keys = {pr.key for pr in prs}
     comments = [asdict(c) for c in batch.comments]
