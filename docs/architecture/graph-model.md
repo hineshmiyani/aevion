@@ -139,4 +139,6 @@ A thread goes to the extraction model only if it matches at least one of:
 - a closed issue with ≥ 3 comments;
 - a PR that modifies a docs file (`is_doc = true`).
 
-Everything else stays deterministic structure with no LLM cost.
+Everything else stays deterministic structure with no LLM cost. On the full demo graph this selects **1,177 threads**, projected at **$0.23** with Haiku 5.5 (`aevion extract --dry-run`).
+
+**Validation before anything reaches the graph:** `MADE_BY` only for people who took part in the thread, `AFFECTS` only for Components the thread's PRs touched, `EVIDENCED_BY` only for real comments of the thread, and decisions with confidence below 0.5 are dropped. A Decision's id is a hash of the thread key and summary, so re-runs MERGE onto the same node.

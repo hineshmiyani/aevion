@@ -8,6 +8,7 @@ Guardrails from ADR-0009 live here so no caller can skip them:
 
 import hashlib
 import json
+import threading
 import time
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -61,6 +62,7 @@ class Ledger:
 
     def __init__(self, path: Path) -> None:
         self.path = path
+        self._lock = threading.Lock()  # extraction records from several worker threads
 
     def record(self, model: str, usage: Usage, cached: bool, purpose: str) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
@@ -74,7 +76,7 @@ class Ledger:
             "reasoning_tokens": usage.reasoning_tokens,
             "cost_usd": 0.0 if cached else usage.cost_usd,
         }
-        with self.path.open("a") as f:
+        with self._lock, self.path.open("a") as f:
             f.write(json.dumps(entry) + "\n")
 
     def entries(self) -> list[dict[str, Any]]:
