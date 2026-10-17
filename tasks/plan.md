@@ -139,7 +139,7 @@ Per task, in order:
 2. **Build:** Addy Osmani `incremental-implementation`, one thin slice at a time; Matt Pocock `tdd` at the agreed seams (each Cypher tool, ingestion normalisers, webhook HMAC, fallback guard).
 3. **UI tasks:** Addy `frontend-ui-engineering`, then `browser-testing-with-devtools` to verify in a real browser.
 4. **Review:** Addy `code-review-and-quality` on the diff before the PR.
-5. **Ship the task:** commit `<type>: AEV-n - message` with a bullet body → PR into `develop` → squash-merge → **keep the branch** → Notion task Done with the PR link.
+5. **Ship the task:** commit `<type>: AEV-n - message` with a bullet body → PR into `develop` → **merge commit** (`gh pr merge --merge`) → **keep the branch** → Notion task Done with the PR link.
 6. **Checkpoints:** run the checkpoint list above before moving to the next phase.
 
 ## Open questions carried from the spec
