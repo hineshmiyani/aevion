@@ -1,10 +1,12 @@
 """Turn raw GitHub GraphQL nodes into plain records for the loader. Pure functions only."""
 
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any
 
 from aevion.ingest.components import component_key, component_path, is_doc
+from aevion.ingest.references import find_closing_references, find_references
 
 BODY_EXCERPT_CHARS = 500
 
@@ -35,6 +37,27 @@ class FileChangeRec:
 
 
 @dataclass(frozen=True)
+class LabelRec:
+    key: str
+    repo: str
+    name: str
+    color: str | None
+
+
+@dataclass(frozen=True)
+class CommentRec:
+    """`kind`: issue (conversation), review (review summary) or review_thread (inline)."""
+
+    id: str
+    kind: str
+    excerpt: str
+    url: str
+    created_at: int | None
+    author: str
+    thread_key: str
+
+
+@dataclass(frozen=True)
 class PullRequestRec:
     key: str
     repo: str
@@ -50,8 +73,29 @@ class PullRequestRec:
     additions: int
     deletions: int
     author: str | None
-    reviews: tuple[ReviewRec, ...] = field(default_factory=tuple)
-    files: tuple[FileChangeRec, ...] = field(default_factory=tuple)
+    reviews: tuple[ReviewRec, ...] = ()
+    files: tuple[FileChangeRec, ...] = ()
+    labels: tuple[str, ...] = ()
+    ref_keys: tuple[str, ...] = ()
+    fix_keys: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class IssueRec:
+    key: str
+    repo: str
+    number: int
+    title: str
+    body_excerpt: str
+    state: str
+    url: str
+    created_at: int | None
+    closed_at: int | None
+    updated_at: int | None
+    author: str | None
+    labels: tuple[str, ...] = ()
+    assignees: tuple[str, ...] = ()
+    ref_keys: tuple[str, ...] = ()
 
 
 @dataclass
@@ -59,7 +103,10 @@ class Batch:
     """Everything one ingestion page produced, deduplicated by key."""
 
     people: dict[str, PersonRec] = field(default_factory=dict)
+    labels: dict[str, LabelRec] = field(default_factory=dict)
     pull_requests: list[PullRequestRec] = field(default_factory=list)
+    issues: list[IssueRec] = field(default_factory=list)
+    comments: list[CommentRec] = field(default_factory=list)
 
     def add_person(self, person: PersonRec | None) -> None:
         if person and person.login not in self.people:
@@ -92,11 +139,13 @@ def pull_request_from(
     bot_logins: frozenset[str],
     batch: Batch,
 ) -> PullRequestRec:
+    key = f"{repo}#{node['number']}"
     author = person_from(node.get("author"), bot_logins)
     batch.add_person(author)
 
     reviews: list[ReviewRec] = []
-    for review in (node.get("reviews") or {}).get("nodes", []):
+    review_texts: list[str] = []
+    for review in _nodes(node, "reviews"):
         reviewer = person_from(review.get("author"), bot_logins)
         if reviewer is None:
             continue
@@ -104,6 +153,16 @@ def pull_request_from(
         reviews.append(
             ReviewRec(reviewer.login, review["state"], to_epoch_ms(review.get("submittedAt")))
         )
+        if reviewer.is_bot:
+            continue  # AI review bots post long summaries: noise for expertise and decisions
+        if review.get("body"):
+            review_texts.append(review["body"])
+            _add_comment(batch, review, "rv", "review", reviewer.login, key)
+        for inline in _nodes(review, "comments"):
+            review_texts.append(inline.get("body") or "")
+            _add_comment(batch, inline, "rc", "review_thread", reviewer.login, key)
+
+    conversation = _thread_comments(node, key, bot_logins, batch)
 
     files = tuple(
         FileChangeRec(
@@ -115,15 +174,22 @@ def pull_request_from(
             additions=int(f.get("additions") or 0),
             deletions=int(f.get("deletions") or 0),
         )
-        for f in (node.get("files") or {}).get("nodes", [])
+        for f in _nodes(node, "files")
     )
 
+    body = node.get("body") or ""
+    fixes = find_closing_references(body, repo) | {
+        f"{ref['repository']['nameWithOwner']}#{ref['number']}"
+        for ref in _nodes(node, "closingIssuesReferences")
+    }
+    refs = _references([body, node.get("title"), *conversation, *review_texts], repo) - fixes
+
     record = PullRequestRec(
-        key=f"{repo}#{node['number']}",
+        key=key,
         repo=repo,
         number=int(node["number"]),
         title=node.get("title") or "",
-        body_excerpt=(node.get("body") or "")[:BODY_EXCERPT_CHARS],
+        body_excerpt=body[:BODY_EXCERPT_CHARS],
         state=node["state"],
         url=node["url"],
         created_at=to_epoch_ms(node.get("createdAt")),
@@ -135,9 +201,104 @@ def pull_request_from(
         author=author.login if author else None,
         reviews=tuple(_latest_review_per_person(reviews)),
         files=files,
+        labels=_labels(node, repo, batch),
+        ref_keys=tuple(sorted(refs - {key})),
+        fix_keys=tuple(sorted(fixes - {key})),
     )
     batch.pull_requests.append(record)
     return record
+
+
+def issue_from(
+    node: dict[str, Any], repo: str, bot_logins: frozenset[str], batch: Batch
+) -> IssueRec:
+    key = f"{repo}#{node['number']}"
+    author = person_from(node.get("author"), bot_logins)
+    batch.add_person(author)
+
+    assignees: list[str] = []
+    for actor in _nodes(node, "assignees"):
+        person = person_from({"__typename": "User", **actor}, bot_logins)
+        if person:
+            batch.add_person(person)
+            assignees.append(person.login)
+
+    conversation = _thread_comments(node, key, bot_logins, batch)
+    body = node.get("body") or ""
+    refs = _references([body, node.get("title"), *conversation], repo) - {key}
+
+    record = IssueRec(
+        key=key,
+        repo=repo,
+        number=int(node["number"]),
+        title=node.get("title") or "",
+        body_excerpt=body[:BODY_EXCERPT_CHARS],
+        state=node["state"],
+        url=node["url"],
+        created_at=to_epoch_ms(node.get("createdAt")),
+        closed_at=to_epoch_ms(node.get("closedAt")),
+        updated_at=to_epoch_ms(node.get("updatedAt")),
+        author=author.login if author else None,
+        labels=_labels(node, repo, batch),
+        assignees=tuple(assignees),
+        ref_keys=tuple(sorted(refs)),
+    )
+    batch.issues.append(record)
+    return record
+
+
+def _nodes(parent: dict[str, Any], connection: str) -> list[dict[str, Any]]:
+    nodes: list[dict[str, Any]] = (parent.get(connection) or {}).get("nodes") or []
+    return nodes
+
+
+def _thread_comments(
+    node: dict[str, Any], thread_key: str, bot_logins: frozenset[str], batch: Batch
+) -> list[str]:
+    """Add human conversation comments to the batch; return their texts for reference parsing."""
+    texts: list[str] = []
+    for comment in _nodes(node, "comments"):
+        author = person_from(comment.get("author"), bot_logins)
+        if author is None or author.is_bot:
+            continue
+        batch.add_person(author)
+        texts.append(comment.get("body") or "")
+        _add_comment(batch, comment, "ic", "issue", author.login, thread_key)
+    return texts
+
+
+def _add_comment(
+    batch: Batch, raw: dict[str, Any], prefix: str, kind: str, author: str, thread_key: str
+) -> None:
+    if not raw.get("databaseId") or not raw.get("url"):
+        return
+    batch.comments.append(
+        CommentRec(
+            id=f"{prefix}:{raw['databaseId']}",  # GitHub ID spaces differ per comment type
+            kind=kind,
+            excerpt=(raw.get("body") or "")[:BODY_EXCERPT_CHARS],
+            url=raw["url"],
+            created_at=to_epoch_ms(raw.get("createdAt") or raw.get("submittedAt")),
+            author=author,
+            thread_key=thread_key,
+        )
+    )
+
+
+def _labels(node: dict[str, Any], repo: str, batch: Batch) -> tuple[str, ...]:
+    keys: list[str] = []
+    for label in _nodes(node, "labels"):
+        rec = LabelRec(f"{repo}:{label['name']}", repo, label["name"], label.get("color"))
+        batch.labels.setdefault(rec.key, rec)
+        keys.append(rec.key)
+    return tuple(keys)
+
+
+def _references(texts: Iterable[str | None], repo: str) -> set[str]:
+    refs: set[str] = set()
+    for text in texts:
+        refs |= find_references(text, repo)
+    return refs
 
 
 def _latest_review_per_person(reviews: list[ReviewRec]) -> list[ReviewRec]:

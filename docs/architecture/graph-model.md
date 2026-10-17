@@ -51,12 +51,12 @@ All times are **epoch milliseconds** (integers). `key` is the MERGE key and is u
 |---|---|---|---|
 | `Repo` | `full_name` (`FalkorDB/FalkorDB`) | `name`, `url`, `stars`, `default_branch` | GitHub API |
 | `Person` | `login` | `name`, `avatar_url`, `is_bot` | GitHub API |
-| `Issue` | `key` (`FalkorDB/FalkorDB#123`) | `number`, `title`, `body_excerpt`, `state`, `created_at`, `closed_at`, `url` | GitHub API |
-| `PullRequest` | `key` (`FalkorDB/FalkorDB#456`) | `number`, `title`, `body_excerpt`, `state`, `created_at`, `merged_at`, `url`, `additions`, `deletions` | GitHub API |
-| `Comment` | `id` (GitHub ID) | `kind` (`issue` / `review` / `review_thread`), `excerpt`, `created_at`, `url` | GitHub API |
+| `Issue` | `key` (`FalkorDB/FalkorDB#123`) | `number`, `title`, `body_excerpt`, `state`, `created_at`, `closed_at`, `updated_at`, `url`, `ref_keys` | GitHub API |
+| `PullRequest` | `key` (`FalkorDB/FalkorDB#456`) | `number`, `title`, `body_excerpt`, `state`, `created_at`, `merged_at`, `closed_at`, `updated_at`, `url`, `additions`, `deletions`, `ref_keys`, `fix_keys` | GitHub API |
+| `Comment` | `id` (`ic:` / `rv:` / `rc:` + GitHub ID, since each comment type has its own ID space) | `kind` (`issue` / `review` / `review_thread`), `excerpt`, `created_at`, `url` | GitHub API; comments by bots are skipped |
 | `File` | `key` (`FalkorDB/FalkorDB:src/x.c`) | `path`, `repo`, `is_doc` | PR file lists |
 | `Component` | `key` (`FalkorDB/FalkorDB:src/execution_plan`) | `name`, `repo`, `path_prefix`, `source` (`path` / `label`) | Derived: directory prefix (default depth 2) |
-| `Label` | `key` (`FalkorDB/FalkorDB:bug`) | `name`, `color` | GitHub API |
+| `Label` | `key` (`FalkorDB/FalkorDB:bug`) | `name`, `color`, `repo` | GitHub API |
 | `Release` | `key` (`FalkorDB/FalkorDB@v4.8.0`) | `tag`, `published_at`, `url` | GitHub API |
 | `Decision` | `id` (content hash) | `summary`, `rationale`, `alternatives`, `decided_at`, `confidence`, `model`, `source_url` | LLM extraction ([ADR-0010](../adr/0010-llm-model-bake-off.md)) |
 
@@ -64,11 +64,11 @@ All times are **epoch milliseconds** (integers). `key` is the MERGE key and is u
 
 | Type | From → To | Properties | Notes |
 |---|---|---|---|
-| `AUTHORED` | Person → Issue / PullRequest / Comment | `at` | |
+| `AUTHORED` | Person → Issue / PullRequest / Comment | `at` | No REVIEWED edge for self-reviews |
 | `REVIEWED` | Person → PullRequest | `state` (`APPROVED` / `CHANGES_REQUESTED` / `COMMENTED`), `at` | |
 | `ON` | Comment → Issue / PullRequest | | |
-| `FIXES` | PullRequest → Issue | | From closing keywords and GitHub's closing references |
-| `REFERENCES` | Issue / PullRequest → Issue / PullRequest | `at` | From `#123` / `owner/repo#123` mentions |
+| `FIXES` | PullRequest → Issue | | From closing keywords and GitHub's `closingIssuesReferences`; created by `link_references()` from `fix_keys` |
+| `REFERENCES` | Issue / PullRequest → Issue / PullRequest | | From `#123`, `owner/repo#123` and GitHub URLs in titles, bodies and human comments (code spans ignored); created by `link_references()` from `ref_keys` after all repos load, so cross-repo links resolve |
 | `MODIFIES` | PullRequest → File | `additions`, `deletions` | |
 | `IN_COMPONENT` | File → Component | | |
 | `MAPS_TO` | Label → Component | | Per-repo config |
@@ -90,7 +90,9 @@ FalkorDB's read-only command (`GRAPH.RO_QUERY`) **fails on a graph that doesn't 
 ## Indexes
 
 ```cypher
+CREATE INDEX FOR (r:Repo) ON (r.full_name)
 CREATE INDEX FOR (p:Person) ON (p.login)
+CREATE INDEX FOR (l:Label) ON (l.key)
 CREATE INDEX FOR (i:Issue) ON (i.key)
 CREATE INDEX FOR (pr:PullRequest) ON (pr.key)
 CREATE INDEX FOR (c:Comment) ON (c.id)

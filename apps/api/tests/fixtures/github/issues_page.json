@@ -1,0 +1,111 @@
+{
+  "nameWithOwner": "FalkorDB/falkordb-py",
+  "url": "https://github.com/FalkorDB/falkordb-py",
+  "stargazerCount": 69,
+  "defaultBranchRef": {
+    "name": "main"
+  },
+  "issues": {
+    "pageInfo": {
+      "hasNextPage": false,
+      "endCursor": null
+    },
+    "nodes": [
+      {
+        "number": 90,
+        "title": "Async queries hang forever",
+        "body": "Queries never time out. Maybe related to FalkorDB/FalkorDB#1200.",
+        "url": "https://github.com/FalkorDB/falkordb-py/issues/90",
+        "state": "CLOSED",
+        "createdAt": "2026-08-20T10:00:00Z",
+        "updatedAt": "2026-09-03T12:00:00Z",
+        "closedAt": "2026-09-03T12:00:00Z",
+        "author": {
+          "__typename": "User",
+          "login": "carol",
+          "avatarUrl": null
+        },
+        "labels": {
+          "nodes": [
+            {
+              "name": "bug",
+              "color": "d73a4a"
+            }
+          ]
+        },
+        "assignees": {
+          "nodes": [
+            {
+              "login": "alice",
+              "avatarUrl": null
+            }
+          ]
+        },
+        "comments": {
+          "nodes": [
+            {
+              "databaseId": 601,
+              "body": "Working on it in #101",
+              "url": "https://github.com/FalkorDB/falkordb-py/issues/90#issuecomment-601",
+              "createdAt": "2026-08-21T10:00:00Z",
+              "author": {
+                "__typename": "User",
+                "login": "alice",
+                "avatarUrl": null
+              }
+            }
+          ]
+        }
+      },
+      {
+        "number": 95,
+        "title": "Document query timeouts",
+        "body": "",
+        "url": "https://github.com/FalkorDB/falkordb-py/issues/95",
+        "state": "OPEN",
+        "createdAt": "2026-08-25T10:00:00Z",
+        "updatedAt": "2026-08-25T10:00:00Z",
+        "closedAt": null,
+        "author": {
+          "__typename": "User",
+          "login": "dave",
+          "avatarUrl": null
+        },
+        "labels": {
+          "nodes": [
+            {
+              "name": "documentation",
+              "color": "0075ca"
+            }
+          ]
+        },
+        "assignees": {
+          "nodes": []
+        },
+        "comments": {
+          "nodes": []
+        }
+      },
+      {
+        "number": 96,
+        "title": "Question from a deleted user",
+        "body": "See #90",
+        "url": "https://github.com/FalkorDB/falkordb-py/issues/96",
+        "state": "OPEN",
+        "createdAt": "2026-08-26T10:00:00Z",
+        "updatedAt": "2026-08-26T10:00:00Z",
+        "closedAt": null,
+        "author": null,
+        "labels": {
+          "nodes": []
+        },
+        "assignees": {
+          "nodes": []
+        },
+        "comments": {
+          "nodes": []
+        }
+      }
+    ]
+  }
+}

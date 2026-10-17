@@ -17,22 +17,52 @@ import httpx
 GRAPHQL_URL = "https://api.github.com/graphql"
 MAX_ATTEMPTS = 5
 
-PULL_REQUESTS_QUERY = """
-query($owner: String!, $name: String!, $after: String) {
-  repository(owner: $owner, name: $name) {
+_ACTOR = "author { __typename login avatarUrl }"
+_COMMENTS = f"comments(first: 50) {{ nodes {{ databaseId body url createdAt {_ACTOR} }} }}"
+_LABELS = "labels(first: 20) { nodes { name color } }"
+
+PULL_REQUESTS_QUERY = f"""
+query($owner: String!, $name: String!, $after: String) {{
+  repository(owner: $owner, name: $name) {{
     nameWithOwner url stargazerCount
-    defaultBranchRef { name }
-    pullRequests(first: 40, after: $after, orderBy: {field: UPDATED_AT, direction: DESC}) {
-      pageInfo { hasNextPage endCursor }
-      nodes {
+    defaultBranchRef {{ name }}
+    pullRequests(first: 25, after: $after, orderBy: {{field: UPDATED_AT, direction: DESC}}) {{
+      pageInfo {{ hasNextPage endCursor }}
+      nodes {{
         number title body url state createdAt updatedAt mergedAt closedAt additions deletions
-        author { __typename login avatarUrl }
-        reviews(first: 50) { nodes { author { __typename login avatarUrl } state submittedAt } }
-        files(first: 100) { nodes { path additions deletions } }
-      }
-    }
-  }
-}
+        {_ACTOR}
+        {_LABELS}
+        {_COMMENTS}
+        closingIssuesReferences(first: 10) {{ nodes {{ number repository {{ nameWithOwner }} }} }}
+        reviews(first: 50) {{ nodes {{
+          databaseId body url state submittedAt {_ACTOR}
+          comments(first: 20) {{ nodes {{ databaseId body url createdAt }} }}
+        }} }}
+        files(first: 100) {{ nodes {{ path additions deletions }} }}
+      }}
+    }}
+  }}
+}}
+"""
+
+ISSUES_QUERY = f"""
+query($owner: String!, $name: String!, $after: String, $since: DateTime!) {{
+  repository(owner: $owner, name: $name) {{
+    nameWithOwner url stargazerCount
+    defaultBranchRef {{ name }}
+    issues(first: 50, after: $after, orderBy: {{field: UPDATED_AT, direction: DESC}},
+           filterBy: {{since: $since}}) {{
+      pageInfo {{ hasNextPage endCursor }}
+      nodes {{
+        number title body url state createdAt updatedAt closedAt
+        {_ACTOR}
+        {_LABELS}
+        assignees(first: 5) {{ nodes {{ login avatarUrl }} }}
+        {_COMMENTS}
+      }}
+    }}
+  }}
+}}
 """
 
 
@@ -85,6 +115,20 @@ class GitHubClient:
             if len(fresh) < len(connection["nodes"]) or not connection["pageInfo"]["hasNextPage"]:
                 return
             after = connection["pageInfo"]["endCursor"]
+
+    def issue_pages(self, owner: str, name: str, since: datetime) -> Iterator[dict[str, Any]]:
+        """Yield `repository` payloads of issues updated since `since` (GitHub filters)."""
+        after: str | None = None
+        since_iso = since.strftime("%Y-%m-%dT%H:%M:%SZ")
+        while True:
+            repository = self.graphql(
+                ISSUES_QUERY, {"owner": owner, "name": name, "after": after, "since": since_iso}
+            )["repository"]
+            yield repository
+            page_info = repository["issues"]["pageInfo"]
+            if not page_info["hasNextPage"]:
+                return
+            after = page_info["endCursor"]
 
     def close(self) -> None:
         self._http.close()
