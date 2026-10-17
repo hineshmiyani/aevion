@@ -78,10 +78,14 @@ LIMIT $pool
 """
 
 # The code that fixed each issue: which Components did those PRs change? Docs don't vote.
+# The WITH matters: as one pattern, FalkorDB planned it from a scan of every File (because of
+# the is_doc filter), 800 ms and over the server's 1 s timeout on Railway. Split at the PR, it
+# starts from the Issue.key index: 5 ms, same rows.
 FIX_COMPONENTS = """
 UNWIND $issues AS issue_key
-MATCH (i:Issue {key: issue_key})<-[:FIXES]-(pr:PullRequest)-[:MODIFIES]->(f:File)
-      -[:IN_COMPONENT]->(c:Component)
+MATCH (i:Issue {key: issue_key})<-[:FIXES]-(pr:PullRequest)
+WITH issue_key, pr
+MATCH (pr)-[:MODIFIES]->(f:File)-[:IN_COMPONENT]->(c:Component)
 WHERE NOT f.is_doc
 RETURN issue_key AS issue, pr.key AS pr, pr.title AS pr_title, pr.url AS pr_url,
        f.key AS file, f.path AS path, c.key AS component, c.name AS name
