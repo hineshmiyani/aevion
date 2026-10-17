@@ -8,7 +8,7 @@ import httpx
 import pytest
 
 from aevion.extract.candidates import candidates, load_thread
-from aevion.extract.extractor import parse_decisions
+from aevion.extract.extractor import TOKEN_BUDGETS, extract_decisions, parse_decisions
 from aevion.extract.loader import load_decisions
 from aevion.extract.run import run_extraction
 from aevion.graph.client import OrgGraph
@@ -68,7 +68,17 @@ def test_model_output_is_validated_against_the_thread(fixture_graph: OrgGraph) -
 def test_bad_model_output_is_reported_not_loaded(fixture_graph: OrgGraph) -> None:
     thread = load_thread(fixture_graph, PR_101, "PullRequest")
     assert parse_decisions(_reply("I could not find any"), thread).invalid_json
-    assert parse_decisions(_reply('{"decisions": [{"summary": "x"}]}'), thread).invalid_json
+    assert parse_decisions(_reply('{"decisions": "none"}'), thread).invalid_json
+    cut_off = json.dumps(MODEL_REPLY)[:200]  # what a max_tokens cut-off looks like
+    assert parse_decisions(_reply(cut_off), thread).invalid_json
+
+
+def test_one_malformed_decision_does_not_sink_the_rest(fixture_graph: OrgGraph) -> None:
+    # Seen in real replies: a valid decision followed by an empty placeholder object.
+    thread = load_thread(fixture_graph, PR_101, "PullRequest")
+    reply = {"decisions": [MODEL_REPLY["decisions"][0], {"summary": "", "confidence": 0}]}
+    result = parse_decisions(_reply(json.dumps(reply)), thread)
+    assert not result.invalid_json and len(result.decisions) == 1 and result.dropped == 1
 
 
 def test_loaded_decision_links_thread_people_component_and_evidence(
@@ -121,3 +131,51 @@ def test_run_extraction_with_stubbed_model(fixture_graph: OrgGraph, tmp_path: Pa
         fixture_graph, client, "anthropic/claude-haiku-5.5", None, None, workers=2
     )
     assert again.decisions == 1 and len(calls) == 1  # second run served from the LLM cache
+
+
+def _client(tmp_path: Path, handler: Any) -> LLMClient:
+    return LLMClient(
+        "sk-or-test",
+        base_url="https://openrouter.test/api/v1",
+        cache_dir=tmp_path / "cache",
+        ledger=Ledger(tmp_path / "ledger.jsonl"),
+        budget_usd=1.0,
+        transport=httpx.MockTransport(handler),
+    )
+
+
+def test_reply_cut_off_by_max_tokens_is_retried_with_more_room(
+    fixture_graph: OrgGraph, tmp_path: Path
+) -> None:
+    budgets: list[int] = []
+
+    def openrouter(request: httpx.Request) -> httpx.Response:
+        budget = json.loads(request.content)["max_tokens"]
+        budgets.append(budget)
+        if budget == TOKEN_BUDGETS[0]:  # reasoning used the budget; the JSON is cut off
+            choice = {
+                "message": {"content": json.dumps(MODEL_REPLY)[:120]},
+                "finish_reason": "length",
+            }
+        else:
+            choice = {"message": {"content": json.dumps(MODEL_REPLY)}, "finish_reason": "stop"}
+        return httpx.Response(200, json={"choices": [choice], "usage": {"cost": 0.0001}})
+
+    thread = load_thread(fixture_graph, PR_101, "PullRequest")
+    result = extract_decisions(_client(tmp_path, openrouter), "m", thread)
+    assert budgets == list(TOKEN_BUDGETS)
+    assert result.retried and not result.truncated and not result.invalid_json
+    assert len(result.decisions) == 1
+
+
+def test_reply_still_cut_off_after_the_retry_is_counted(
+    fixture_graph: OrgGraph, tmp_path: Path
+) -> None:
+    def openrouter(request: httpx.Request) -> httpx.Response:
+        choice = {"message": {"content": '{"decisions": [{"summ'}, "finish_reason": "length"}
+        return httpx.Response(200, json={"choices": [choice], "usage": {"cost": 0.0001}})
+
+    report = run_extraction(
+        fixture_graph, _client(tmp_path, openrouter), "m", None, None, workers=1
+    )
+    assert (report.retried, report.truncated, report.invalid_json) == (1, 1, 1)

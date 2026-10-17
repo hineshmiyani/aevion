@@ -1,7 +1,8 @@
 """decision_trail: why was X decided? (US-2)
 
 Finds Decisions by full-text search over their summary and rationale (optionally within a
-Component), then walks each one's trail: the thread it was decided in, the issues that thread
+Component), re-ranks the candidates by how many of the topic's keywords each one covers, then
+walks each one's trail: the thread it was decided in, the issues that thread
 fixed, the comments that evidence it, the people who made it, the Components it affects, and
 any SUPERSEDES chain, so an answer can say what we believed before and what replaced it.
 """
@@ -53,15 +54,21 @@ _STOPWORDS = frozenset(
     ]
 )
 
+# The index finds candidates; it can't rank them well on its own. Its TF-IDF score rewards
+# short text that repeats one query word, so "merge queue entries aren't cancelled" outscores
+# "gate main with a merge queue" for "why gate main on a merge queue". We fetch a wide pool and
+# re-rank in Python by keyword coverage (see _rank).
 SEARCH = """
 CALL db.idx.fulltext.queryNodes('Decision', $query) YIELD node, score
 OPTIONAL MATCH (node)-[:AFFECTS]->(c:Component)
 WITH node, score, collect(c.key) AS affects
 WHERE size($components) = 0 OR any(k IN affects WHERE k IN $components)
-RETURN node.id AS id, score
+RETURN node.id AS id, score, node.confidence AS confidence,
+       node.summary + ' ' + node.rationale AS text
 ORDER BY score DESC
-LIMIT $limit
+LIMIT $pool
 """
+SEARCH_POOL = 50
 
 BY_COMPONENT = """
 MATCH (d:Decision)-[:AFFECTS]->(c:Component)
@@ -117,12 +124,39 @@ class DecisionTrailArgs(BaseModel):
         return self
 
 
+def keywords(topic: str) -> list[str]:
+    words = re.findall(r"[a-z0-9]+", topic.lower())
+    return list(dict.fromkeys(w for w in words if len(w) > 2 and w not in _STOPWORDS))
+
+
 def fulltext_query(topic: str) -> str | None:
     """User words → a safe full-text OR query. FalkorDB's index stems, so 'queues' finds 'queue'."""
-    words = [
-        w for w in re.findall(r"[a-z0-9]+", topic.lower()) if len(w) > 2 and w not in _STOPWORDS
-    ]
-    return "|".join(dict.fromkeys(words)) or None
+    return "|".join(keywords(topic)) or None
+
+
+def _stem(word: str) -> str:
+    """Crude suffix stripping, enough to agree with the index's stemmer on common forms."""
+    for suffix in ("ing", "ed", "es", "s"):
+        if word.endswith(suffix) and len(word) - len(suffix) >= 3:
+            return word[: -len(suffix)]
+    return word
+
+
+def _rank(topic: str, candidates: list[list[Any]], limit: int) -> list[str]:
+    """Order by keyword coverage, then text score weighted by the extractor's confidence.
+
+    Coverage is the share of the topic's distinct keywords that appear in the decision, so a
+    decision about every part of the question beats one that repeats a single word of it.
+    """
+    wanted = {_stem(w) for w in keywords(topic)}
+
+    def key(row: list[Any]) -> tuple[float, float]:
+        _id, score, confidence, text = row
+        present = {_stem(w) for w in re.findall(r"[a-z0-9]+", (text or "").lower())}
+        coverage = len(wanted & present) / len(wanted) if wanted else 0.0
+        return (-round(coverage, 2), -float(score) * float(confidence or 0))
+
+    return [row[0] for row in sorted(candidates, key=key)[:limit]]
 
 
 def decision_trail(graph: OrgGraph, args: DecisionTrailArgs) -> ToolResult:
@@ -132,12 +166,8 @@ def decision_trail(graph: OrgGraph, args: DecisionTrailArgs) -> ToolResult:
     cypher = [TRAIL.strip(), EVIDENCE.strip(), SUPERSEDES.strip()]
 
     if query:
-        ids = [
-            r[0]
-            for r in graph.ro_query(
-                SEARCH, {"query": query, "components": keys, "limit": args.limit}
-            ).rows
-        ]
+        pool = graph.ro_query(SEARCH, {"query": query, "components": keys, "pool": SEARCH_POOL})
+        ids = _rank(args.topic or "", pool.rows, args.limit)
         cypher.insert(0, SEARCH.strip())
     elif keys:
         ids = [

@@ -11,7 +11,10 @@ from aevion.extract.loader import link_supersedes, load_decisions
 from aevion.graph.client import OrgGraph
 from aevion.llm.client import BudgetExceededError, LLMClient, LLMError
 
-OUTPUT_TOKENS_PER_THREAD = 250  # observed upper range for the JSON reply
+# Measured on the full FalkorDB run (Haiku 5.5): output tokens include hidden reasoning, and about
+# a quarter of threads are retried with a larger budget, which re-sends their input too.
+OUTPUT_TOKENS_PER_THREAD = 600
+RETRY_SHARE = 0.25
 
 
 @dataclass
@@ -28,6 +31,8 @@ class RunReport:
     decisions: int = 0
     dropped_low_confidence: int = 0
     invalid_json: int = 0
+    retried: int = 0  # replies cut off at the first token budget
+    truncated: int = 0  # still cut off after the retry
     errors: list[str] = field(default_factory=list)
     stopped_on_budget: bool = False
 
@@ -49,7 +54,8 @@ def dry_run(
     graph: OrgGraph, model: str, base_url: str, repo: str | None, limit: int | None
 ) -> DryRun:
     picked = candidates(graph, repo)[:limit]
-    input_tokens = sum(estimate_tokens(load_thread(graph, k, label)) for k, label in picked)
+    first_pass = sum(estimate_tokens(load_thread(graph, k, label)) for k, label in picked)
+    input_tokens = round(first_pass * (1 + RETRY_SHARE))
     output_tokens = OUTPUT_TOKENS_PER_THREAD * len(picked)
     pricing = model_pricing(model, base_url)
     usd = None if pricing is None else input_tokens * pricing[0] + output_tokens * pricing[1]
@@ -85,6 +91,8 @@ def run_extraction(
             found.extend(result.decisions)
             report.dropped_low_confidence += result.dropped
             report.invalid_json += int(result.invalid_json)
+            report.retried += int(result.retried)
+            report.truncated += int(result.truncated)
 
     load_decisions(graph, found)  # one write pass, after all model calls
     link_supersedes(graph)

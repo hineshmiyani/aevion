@@ -43,6 +43,7 @@ class ChatResult:
     tool_calls: list[dict[str, Any]] = field(default_factory=list)
     usage: Usage = Usage()
     cached: bool = False
+    finish_reason: str = ""  # "length" means max_tokens cut the reply off
 
     def tool_arguments(self) -> list[tuple[str, dict[str, Any]]]:
         """(tool name, parsed arguments) for each tool call; bad JSON becomes {}."""
@@ -201,4 +202,5 @@ def _parse(body: dict[str, Any], model: str, *, cached: bool) -> ChatResult:
             cost_usd=float(usage.get("cost") or 0.0),
         ),
         cached=cached,
+        finish_reason=choice.get("finish_reason") or "",
     )
