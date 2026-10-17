@@ -2,13 +2,13 @@
 
 > Team **Aevion**'s entry for [Graph Hacks: Context for AI Agents](https://www.wemakedevs.org/hackathons/falkordb) (WeMakeDevs × FalkorDB, Oct 15–18, 2026).
 
-**Status:** design phase. The product direction is chosen (Company Brain built from a public GitHub org). The detailed design decisions are being locked in [docs/grilling/](docs/grilling/).
+**Status:** design phase. Product direction and core decisions are locked ([ADRs 0001–0009](docs/adr/)); graph schema and deployment are next ([docs/grilling/](docs/grilling/)).
 
 ## What we're building
 
 An agent that understands how an open-source company works. It loads a GitHub organisation's public issues, PRs, reviews, commits and docs into a FalkorDB graph. It then answers questions like *"who knows this system?"* and *"why was this decided?"*, with the graph path behind every answer. It also triages incoming issues by acting on what the graph shows.
 
-- **Tracks:** 03 Company Brain (main), 01 Agents That Act on Connected Data (secondary). Still to be confirmed, see [round 1](docs/grilling/round-01.md).
+- **Tracks:** 03 Company Brain (main), 01 Agents That Act on Connected Data (secondary). See [ADR-0004](docs/adr/0004-product-scope-and-data.md).
 - **Demo dataset:** the FalkorDB GitHub org.
 
 ## Where things live
