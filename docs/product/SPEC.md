@@ -107,10 +107,10 @@ uv run --project apps/api ruff check apps/api && uv run --project apps/api ruff 
 uv run --project apps/api mypy apps/api/src
 
 # Data
-uv run --project apps/api aevion ingest --org-config config/orgs/falkordb.yaml
+uv run --project apps/api aevion ingest --org-config config/orgs/falkordb.toml [--repos falkordb-py] [--cache]
 uv run --project apps/api aevion extract --org FalkorDB --dry-run   # prints projected LLM cost, writes nothing
 uv run --project apps/api aevion extract --org FalkorDB
-uv run --project apps/api aevion poll --org-config config/orgs/falkordb.yaml
+uv run --project apps/api aevion poll --org-config config/orgs/falkordb.toml
 
 # MCP (stdio)
 uv run --project apps/api aevion mcp --org FalkorDB
@@ -148,8 +148,8 @@ apps/
       fixtures/              Recorded GitHub JSON, fixture graph loader
   web/                       Next.js app (app/, components/, lib/api.ts generated types)
 config/
-  orgs/falkordb.yaml         Repos, since-date, component depth, label → component map
-  orgs/sandbox.yaml
+  orgs/falkordb.toml         Repos, since-months, component depth, bot logins, label → component map
+  orgs/sandbox.toml
 evals/                       Bake-off: labelled threads, known-answer questions, runner
 infra/
   docker-compose.yml         Local FalkorDB
@@ -229,7 +229,7 @@ def experts_for(graph: OrgGraph, component: str, limit: int = 5) -> ToolResult:
 - Responses are cached by content hash; a re-run costs $0.
 
 ### `ingest`
-- Inputs come from `config/orgs/*.yaml`: repos, since-date, component depth (default 2), and the label → component map.
+- Inputs come from `config/orgs/*.toml` (stdlib `tomllib`, no extra dependency): repos, since-date, component depth (default 2), and the label → component map.
 - Loads issues, PRs, reviews, review comments, issue comments, PR file lists, CODEOWNERS (current + history), labels, releases and docs markdown paths.
 - Bots are excluded: `[bot]` suffix, `type == "Bot"`, plus a configurable deny-list.
 - References come from closing keywords, GitHub's closing references, and `#n` / `owner/repo#n` mentions.
@@ -340,6 +340,6 @@ The spec is done when all of these are true and verified:
 | OQ-1 | Duplicate detection: full-text index only, or vector embeddings? | `tools.triage_candidates` | Start with full-text plus shared Component and shared File signals; revisit if dry-run quality is poor |
 | OQ-2 | Graph visualisation library for the evidence path | `web` | Round 3 |
 | OQ-3 | Final work split | all | Confirm with Jignesh and Jaydeep (Notion task) |
-| OQ-4 | Component depth per repo (default 2) | `ingest` | Check after the first ingestion; tune in `config/orgs/falkordb.yaml` |
+| OQ-4 | Component depth per repo (default 2) | `ingest` | Check after the first ingestion; tune in `config/orgs/falkordb.toml` |
 | OQ-5 | Railway credit available? | deployment | Check before the provisioning task |
 | OQ-6 | Where cached hero answers live | `api` | Proposed: in the org graph as `(:CachedAnswer)` nodes, so FalkorDB stays the only datastore |
