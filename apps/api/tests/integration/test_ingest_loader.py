@@ -84,3 +84,54 @@ def test_comments_link_thread_and_author(loaded: OrgGraph) -> None:
         ["rc:21", "review_thread", "bob", 101],
         ["rv:11", "review", "bob", 101],
     ]
+
+
+def test_releases_and_codeowners(loaded: OrgGraph) -> None:
+    from aevion.ingest.loader import link_references, load_batch
+    from aevion.ingest.normalize import Batch, ownerships_from, release_from
+
+    repo = "FalkorDB/falkordb-py"
+    batch = Batch()
+    release_from(
+        {
+            "tagName": "v1.6.2",
+            "name": "v1.6.2",
+            "url": "https://github.com/FalkorDB/falkordb-py/releases/tag/v1.6.2",
+            "publishedAt": "2026-09-04T00:00:00Z",
+            "description": "- Add async query timeout (#101)\n- Docs (#999 not in graph)",
+        },
+        repo,
+        batch,
+    )
+    ownerships_from(
+        [
+            ("2026-01-01T00:00:00Z", "/falkordb/ @alice\n/.github/ @FalkorDB/core"),
+            ("2026-06-01T00:00:00Z", "/falkordb/ @bob\n/.github/ @FalkorDB/core"),
+        ],
+        repo,
+        1,
+        batch,
+    )
+    for _ in range(2):  # idempotent
+        load_batch(loaded, batch)
+        link_references(loaded)
+
+    assert (
+        _one(loaded, "MATCH (:Release {tag: 'v1.6.2'})-[:INCLUDES]->(pr) RETURN pr.number") == 101
+    )
+    assert _one(loaded, "MATCH (:Release)-[r:INCLUDES]->() RETURN count(r)") == 1
+    owners = loaded.ro_query(
+        "MATCH (o)-[own:OWNS]->(c:Component) "
+        "RETURN labels(o)[0], coalesce(o.login, o.key), c.name, own.valid_to IS NULL "
+        "ORDER BY c.name, coalesce(o.login, o.key)"
+    ).rows
+    assert owners == [
+        ["Team", "FalkorDB/core", ".github", True],
+        ["Person", "alice", "falkordb", False],  # replaced by bob in June
+        ["Person", "bob", "falkordb", True],
+    ]
+    # CODEOWNERS can name a Component no PR touched yet; it still belongs to the repo
+    assert (
+        _one(loaded, "MATCH (c:Component {name: '.github'})-[:IN_REPO]->(r) RETURN r.full_name")
+        == repo
+    )
