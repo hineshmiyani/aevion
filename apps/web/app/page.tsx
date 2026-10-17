@@ -1,4 +1,5 @@
 import { AskExperience } from "@/components/ask/AskExperience";
+import { SiteHeader } from "@/components/SiteHeader";
 
 const ORG = "FalkorDB";
 
@@ -11,15 +12,7 @@ export default function Home() {
       >
         Skip to the question
       </a>
-      <header className="mb-10 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b border-rule pb-4">
-        <p className="text-base font-semibold tracking-tight">Aevion</p>
-        <p className="text-sm text-muted">
-          <a href={`https://github.com/${ORG}`} className="text-ink underline decoration-rule-strong underline-offset-4 hover:decoration-path">
-            {ORG} on GitHub
-          </a>
-          , 9 repositories, last 12 months
-        </p>
-      </header>
+      <SiteHeader current="/" />
       <main id="main" className="flex-1">
         <AskExperience org={ORG} />
       </main>

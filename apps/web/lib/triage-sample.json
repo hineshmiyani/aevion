@@ -1,0 +1,674 @@
+{
+ "issue": {
+  "title": "`GRAPH.UDF LOAD REPLACE` is not atomic: concurrent queries fail with `Unknown function`",
+  "state": "OPEN",
+  "url": "https://github.com/FalkorDB/FalkorDB/issues/3357",
+  "repo": "FalkorDB/FalkorDB",
+  "author": "Vaibhaav-Tiwari",
+  "key": "FalkorDB/FalkorDB#3357"
+ },
+ "mode": "dry_run",
+ "duplicates": [],
+ "related": [
+  {
+   "key": "FalkorDB/FalkorDB#2126",
+   "title": "Indexer crash with concurrent GRAPH.DELETE queries",
+   "state": "OPEN",
+   "url": "https://github.com/FalkorDB/FalkorDB/issues/2126",
+   "repo": "FalkorDB/FalkorDB",
+   "match": 0.27,
+   "fixed_by": [
+    "FalkorDB/FalkorDB#2125"
+   ],
+   "likely_duplicate": false
+  },
+  {
+   "key": "FalkorDB/GraphRAG-SDK#330",
+   "title": "Unguarded lazy init: concurrent requests redundantly load and re-register the ontology",
+   "state": "OPEN",
+   "url": "https://github.com/FalkorDB/GraphRAG-SDK/issues/330",
+   "repo": "FalkorDB/GraphRAG-SDK",
+   "match": 0.18,
+   "fixed_by": [
+    "FalkorDB/GraphRAG-SDK#331"
+   ],
+   "likely_duplicate": false
+  },
+  {
+   "key": "FalkorDB/FalkorDB#374",
+   "title": "Replace some historical GxB functions",
+   "state": "CLOSED",
+   "url": "https://github.com/FalkorDB/FalkorDB/issues/374",
+   "repo": "FalkorDB/FalkorDB",
+   "match": 0.18,
+   "fixed_by": [],
+   "likely_duplicate": false
+  }
+ ],
+ "component": {
+  "key": "FalkorDB/FalkorDB:src/udf",
+  "name": "src/udf",
+  "votes": 0.82,
+  "strength": "moderate",
+  "via": [
+   "FalkorDB/FalkorDB#1529",
+   "FalkorDB/FalkorDB#2075",
+   "FalkorDB/FalkorDB#1265",
+   "name: udf"
+  ]
+ },
+ "expert": {
+  "login": "swilly22",
+  "score": 33.32,
+  "authored_prs": 8,
+  "reviewed_prs": 2,
+  "comments": 64,
+  "url": "https://github.com/swilly22"
+ },
+ "draft_reply": "Thanks for the report, [FalkorDB/FalkorDB#3357](https://github.com/FalkorDB/FalkorDB/issues/3357). The closest related issue is [FalkorDB/FalkorDB#2126](https://github.com/FalkorDB/FalkorDB/issues/2126), a concurrency crash that was fixed by [FalkorDB/FalkorDB#2125](https://github.com/FalkorDB/FalkorDB/pull/2125). This most likely touches the UDF code in `src/udf`. [swilly22](https://github.com/swilly22) may be able to help.",
+ "actions": [
+  {
+   "type": "label",
+   "value": "area: src/udf",
+   "status": "proposed",
+   "detail": null
+  },
+  {
+   "type": "assign_or_mention",
+   "value": "swilly22",
+   "status": "proposed",
+   "detail": "assign if they are a collaborator; otherwise link their profile, no @"
+  },
+  {
+   "type": "comment",
+   "value": "Thanks for the report, [FalkorDB/FalkorDB#3357](https://github.com/FalkorDB/FalkorDB/issues/3357). The closest related issue is [FalkorDB/FalkorDB#2126](https://github.com/FalkorDB/FalkorDB/issues/2126), a concurrency crash that was fixed by [FalkorDB/FalkorDB#2125](https://github.com/FalkorDB/FalkorDB/pull/2125). This most likely touches the UDF code in `src/udf`. [swilly22](https://github.com/swilly22) may be able to help.",
+   "status": "proposed",
+   "detail": null
+  }
+ ],
+ "evidence": {
+  "nodes": [
+   {
+    "id": "Issue:FalkorDB/FalkorDB#3357",
+    "label": "Issue",
+    "title": "`GRAPH.UDF LOAD REPLACE` is not atomic: concurrent queries fail with `Unknown function`",
+    "url": "https://github.com/FalkorDB/FalkorDB/issues/3357"
+   },
+   {
+    "id": "PullRequest:FalkorDB/FalkorDB#2125",
+    "label": "PullRequest",
+    "title": "Indexer schema guards",
+    "url": "https://github.com/FalkorDB/FalkorDB/pull/2125"
+   },
+   {
+    "id": "File:FalkorDB/FalkorDB:src/commands/index_operations.c",
+    "label": "File",
+    "title": "src/commands/index_operations.c",
+    "url": null
+   },
+   {
+    "id": "Component:FalkorDB/FalkorDB:src/commands",
+    "label": "Component",
+    "title": "src/commands",
+    "url": null
+   },
+   {
+    "id": "File:FalkorDB/FalkorDB:src/graph/graphcontext.c",
+    "label": "File",
+    "title": "src/graph/graphcontext.c",
+    "url": null
+   },
+   {
+    "id": "Component:FalkorDB/FalkorDB:src/graph",
+    "label": "Component",
+    "title": "src/graph",
+    "url": null
+   },
+   {
+    "id": "File:FalkorDB/FalkorDB:src/execution_plan/ops/op_procedure_call.c",
+    "label": "File",
+    "title": "src/execution_plan/ops/op_procedure_call.c",
+    "url": null
+   },
+   {
+    "id": "Component:FalkorDB/FalkorDB:src/execution_plan",
+    "label": "Component",
+    "title": "src/execution_plan",
+    "url": null
+   },
+   {
+    "id": "PullRequest:FalkorDB/FalkorDB#1530",
+    "label": "PullRequest",
+    "title": "fix retrieval of incoming edges",
+    "url": "https://github.com/FalkorDB/FalkorDB/pull/1530"
+   },
+   {
+    "id": "File:FalkorDB/FalkorDB:src/udf/node_class.c",
+    "label": "File",
+    "title": "src/udf/node_class.c",
+    "url": null
+   },
+   {
+    "id": "Component:FalkorDB/FalkorDB:src/udf",
+    "label": "Component",
+    "title": "src/udf",
+    "url": null
+   },
+   {
+    "id": "PullRequest:FalkorDB/FalkorDB#2076",
+    "label": "PullRequest",
+    "title": "avoid creating udf context if there are no udf libs",
+    "url": "https://github.com/FalkorDB/FalkorDB/pull/2076"
+   },
+   {
+    "id": "File:FalkorDB/FalkorDB:src/udf/udf_ctx.c",
+    "label": "File",
+    "title": "src/udf/udf_ctx.c",
+    "url": null
+   },
+   {
+    "id": "PullRequest:FalkorDB/FalkorDB#1266",
+    "label": "PullRequest",
+    "title": "Low level api",
+    "url": "https://github.com/FalkorDB/FalkorDB/pull/1266"
+   },
+   {
+    "id": "File:FalkorDB/FalkorDB:src/serializers/graphcontext_type.c",
+    "label": "File",
+    "title": "src/serializers/graphcontext_type.c",
+    "url": null
+   },
+   {
+    "id": "Component:FalkorDB/FalkorDB:src/serializers",
+    "label": "Component",
+    "title": "src/serializers",
+    "url": null
+   },
+   {
+    "id": "File:FalkorDB/FalkorDB:src/module.c",
+    "label": "File",
+    "title": "src/module.c",
+    "url": null
+   },
+   {
+    "id": "Component:FalkorDB/FalkorDB:src",
+    "label": "Component",
+    "title": "src",
+    "url": null
+   },
+   {
+    "id": "File:FalkorDB/FalkorDB:src/arithmetic/boolean_funcs/boolean_funcs.c",
+    "label": "File",
+    "title": "src/arithmetic/boolean_funcs/boolean_funcs.c",
+    "url": null
+   },
+   {
+    "id": "Component:FalkorDB/FalkorDB:src/arithmetic",
+    "label": "Component",
+    "title": "src/arithmetic",
+    "url": null
+   },
+   {
+    "id": "File:FalkorDB/FalkorDB:src/procedures/procedures.h",
+    "label": "File",
+    "title": "src/procedures/procedures.h",
+    "url": null
+   },
+   {
+    "id": "Component:FalkorDB/FalkorDB:src/procedures",
+    "label": "Component",
+    "title": "src/procedures",
+    "url": null
+   },
+   {
+    "id": "File:FalkorDB/FalkorDB:src/commands/cmd_query.c",
+    "label": "File",
+    "title": "src/commands/cmd_query.c",
+    "url": null
+   },
+   {
+    "id": "File:FalkorDB/FalkorDB:src/udf/utils.c",
+    "label": "File",
+    "title": "src/udf/utils.c",
+    "url": null
+   },
+   {
+    "id": "File:FalkorDB/FalkorDB:src/datatypes/date.c",
+    "label": "File",
+    "title": "src/datatypes/date.c",
+    "url": null
+   },
+   {
+    "id": "Component:FalkorDB/FalkorDB:src/datatypes",
+    "label": "Component",
+    "title": "src/datatypes",
+    "url": null
+   },
+   {
+    "id": "PullRequest:FalkorDB/FalkorDB#3310",
+    "label": "PullRequest",
+    "title": "feat(replication): load replica full syncs straight off the socket (diskless load)",
+    "url": "https://github.com/FalkorDB/FalkorDB/pull/3310"
+   },
+   {
+    "id": "File:FalkorDB/FalkorDB:src/redis_type.rs",
+    "label": "File",
+    "title": "src/redis_type.rs",
+    "url": null
+   },
+   {
+    "id": "File:FalkorDB/FalkorDB:graph/src/udf/repository.rs",
+    "label": "File",
+    "title": "graph/src/udf/repository.rs",
+    "url": null
+   },
+   {
+    "id": "Component:FalkorDB/FalkorDB:graph/src/udf",
+    "label": "Component",
+    "title": "graph/src/udf",
+    "url": null
+   },
+   {
+    "id": "File:FalkorDB/FalkorDB:src/commands/debug.rs",
+    "label": "File",
+    "title": "src/commands/debug.rs",
+    "url": null
+   },
+   {
+    "id": "Component:FalkorDB/FalkorDB:proofs/algo_udf",
+    "label": "Component",
+    "title": "proofs/algo_udf",
+    "url": null
+   },
+   {
+    "id": "Component:FalkorDB/FalkorDB:src/queries_log",
+    "label": "Component",
+    "title": "src/queries_log",
+    "url": null
+   },
+   {
+    "id": "Issue:FalkorDB/FalkorDB#2126",
+    "label": "Issue",
+    "title": "Indexer crash with concurrent GRAPH.DELETE queries",
+    "url": "https://github.com/FalkorDB/FalkorDB/issues/2126"
+   },
+   {
+    "id": "Issue:FalkorDB/GraphRAG-SDK#330",
+    "label": "Issue",
+    "title": "Unguarded lazy init: concurrent requests redundantly load and re-register the ontology",
+    "url": "https://github.com/FalkorDB/GraphRAG-SDK/issues/330"
+   },
+   {
+    "id": "Issue:FalkorDB/FalkorDB#374",
+    "label": "Issue",
+    "title": "Replace some historical GxB functions",
+    "url": "https://github.com/FalkorDB/FalkorDB/issues/374"
+   },
+   {
+    "id": "Issue:FalkorDB/GraphRAG-SDK#124",
+    "label": "Issue",
+    "title": "[Bug] JSONL loader not load small file.",
+    "url": "https://github.com/FalkorDB/GraphRAG-SDK/issues/124"
+   },
+   {
+    "id": "Issue:FalkorDB/falkordb-browser#1361",
+    "label": "Issue",
+    "title": "[Browser] UDF Libraries visualization ",
+    "url": "https://github.com/FalkorDB/falkordb-browser/issues/1361"
+   },
+   {
+    "id": "Issue:FalkorDB/falkordb-browser#620",
+    "label": "Issue",
+    "title": "Add a list of example queries for easy getting started",
+    "url": "https://github.com/FalkorDB/falkordb-browser/issues/620"
+   },
+   {
+    "id": "Issue:FalkorDB/FalkorDB#593",
+    "label": "Issue",
+    "title": "Replace RediSearch Index with alternative",
+    "url": "https://github.com/FalkorDB/FalkorDB/issues/593"
+   },
+   {
+    "id": "Issue:FalkorDB/FalkorDB#86",
+    "label": "Issue",
+    "title": "Support for API Bulk Loading",
+    "url": "https://github.com/FalkorDB/FalkorDB/issues/86"
+   },
+   {
+    "id": "Issue:FalkorDB/FalkorDB#1529",
+    "label": "Issue",
+    "title": "UDF getNeighbors incoming edges aren't returned",
+    "url": "https://github.com/FalkorDB/FalkorDB/issues/1529"
+   },
+   {
+    "id": "Issue:FalkorDB/FalkorDB#2075",
+    "label": "Issue",
+    "title": "Avoid QuickJS context creation when there are no UDF libraries",
+    "url": "https://github.com/FalkorDB/FalkorDB/issues/2075"
+   },
+   {
+    "id": "Issue:FalkorDB/FalkorDB#1265",
+    "label": "Issue",
+    "title": "Implement UDF",
+    "url": "https://github.com/FalkorDB/FalkorDB/issues/1265"
+   },
+   {
+    "id": "Issue:FalkorDB/FalkorDB#3309",
+    "label": "Issue",
+    "title": "[Rust] Support diskless replica loading (repl-diskless-load on-empty-db / swapdb)",
+    "url": "https://github.com/FalkorDB/FalkorDB/issues/3309"
+   },
+   {
+    "id": "Person:swilly22",
+    "label": "Person",
+    "title": "swilly22",
+    "url": "https://github.com/swilly22"
+   },
+   {
+    "id": "PullRequest:FalkorDB/FalkorDB#2398",
+    "label": "PullRequest",
+    "title": "replicate index and constraints via effects, make effects the default\u2026",
+    "url": "https://github.com/FalkorDB/FalkorDB/pull/2398"
+   },
+   {
+    "id": "PullRequest:FalkorDB/FalkorDB#1747",
+    "label": "PullRequest",
+    "title": "UDF graph.getNodeById",
+    "url": "https://github.com/FalkorDB/FalkorDB/pull/1747"
+   },
+   {
+    "id": "Person:GomezGab",
+    "label": "Person",
+    "title": "GomezGab",
+    "url": "https://github.com/GomezGab"
+   },
+   {
+    "id": "PullRequest:FalkorDB/FalkorDB#2108",
+    "label": "PullRequest",
+    "title": "Enforce a maximum legth on identifiers",
+    "url": "https://github.com/FalkorDB/FalkorDB/pull/2108"
+   },
+   {
+    "id": "File:FalkorDB/FalkorDB:src/udf/falkor_obj.c",
+    "label": "File",
+    "title": "src/udf/falkor_obj.c",
+    "url": null
+   },
+   {
+    "id": "PullRequest:FalkorDB/FalkorDB#1783",
+    "label": "PullRequest",
+    "title": "Fix SIGSEGV in `_GraphContext_GetLabelID` due to data race on schema arrays",
+    "url": "https://github.com/FalkorDB/FalkorDB/pull/1783"
+   },
+   {
+    "id": "File:FalkorDB/FalkorDB:src/udf/traverse.c",
+    "label": "File",
+    "title": "src/udf/traverse.c",
+    "url": null
+   },
+   {
+    "id": "Person:DvirDukhan",
+    "label": "Person",
+    "title": "DvirDukhan",
+    "url": "https://github.com/DvirDukhan"
+   }
+  ],
+  "edges": [
+   {
+    "source": "PullRequest:FalkorDB/FalkorDB#2125",
+    "target": "Issue:FalkorDB/FalkorDB#2126",
+    "type": "FIXES"
+   },
+   {
+    "source": "PullRequest:FalkorDB/FalkorDB#2125",
+    "target": "File:FalkorDB/FalkorDB:src/commands/index_operations.c",
+    "type": "MODIFIES"
+   },
+   {
+    "source": "File:FalkorDB/FalkorDB:src/commands/index_operations.c",
+    "target": "Component:FalkorDB/FalkorDB:src/commands",
+    "type": "IN_COMPONENT"
+   },
+   {
+    "source": "PullRequest:FalkorDB/FalkorDB#2125",
+    "target": "File:FalkorDB/FalkorDB:src/graph/graphcontext.c",
+    "type": "MODIFIES"
+   },
+   {
+    "source": "File:FalkorDB/FalkorDB:src/graph/graphcontext.c",
+    "target": "Component:FalkorDB/FalkorDB:src/graph",
+    "type": "IN_COMPONENT"
+   },
+   {
+    "source": "PullRequest:FalkorDB/FalkorDB#2125",
+    "target": "File:FalkorDB/FalkorDB:src/execution_plan/ops/op_procedure_call.c",
+    "type": "MODIFIES"
+   },
+   {
+    "source": "File:FalkorDB/FalkorDB:src/execution_plan/ops/op_procedure_call.c",
+    "target": "Component:FalkorDB/FalkorDB:src/execution_plan",
+    "type": "IN_COMPONENT"
+   },
+   {
+    "source": "PullRequest:FalkorDB/FalkorDB#1530",
+    "target": "Issue:FalkorDB/FalkorDB#1529",
+    "type": "FIXES"
+   },
+   {
+    "source": "PullRequest:FalkorDB/FalkorDB#1530",
+    "target": "File:FalkorDB/FalkorDB:src/udf/node_class.c",
+    "type": "MODIFIES"
+   },
+   {
+    "source": "File:FalkorDB/FalkorDB:src/udf/node_class.c",
+    "target": "Component:FalkorDB/FalkorDB:src/udf",
+    "type": "IN_COMPONENT"
+   },
+   {
+    "source": "PullRequest:FalkorDB/FalkorDB#2076",
+    "target": "Issue:FalkorDB/FalkorDB#2075",
+    "type": "FIXES"
+   },
+   {
+    "source": "PullRequest:FalkorDB/FalkorDB#2076",
+    "target": "File:FalkorDB/FalkorDB:src/udf/udf_ctx.c",
+    "type": "MODIFIES"
+   },
+   {
+    "source": "File:FalkorDB/FalkorDB:src/udf/udf_ctx.c",
+    "target": "Component:FalkorDB/FalkorDB:src/udf",
+    "type": "IN_COMPONENT"
+   },
+   {
+    "source": "PullRequest:FalkorDB/FalkorDB#1266",
+    "target": "Issue:FalkorDB/FalkorDB#1265",
+    "type": "FIXES"
+   },
+   {
+    "source": "PullRequest:FalkorDB/FalkorDB#1266",
+    "target": "File:FalkorDB/FalkorDB:src/serializers/graphcontext_type.c",
+    "type": "MODIFIES"
+   },
+   {
+    "source": "File:FalkorDB/FalkorDB:src/serializers/graphcontext_type.c",
+    "target": "Component:FalkorDB/FalkorDB:src/serializers",
+    "type": "IN_COMPONENT"
+   },
+   {
+    "source": "PullRequest:FalkorDB/FalkorDB#1266",
+    "target": "File:FalkorDB/FalkorDB:src/module.c",
+    "type": "MODIFIES"
+   },
+   {
+    "source": "File:FalkorDB/FalkorDB:src/module.c",
+    "target": "Component:FalkorDB/FalkorDB:src",
+    "type": "IN_COMPONENT"
+   },
+   {
+    "source": "PullRequest:FalkorDB/FalkorDB#1266",
+    "target": "File:FalkorDB/FalkorDB:src/arithmetic/boolean_funcs/boolean_funcs.c",
+    "type": "MODIFIES"
+   },
+   {
+    "source": "File:FalkorDB/FalkorDB:src/arithmetic/boolean_funcs/boolean_funcs.c",
+    "target": "Component:FalkorDB/FalkorDB:src/arithmetic",
+    "type": "IN_COMPONENT"
+   },
+   {
+    "source": "PullRequest:FalkorDB/FalkorDB#1266",
+    "target": "File:FalkorDB/FalkorDB:src/procedures/procedures.h",
+    "type": "MODIFIES"
+   },
+   {
+    "source": "File:FalkorDB/FalkorDB:src/procedures/procedures.h",
+    "target": "Component:FalkorDB/FalkorDB:src/procedures",
+    "type": "IN_COMPONENT"
+   },
+   {
+    "source": "PullRequest:FalkorDB/FalkorDB#1266",
+    "target": "File:FalkorDB/FalkorDB:src/commands/cmd_query.c",
+    "type": "MODIFIES"
+   },
+   {
+    "source": "File:FalkorDB/FalkorDB:src/commands/cmd_query.c",
+    "target": "Component:FalkorDB/FalkorDB:src/commands",
+    "type": "IN_COMPONENT"
+   },
+   {
+    "source": "PullRequest:FalkorDB/FalkorDB#1266",
+    "target": "File:FalkorDB/FalkorDB:src/udf/utils.c",
+    "type": "MODIFIES"
+   },
+   {
+    "source": "File:FalkorDB/FalkorDB:src/udf/utils.c",
+    "target": "Component:FalkorDB/FalkorDB:src/udf",
+    "type": "IN_COMPONENT"
+   },
+   {
+    "source": "PullRequest:FalkorDB/FalkorDB#1266",
+    "target": "File:FalkorDB/FalkorDB:src/datatypes/date.c",
+    "type": "MODIFIES"
+   },
+   {
+    "source": "File:FalkorDB/FalkorDB:src/datatypes/date.c",
+    "target": "Component:FalkorDB/FalkorDB:src/datatypes",
+    "type": "IN_COMPONENT"
+   },
+   {
+    "source": "PullRequest:FalkorDB/FalkorDB#3310",
+    "target": "Issue:FalkorDB/FalkorDB#3309",
+    "type": "FIXES"
+   },
+   {
+    "source": "PullRequest:FalkorDB/FalkorDB#3310",
+    "target": "File:FalkorDB/FalkorDB:src/redis_type.rs",
+    "type": "MODIFIES"
+   },
+   {
+    "source": "File:FalkorDB/FalkorDB:src/redis_type.rs",
+    "target": "Component:FalkorDB/FalkorDB:src",
+    "type": "IN_COMPONENT"
+   },
+   {
+    "source": "PullRequest:FalkorDB/FalkorDB#3310",
+    "target": "File:FalkorDB/FalkorDB:graph/src/udf/repository.rs",
+    "type": "MODIFIES"
+   },
+   {
+    "source": "File:FalkorDB/FalkorDB:graph/src/udf/repository.rs",
+    "target": "Component:FalkorDB/FalkorDB:graph/src/udf",
+    "type": "IN_COMPONENT"
+   },
+   {
+    "source": "PullRequest:FalkorDB/FalkorDB#3310",
+    "target": "File:FalkorDB/FalkorDB:src/commands/debug.rs",
+    "type": "MODIFIES"
+   },
+   {
+    "source": "File:FalkorDB/FalkorDB:src/commands/debug.rs",
+    "target": "Component:FalkorDB/FalkorDB:src/commands",
+    "type": "IN_COMPONENT"
+   },
+   {
+    "source": "Person:swilly22",
+    "target": "PullRequest:FalkorDB/FalkorDB#2398",
+    "type": "AUTHORED"
+   },
+   {
+    "source": "PullRequest:FalkorDB/FalkorDB#2398",
+    "target": "File:FalkorDB/FalkorDB:src/udf/utils.c",
+    "type": "MODIFIES"
+   },
+   {
+    "source": "Person:swilly22",
+    "target": "PullRequest:FalkorDB/FalkorDB#2076",
+    "type": "AUTHORED"
+   },
+   {
+    "source": "Person:swilly22",
+    "target": "PullRequest:FalkorDB/FalkorDB#1747",
+    "type": "AUTHORED"
+   },
+   {
+    "source": "PullRequest:FalkorDB/FalkorDB#1747",
+    "target": "File:FalkorDB/FalkorDB:src/udf/utils.c",
+    "type": "MODIFIES"
+   },
+   {
+    "source": "Person:GomezGab",
+    "target": "PullRequest:FalkorDB/FalkorDB#2108",
+    "type": "AUTHORED"
+   },
+   {
+    "source": "PullRequest:FalkorDB/FalkorDB#2108",
+    "target": "File:FalkorDB/FalkorDB:src/udf/falkor_obj.c",
+    "type": "MODIFIES"
+   },
+   {
+    "source": "File:FalkorDB/FalkorDB:src/udf/falkor_obj.c",
+    "target": "Component:FalkorDB/FalkorDB:src/udf",
+    "type": "IN_COMPONENT"
+   },
+   {
+    "source": "Person:GomezGab",
+    "target": "PullRequest:FalkorDB/FalkorDB#1783",
+    "type": "REVIEWED"
+   },
+   {
+    "source": "PullRequest:FalkorDB/FalkorDB#1783",
+    "target": "File:FalkorDB/FalkorDB:src/udf/traverse.c",
+    "type": "MODIFIES"
+   },
+   {
+    "source": "File:FalkorDB/FalkorDB:src/udf/traverse.c",
+    "target": "Component:FalkorDB/FalkorDB:src/udf",
+    "type": "IN_COMPONENT"
+   },
+   {
+    "source": "Person:GomezGab",
+    "target": "PullRequest:FalkorDB/FalkorDB#1747",
+    "type": "REVIEWED"
+   },
+   {
+    "source": "Person:DvirDukhan",
+    "target": "PullRequest:FalkorDB/FalkorDB#2398",
+    "type": "REVIEWED"
+   },
+   {
+    "source": "Person:DvirDukhan",
+    "target": "PullRequest:FalkorDB/FalkorDB#2076",
+    "type": "REVIEWED"
+   }
+  ]
+ },
+ "cypher": [
+  "MATCH (i:Issue {key: $key})-[:IN_REPO]->(r:Repo)\nOPTIONAL MATCH (a:Person)-[:AUTHORED]->(i)\nRETURN i.title AS title, i.body_excerpt AS body, i.state AS state, i.url AS url,\n       r.full_name AS repo, a.login AS author",
+  "CALL db.idx.fulltext.queryNodes('Issue', $query) YIELD node, score\nWITH node, score WHERE node.key <> $key\nMATCH (node)-[:IN_REPO]->(r:Repo)\nOPTIONAL MATCH (pr:PullRequest)-[:FIXES]->(node)\nRETURN node.key AS key, node.title AS title, node.body_excerpt AS body, node.state AS state,\n       node.url AS url, r.full_name AS repo, score, collect(pr.key) AS fixed_by\nORDER BY score DESC\nLIMIT $pool",
+  "UNWIND $issues AS issue_key\nMATCH (i:Issue {key: issue_key})<-[:FIXES]-(pr:PullRequest)\nWITH issue_key, pr\nMATCH (pr)-[:MODIFIES]->(f:File)-[:IN_COMPONENT]->(c:Component)\nWHERE NOT f.is_doc\nRETURN issue_key AS issue, pr.key AS pr, pr.title AS pr_title, pr.url AS pr_url,\n       f.key AS file, f.path AS path, c.key AS component, c.name AS name\nLIMIT 600",
+  "MATCH (c:Component)\nWHERE c.repo = $repo\nRETURN c.key AS key, c.name AS name, c.path_prefix AS path",
+  "MATCH (c:Component)\nWHERE (c.key = $component OR toLower(c.path_prefix) CONTAINS toLower($component))\n  AND ($repo IS NULL OR c.repo = $repo)\nRETURN c.key, c.name, c.repo\nORDER BY c.key = $component DESC, size(c.path_prefix)\nLIMIT 5",
+  "MATCH (c:Component)<-[:IN_COMPONENT]-(f:File)<-[:MODIFIES]-(pr:PullRequest)\nWHERE c.key IN $components AND pr.merged_at IS NOT NULL\nMATCH (p:Person)-[r:AUTHORED|REVIEWED]->(pr)\nWHERE NOT p.is_bot\nWITH p, pr, type(r) AS role, collect(f.key)[0] AS file, collect(c.key)[0] AS component,\n     exp(-((timestamp() - pr.merged_at) / 86400000.0) / $decay) AS recency\nRETURN p.login AS login, pr.key AS pr, pr.title AS title, pr.url AS url, pr.merged_at AS at,\n       role, file, component,\n       CASE role WHEN 'AUTHORED' THEN $authored ELSE $reviewed END * recency AS points",
+  "MATCH (c:Component)<-[:IN_COMPONENT]-(:File)<-[:MODIFIES]-(pr:PullRequest)\nWHERE c.key IN $components AND pr.merged_at IS NOT NULL\nMATCH (p:Person)-[:AUTHORED]->(cm:Comment)-[:ON]->(pr)\nWHERE NOT p.is_bot\nWITH DISTINCT p, cm, pr\nRETURN p.login AS login, cm.id AS comment, cm.url AS url, pr.key AS pr,\n       $comment * exp(-((timestamp() - cm.created_at) / 86400000.0) / $decay) AS points"
+ ],
+ "model": "anthropic/claude-haiku-5.5"
+}

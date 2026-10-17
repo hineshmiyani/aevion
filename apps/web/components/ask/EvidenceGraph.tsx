@@ -26,9 +26,12 @@ type Link = { source: string; target: string; type: string };
 
 /** Lay the graph out once, synchronously: calm, deterministic, nothing moves. */
 function layout(evidence: EvidencePath): { nodes: Placed[]; links: Link[]; viewBox: string; aspect: number } {
-  const nodes = evidence.nodes.map((n) => ({ ...n })) as Placed[];
-  const ids = new Set(nodes.map((n) => n.id));
-  const links = evidence.edges.filter((e) => ids.has(e.source) && ids.has(e.target)).map((e) => ({ ...e }));
+  const known = new Set(evidence.nodes.map((n) => n.id));
+  const links = evidence.edges.filter((e) => known.has(e.source) && known.has(e.target)).map((e) => ({ ...e }));
+  // Unconnected nodes (a similar issue nobody fixed yet) say nothing in a graph and scatter
+  // around its edges; the trail beside the answer still lists them.
+  const linked = new Set(links.flatMap((l) => [l.source, l.target]));
+  const nodes = evidence.nodes.filter((n) => links.length === 0 || linked.has(n.id)).map((n) => ({ ...n })) as Placed[];
   const simulation = forceSimulation(nodes)
     .force("link", forceLink<Placed, { source: string | Placed; target: string | Placed }>(links.map((l) => ({ ...l }))).id((d) => d.id).distance(64))
     .force("charge", forceManyBody().strength(-260))
