@@ -8,15 +8,19 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "gen:api": "openapi-typescript ${AEVION_API_URL:-http://localhost:8000}/openapi.json -o lib/api-schema.ts"
+    "gen:api": "openapi-typescript ${AEVION_API_URL:-http://localhost:8000}/openapi.json -o lib/api-schema.ts",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
+    "d3-force": "3.0.0",
     "next": "16.3.8",
     "react": "19.2.8",
     "react-dom": "19.2.8"
   },
   "devDependencies": {
+    "@playwright/test": "1.64.0",
     "@tailwindcss/postcss": "^4",
+    "@types/d3-force": "3.0.10",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
