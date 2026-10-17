@@ -153,6 +153,54 @@ RETURN DISTINCT i.key AS key, i.title AS title, i.url AS url, i.closed_at AS clo
 
 **Measured on the real graph** (20,422 nodes, 77,710 edges): `related_work` 19 ms, `catch_up` 9 ms, `area_history` under 100 ms.
 
+## `decision_trail`: why was X decided? (US-2)
+
+Module: `tools/decisions.py` · API: `POST /api/tools/decision_trail` `{org, topic?, component?, repo?, limit?}`
+
+**Find decisions** by full-text search over `Decision(summary, rationale)`. The topic is reduced to keywords joined with `|` (OR); FalkorDB's index stems words, so "queues" matches "queue". Optionally keep only decisions that `AFFECTS` the given Components:
+
+```cypher
+CALL db.idx.fulltext.queryNodes('Decision', $query) YIELD node, score
+OPTIONAL MATCH (node)-[:AFFECTS]->(c:Component)
+WITH node, score, collect(c.key) AS affects
+WHERE size($components) = 0 OR any(k IN affects WHERE k IN $components)
+RETURN node.id AS id, score
+ORDER BY score DESC
+LIMIT $limit
+```
+
+**Walk each decision's trail**: thread, the issues it fixed, people, Components:
+
+```cypher
+MATCH (d:Decision {id: $id})-[:DECIDED_IN]->(t)
+OPTIONAL MATCH (t)-[:FIXES]->(fixed:Issue)
+OPTIONAL MATCH (d)-[:MADE_BY]->(p:Person)
+OPTIONAL MATCH (d)-[:AFFECTS]->(c:Component)
+RETURN d.summary AS summary, d.rationale AS rationale, d.alternatives AS alternatives,
+       d.decided_at AS decided_at, d.confidence AS confidence,
+       labels(t)[0] AS thread_label, t.key AS thread_key, t.title AS thread_title,
+       t.url AS thread_url,
+       collect(DISTINCT [fixed.key, fixed.title, fixed.url]) AS fixed,
+       collect(DISTINCT p.login) AS made_by,
+       collect(DISTINCT [c.key, c.name]) AS components
+```
+
+…plus up to 4 evidence comments (`EVIDENCED_BY`) with their authors, and the `SUPERSEDES` chain in both directions.
+
+### How `SUPERSEDES` is created
+
+After each extraction run, `link_supersedes()` links a newer decision to an older one only when both affect the same Component **and** the newer decision's thread links to the older one's within two `REFERENCES`/`FIXES` hops. It's evidence-based and deterministic: no LLM call, nothing guessed.
+
+```cypher
+MATCH (new:Decision)-[:DECIDED_IN]->(nt), (old:Decision)-[:DECIDED_IN]->(ot)
+WHERE new <> old AND new.decided_at > old.decided_at AND nt <> ot
+MATCH (new)-[:AFFECTS]->(c:Component)<-[:AFFECTS]-(old)
+MATCH (nt)-[:REFERENCES|FIXES*1..2]-(ot)
+WITH DISTINCT new, old
+MERGE (new)-[s:SUPERSEDES]->(old)
+SET s.at = new.decided_at
+```
+
 ## FalkorDB Cypher notes
 
 - `ORDER BY` can't contain an aggregation directly (`ORDER BY count(x)` fails with "failed to map aggregation expression"); aggregate into an alias in `WITH`/`RETURN` and order by the alias.

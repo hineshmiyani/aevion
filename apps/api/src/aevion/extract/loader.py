@@ -33,6 +33,24 @@ MERGE (d)-[:EVIDENCED_BY]->(c)
 """
 
 
+# A newer decision supersedes an older one when both affect the same Component and the newer
+# decision's thread explicitly links to the older one's (REFERENCES or FIXES, either direction
+# through an issue). Evidence-based and deterministic: no LLM call, nothing guessed.
+LINK_SUPERSEDES = """
+MATCH (new:Decision)-[:DECIDED_IN]->(nt), (old:Decision)-[:DECIDED_IN]->(ot)
+WHERE new <> old AND new.decided_at > old.decided_at AND nt <> ot
+MATCH (new)-[:AFFECTS]->(c:Component)<-[:AFFECTS]-(old)
+MATCH (nt)-[:REFERENCES|FIXES*1..2]-(ot)
+WITH DISTINCT new, old
+MERGE (new)-[s:SUPERSEDES]->(old)
+SET s.at = new.decided_at
+"""
+
+
+def link_supersedes(graph: OrgGraph) -> None:
+    graph.query(LINK_SUPERSEDES)
+
+
 def load_decisions(graph: OrgGraph, decisions: list[DecisionRec]) -> None:
     if not decisions:
         return
