@@ -7,20 +7,20 @@ Tick items off as they're done, and put the owner's name next to each.
 ## Required by the rules
 
 - [ ] Public source-code repository: owner ___
-- [ ] README with setup instructions: owner ___
-- [ ] README section on the graph data model (node labels, relationship types, key properties, a diagram): owner ___
-- [ ] The Cypher queries and graph algorithms the product depends on, listed in the README or linked from it: owner ___
+- [x] README with setup instructions: owner Hinesh
+- [x] README section on the graph data model (node labels, relationship types, key properties, a diagram): owner Hinesh
+- [x] The Cypher queries and graph algorithms the product depends on, listed in the README or linked from it: owner Hinesh
 - [ ] Demo video showing the working project: owner ___
-- [ ] Live deployment URL, or complete local setup instructions: owner ___
+- [x] Live deployment URL, or complete local setup instructions: owner Hinesh (https://aevion-alpha.vercel.app)
 - [ ] Tracks named on the submission form: owner ___
-- [ ] AI-assistant usage disclosed ([ai-usage-disclosure.md](../process/ai-usage-disclosure.md)): owner ___
+- [x] AI-assistant usage disclosed ([ai-usage-disclosure.md](../process/ai-usage-disclosure.md)): owner Hinesh
 
 ## Quality bar (ours, not the rules')
 
 - [ ] The demo video shows the graph doing work within the first 20 seconds
-- [ ] Every agent answer shows its evidence path through the graph
+- [x] Every agent answer shows its evidence path through the graph
 - [ ] Fresh clone + documented setup works on a teammate's machine
-- [ ] No secrets in the repo; `.env.example` lists every variable
+- [x] No secrets in the repo; `.env.example` lists every variable (full-history scan, 2026-10-18)
 - [ ] Every teammate can explain the graph model and each core query
 
 ## Optional
