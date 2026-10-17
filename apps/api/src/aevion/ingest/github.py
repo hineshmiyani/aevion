@@ -66,6 +66,36 @@ query($owner: String!, $name: String!, $after: String, $since: DateTime!) {{
 """
 
 
+CODEOWNERS_HISTORY_QUERY = """
+query($owner: String!, $name: String!, $path: String!, $expression: String!) {
+  repository(owner: $owner, name: $name) {
+    head: object(expression: $expression) { ... on Blob { text } }
+    defaultBranchRef { target { ... on Commit {
+      history(path: $path, first: 20) { nodes { oid committedDate } }
+    } } }
+  }
+}
+"""
+
+BLOB_QUERY = """
+query($owner: String!, $name: String!, $expression: String!) {
+  repository(owner: $owner, name: $name) {
+    object(expression: $expression) { ... on Blob { text } }
+  }
+}
+"""
+
+RELEASES_QUERY = """
+query($owner: String!, $name: String!) {
+  repository(owner: $owner, name: $name) {
+    releases(first: 50, orderBy: {field: CREATED_AT, direction: DESC}) {
+      nodes { tagName name url publishedAt description }
+    }
+  }
+}
+"""
+
+
 class GitHubError(Exception):
     pass
 
@@ -130,6 +160,39 @@ class GitHubClient:
                 return
             after = page_info["endCursor"]
 
+    def codeowners_versions(
+        self, owner: str, name: str, paths: tuple[str, ...]
+    ) -> list[tuple[str | None, str]]:
+        """(committed_at, text) for every version of the first CODEOWNERS file found, oldest
+        first. Falls back to the HEAD version alone if GitHub returns no history."""
+        for path in paths:
+            repo = self.graphql(
+                CODEOWNERS_HISTORY_QUERY,
+                {"owner": owner, "name": name, "path": path, "expression": f"HEAD:{path}"},
+            )["repository"]
+            if not repo["head"]:
+                continue
+            target = (repo.get("defaultBranchRef") or {}).get("target") or {}
+            commits = list(reversed(target.get("history", {}).get("nodes", [])))
+            versions: list[tuple[str | None, str]] = []
+            for commit in commits:
+                blob = self.graphql(
+                    BLOB_QUERY,
+                    {"owner": owner, "name": name, "expression": f"{commit['oid']}:{path}"},
+                )["repository"]["object"]
+                if blob:  # None at commits that deleted the file
+                    versions.append((commit["committedDate"], blob["text"]))
+                else:
+                    versions.append((commit["committedDate"], ""))
+            return versions or [(None, repo["head"]["text"])]
+        return []
+
+    def releases(self, owner: str, name: str, since: datetime) -> list[dict[str, Any]]:
+        nodes = self.graphql(RELEASES_QUERY, {"owner": owner, "name": name})["repository"][
+            "releases"
+        ]["nodes"]
+        return [r for r in nodes if r.get("publishedAt") and _published_after(r, since)]
+
     def close(self) -> None:
         self._http.close()
 
@@ -144,6 +207,10 @@ class GitHubClient:
 
 def _updated_after(node: dict[str, Any], since: datetime) -> bool:
     return datetime.fromisoformat(node["updatedAt"].replace("Z", "+00:00")) >= since
+
+
+def _published_after(node: dict[str, Any], since: datetime) -> bool:
+    return datetime.fromisoformat(node["publishedAt"].replace("Z", "+00:00")) >= since
 
 
 def _is_rate_limited(response: httpx.Response) -> bool:

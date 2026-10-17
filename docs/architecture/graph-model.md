@@ -20,6 +20,8 @@ graph LR
   Person -- AUTHORED --> Comment
   Person -- REVIEWED --> PullRequest
   Person -- OWNS --> Component
+  Team -- OWNS --> Component
+  Release -- IN_REPO --> Repo
   Comment -- ON --> Issue
   Comment -- ON --> PullRequest
   PullRequest -- FIXES --> Issue
@@ -57,7 +59,8 @@ All times are **epoch milliseconds** (integers). `key` is the MERGE key and is u
 | `File` | `key` (`FalkorDB/FalkorDB:src/x.c`) | `path`, `repo`, `is_doc` | PR file lists |
 | `Component` | `key` (`FalkorDB/FalkorDB:src/execution_plan`) | `name`, `repo`, `path_prefix`, `source` (`path` / `label`) | Derived: directory prefix (default depth 2) |
 | `Label` | `key` (`FalkorDB/FalkorDB:bug`) | `name`, `color`, `repo` | GitHub API |
-| `Release` | `key` (`FalkorDB/FalkorDB@v4.8.0`) | `tag`, `published_at`, `url` | GitHub API |
+| `Release` | `key` (`FalkorDB/FalkorDB@v4.8.0`) | `tag`, `name`, `published_at`, `url`, `pr_keys` | GitHub API (last 12 months) |
+| `Team` | `key` (`FalkorDB/falkordb-core`) | `name` | CODEOWNERS team owners (membership isn't public, so teams aren't expanded to people) |
 | `Decision` | `id` (content hash) | `summary`, `rationale`, `alternatives`, `decided_at`, `confidence`, `model`, `source_url` | LLM extraction ([ADR-0010](../adr/0010-llm-model-bake-off.md)) |
 
 ## Relationship types
@@ -74,9 +77,9 @@ All times are **epoch milliseconds** (integers). `key` is the MERGE key and is u
 | `MAPS_TO` | Label → Component | | Per-repo config |
 | `HAS_LABEL` | Issue / PullRequest → Label | | |
 | `ASSIGNED_TO` | Issue → Person | | |
-| `IN_REPO` | Component / Issue / PullRequest → Repo | | |
-| `OWNS` | Person → Component | `source` (`CODEOWNERS`), **`valid_from`, `valid_to`** | Time-ranged; `valid_to = null` means current |
-| `INCLUDES` | Release → PullRequest | | From release notes |
+| `IN_REPO` | Component / Issue / PullRequest / Release → Repo | | |
+| `OWNS` | Person / Team → Component | `source` (`CODEOWNERS`), **`valid_from`, `valid_to`** | Time-ranged from CODEOWNERS history; `valid_to = null` means current; `valid_from = 0` if the first version's date is unknown. Only directory patterns map to Components |
+| `INCLUDES` | Release → PullRequest | | From `#n` / PR URLs in release notes; created by `link_references()` from `pr_keys` |
 | `DECIDED_IN` | Decision → PullRequest / Issue | | |
 | `EVIDENCED_BY` | Decision → Comment | | The comments the extraction cited |
 | `MADE_BY` | Decision → Person | | |
@@ -93,6 +96,8 @@ FalkorDB's read-only command (`GRAPH.RO_QUERY`) **fails on a graph that doesn't 
 CREATE INDEX FOR (r:Repo) ON (r.full_name)
 CREATE INDEX FOR (p:Person) ON (p.login)
 CREATE INDEX FOR (l:Label) ON (l.key)
+CREATE INDEX FOR (t:Team) ON (t.key)
+CREATE INDEX FOR (rel:Release) ON (rel.key)
 CREATE INDEX FOR (i:Issue) ON (i.key)
 CREATE INDEX FOR (pr:PullRequest) ON (pr.key)
 CREATE INDEX FOR (c:Comment) ON (c.id)

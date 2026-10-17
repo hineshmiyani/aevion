@@ -98,6 +98,28 @@ class IssueRec:
     ref_keys: tuple[str, ...] = ()
 
 
+@dataclass(frozen=True)
+class ReleaseRec:
+    key: str
+    repo: str
+    tag: str
+    name: str
+    url: str
+    published_at: int | None
+    pr_keys: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class OwnsRec:
+    owner: str
+    kind: str  # "person" | "team"
+    repo: str
+    component_key: str
+    component_path: str
+    valid_from: int  # 0 when the first version's date is unknown
+    valid_to: int | None
+
+
 @dataclass
 class Batch:
     """Everything one ingestion page produced, deduplicated by key."""
@@ -107,6 +129,8 @@ class Batch:
     pull_requests: list[PullRequestRec] = field(default_factory=list)
     issues: list[IssueRec] = field(default_factory=list)
     comments: list[CommentRec] = field(default_factory=list)
+    releases: list[ReleaseRec] = field(default_factory=list)
+    ownerships: list[OwnsRec] = field(default_factory=list)
 
     def add_person(self, person: PersonRec | None) -> None:
         if person and person.login not in self.people:
@@ -245,6 +269,42 @@ def issue_from(
     )
     batch.issues.append(record)
     return record
+
+
+def release_from(node: dict[str, Any], repo: str, batch: Batch) -> ReleaseRec:
+    """Release notes list the PRs they ship ("Fix crash (#3176)"): those become INCLUDES."""
+    record = ReleaseRec(
+        key=f"{repo}@{node['tagName']}",
+        repo=repo,
+        tag=node["tagName"],
+        name=node.get("name") or node["tagName"],
+        url=node["url"],
+        published_at=to_epoch_ms(node.get("publishedAt")),
+        pr_keys=tuple(sorted(find_references(node.get("description"), repo))),
+    )
+    batch.releases.append(record)
+    return record
+
+
+def ownerships_from(
+    versions: list[tuple[str | None, str]], repo: str, component_depth: int, batch: Batch
+) -> None:
+    from aevion.ingest.codeowners import ownership_intervals
+
+    for own in ownership_intervals(
+        [(to_epoch_ms(at), text) for at, text in versions], component_depth
+    ):
+        batch.ownerships.append(
+            OwnsRec(
+                owner=own.owner,
+                kind=own.kind,
+                repo=repo,
+                component_key=f"{repo}:{own.component_path}",
+                component_path=own.component_path,
+                valid_from=own.valid_from or 0,
+                valid_to=own.valid_to,
+            )
+        )
 
 
 def _nodes(parent: dict[str, Any], connection: str) -> list[dict[str, Any]]:

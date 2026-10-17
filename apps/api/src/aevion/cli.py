@@ -47,7 +47,8 @@ def _ingest(org_config_path: Path, repos: list[str] | None, use_cache: bool) -> 
             report = ingest_repo(graph, client, config, name)
             print(
                 f"{report.repo}: {report.pull_requests} PRs, {report.issues} issues, "
-                f"{report.comments} comments, {report.file_changes} file changes"
+                f"{report.comments} comments, {report.file_changes} file changes, "
+                f"{report.releases} releases, {report.ownerships} ownerships"
             )
         link_references(graph)
     finally:
