@@ -6,6 +6,7 @@ import time
 from pathlib import Path
 
 from aevion.config import REPO_ROOT, Settings
+from aevion.extract.run import dry_run, run_extraction
 from aevion.graph.client import OrgGraph, connect
 from aevion.graph.naming import graph_name_for
 from aevion.graph.schema import bootstrap
@@ -37,11 +38,21 @@ def main(argv: list[str] | None = None) -> int:
         help="Rebuild File→Component links (after changing component depth in the config)",
     )
 
+    extract = commands.add_parser("extract", help="Extract Decisions from PR and issue threads")
+    extract.add_argument("--org", default="FalkorDB")
+    extract.add_argument("--repo", help="Only this repo, e.g. FalkorDB/GraphRAG-SDK")
+    extract.add_argument("--limit", type=int, help="At most this many threads (newest first)")
+    extract.add_argument("--dry-run", action="store_true", help="Price the run; call no model")
+    extract.add_argument("--max-usd", type=float, default=1.0, help="Refuse runs priced above this")
+    extract.add_argument("--workers", type=int, default=8)
+
     commands.add_parser("cost", help="Show LLM spend from the ledger")
     check = commands.add_parser("llm-check", help="Make one tiny live LLM call and print its cost")
     check.add_argument("--model", help="Model ID (default: AGENT_MODEL)")
 
     args = parser.parse_args(argv)
+    if args.command == "extract":
+        return _extract(args)
     if args.command == "cost":
         return _cost()
     if args.command == "llm-check":
@@ -86,6 +97,33 @@ def _ingest(
         f"{after['edges']} edges (+{after['edges'] - before['edges']}) "
         f"in {time.monotonic() - started:.1f}s"
     )
+    return 0
+
+
+def _extract(args: argparse.Namespace) -> int:
+    settings = Settings()
+    graph = OrgGraph(connect(settings), graph_name_for(args.org))
+    model = settings.extraction_model
+    priced = dry_run(graph, model, settings.openrouter_base_url, args.repo, args.limit)
+    cost = "unknown" if priced.usd is None else f"${priced.usd:.4f}"
+    print(
+        f"{priced.threads} candidate threads, ~{priced.input_tokens:,} input + "
+        f"~{priced.output_tokens:,} output tokens with {model}: projected {cost}"
+    )
+    if args.dry_run:
+        return 0
+    # SPEC boundary: any single LLM run projected over $1 needs a human decision first.
+    if priced.usd is None or priced.usd > args.max_usd:
+        print(f"Refusing: projected cost is above --max-usd {args.max_usd} (or unknown).")
+        return 2
+    report = run_extraction(graph, llm_client(settings), model, args.repo, args.limit, args.workers)
+    print(
+        f"{report.threads} threads → {report.decisions} decisions "
+        f"({report.dropped_low_confidence} low-confidence dropped, {report.invalid_json} bad JSON, "
+        f"{len(report.errors)} errors{', stopped on budget' if report.stopped_on_budget else ''})"
+    )
+    for error in report.errors[:5]:
+        print("  error:", error)
     return 0
 
 
