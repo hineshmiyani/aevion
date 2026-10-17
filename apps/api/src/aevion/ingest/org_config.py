@@ -11,6 +11,7 @@ class RepoConfig:
     name: str
     component_depth: int
     depth_overrides: dict[str, int] = field(default_factory=dict)
+    triage_hints: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -25,6 +26,10 @@ class OrgConfig:
         day (raw-cache keys include it)."""
         start = (now or datetime.now(UTC)) - timedelta(days=30 * self.since_months)
         return start.replace(hour=0, minute=0, second=0, microsecond=0)
+
+    def triage_hints(self) -> dict[str, tuple[str, ...]]:
+        """`owner/repo` → hint words, for repos that have any."""
+        return {f"{self.org}/{r.name}": r.triage_hints for r in self.repos if r.triage_hints}
 
     def repo(self, name: str) -> RepoConfig:
         for repo in self.repos:
@@ -46,6 +51,7 @@ def load_org_config(path: Path) -> OrgConfig:
                 depth_overrides={
                     k: int(v) for k, v in r.get("component_depth_overrides", {}).items()
                 },
+                triage_hints=tuple(w.lower() for w in r.get("triage_hints", [])),
             )
             for r in data["repos"]
         ),

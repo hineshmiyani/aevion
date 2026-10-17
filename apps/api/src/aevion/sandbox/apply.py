@@ -21,7 +21,7 @@ from aevion.llm.client import LLMClient
 from aevion.sandbox.safety import profile_url, safe_for_sandbox
 from aevion.sandbox.seed import original_of
 from aevion.sandbox.writer import SandboxWriter
-from aevion.tools.triage import triage_issue
+from aevion.tools.triage import infer_repo, triage_issue
 from aevion.triage.service import TriageAction, TriageResponse, plan
 
 LABEL_COLOR = "8a560f"  # Aevion's evidence-path amber
@@ -100,6 +100,7 @@ def triage_sandbox_issue(
     client: LLMClient | None,
     model: str | None,
     default_repo: str,
+    repo_hints: dict[str, tuple[str, ...]] | None = None,
     force: bool = False,
 ) -> TriageResponse:
     key = ingest_issue(sandbox_graph, repository, issue)
@@ -107,17 +108,23 @@ def triage_sandbox_issue(
         return previous  # a redelivered webhook or a second click never comments twice
 
     original = original_of(issue)
+    if original:
+        repo, why = original.split("#", 1)[0], [f"a copy of `{original}`"]
+    else:
+        repo, why = infer_repo(
+            brain, issue.get("title") or "", issue.get("body") or "", repo_hints or {}, default_repo
+        )
     context = {
         "key": key,
         "title": issue.get("title") or "",
         "body": issue.get("body") or "",
         "state": (issue.get("state") or "open").upper(),
         "url": issue["html_url"],
-        "repo": original.split("#", 1)[0] if original else default_repo,
+        "repo": repo,
         "author": (issue.get("user") or {}).get("login"),
     }
     response = plan(triage_issue(brain, context), "apply", client=client, model=model)
-    response.issue = {**response.issue, "key": key, "context_repo": context["repo"]}
+    response.issue = {**response.issue, "key": key, "context_repo": repo, "context_reason": why}
     response.actions = apply_actions(writer, issue["number"], response)
     sandbox_graph.query(
         RECORD_RUN,

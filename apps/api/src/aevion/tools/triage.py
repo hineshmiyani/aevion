@@ -113,6 +113,44 @@ _PATH = re.compile(
 )
 
 
+HINT_WEIGHT = 1.0  # per hint word found; similar issues add their title coverage
+MIN_REPO_SCORE = 0.5  # below this, fall back to the default repo
+
+
+def infer_repo(
+    graph: OrgGraph,
+    title: str,
+    body: str,
+    hints: dict[str, tuple[str, ...]],
+    default: str,
+) -> tuple[str, list[str]]:
+    """Which repo is a newly filed issue about? Hint words from the org config, plus the repos
+    of the most similar issues across the org. Returns the repo and the reasons, for the UI."""
+    text = f"{title}\n{body}".lower()
+    scores: dict[str, float] = {}
+    reasons: dict[str, list[str]] = {}
+    for repo, words in hints.items():
+        found = [w for w in words if re.search(rf"(?<![\w-]){re.escape(w)}(?![\w-])", text)]
+        if found:
+            scores[repo] = scores.get(repo, 0.0) + HINT_WEIGHT * len(found)
+            reasons.setdefault(repo, []).append("mentions " + ", ".join(found))
+    query = "|".join(keywords(title)[:MAX_QUERY_WORDS])
+    if query:
+        wanted = keyword_stems(title)
+        pool = as_dicts(graph.ro_query(SIMILAR, {"query": query, "key": "", "pool": SIMILAR_POOL}))
+        for row in pool:
+            row["match"] = coverage(wanted, row["title"])
+        for row in sorted(pool, key=lambda r: -r["match"])[:VOTERS]:
+            if row["match"] > 0:
+                scores[row["repo"]] = scores.get(row["repo"], 0.0) + row["match"]
+                reasons.setdefault(row["repo"], []).append(f"like {row['key']}")
+    if scores:
+        repo, score = max(scores.items(), key=lambda kv: kv[1])
+        if score >= MIN_REPO_SCORE:
+            return repo, reasons[repo][:4]
+    return default, ["no clear signal, so the default repo"]
+
+
 class TriageCandidatesArgs(BaseModel):
     issue: str = Field(description="Issue key, e.g. 'FalkorDB/FalkorDB#3371'.")
     limit: int = Field(default=5, ge=1, le=10, description="How many similar issues to return.")

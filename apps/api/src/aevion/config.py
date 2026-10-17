@@ -35,6 +35,8 @@ class Settings(BaseSettings):
     github_webhook_secret: str | None = None
     # Repo whose code a freshly typed sandbox issue is triaged against (copies use their own).
     sandbox_default_repo: str = "FalkorDB/FalkorDB"
+    # Org config with the per-repo triage hints used to place a freshly typed sandbox issue.
+    org_config_path: Path = REPO_ROOT / "config" / "orgs" / "falkordb.toml"
 
     # Browser origins allowed to call the API directly (the Vercel app, plus local dev).
     cors_origins: list[str] = ["http://localhost:3000", "http://localhost:3001"]
