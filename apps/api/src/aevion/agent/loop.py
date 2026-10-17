@@ -74,9 +74,18 @@ class _Sources:
         return next((node for node, k in self.numbers.items() if k == n), None)
 
 
+def org_repos(graph: OrgGraph) -> list[str]:
+    return [
+        row[0]
+        for row in graph.ro_query("MATCH (r:Repo) RETURN r.full_name ORDER BY r.full_name").rows
+    ]
+
+
 def ask(graph: OrgGraph, client: LLMClient, model: str, org: str, question: str) -> AskResponse:
+    repos = ", ".join(org_repos(graph)) or "(none ingested yet)"
+    system = SYSTEM_PROMPT.format(org=org, max_calls=MAX_TOOL_CALLS, repos=repos)
     messages: list[dict[str, Any]] = [
-        {"role": "system", "content": SYSTEM_PROMPT.format(org=org, max_calls=MAX_TOOL_CALLS)},
+        {"role": "system", "content": system},
         {"role": "user", "content": question},
     ]
     specs = tool_specs()
