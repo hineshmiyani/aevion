@@ -253,6 +253,26 @@ Each pick gets a **strength** (strong ≥ 1.0 votes, moderate ≥ 0.4, else weak
 
 **Measured on the real graph:** the tool runs in about 1 s; a full dry run with the drafted reply in 4 to 6 s.
 
+## Sandbox triage: webhook in, actions out (US-6, AEV-32)
+
+Modules: `api/routes/webhooks.py`, `sandbox/apply.py` · `POST /webhooks/github` (HMAC-verified), and `POST /api/triage` with `mode: "apply"` on a sandbox issue.
+
+1. **Ingest** the webhook's issue (and comment, for `issue_comment`) into `org:aevion-sandbox` with the same `UNWIND … MERGE` loader as ingestion: the REST payload is reshaped into the GraphQL record shape first.
+2. **Reason on `org:falkordb`**: `triage_issue()` is `triage_candidates` from the issue's text instead of a stored key. A seeded copy is triaged in its original's repo (read from its hidden marker); a freshly typed issue against `FalkorDB/FalkorDB`.
+3. **Act** through `SandboxWriter` only: the label (`area: <component>`, created on first use), assign if the Expert is a sandbox collaborator (otherwise named by profile link), and the reply, made safe by `safe_for_sandbox`.
+4. **Record** the run, so the same issue is never answered twice:
+
+```cypher
+MATCH (i:Issue {key: $key})
+MERGE (t:TriageRun {issue_key: $key})
+SET t.at = $at, t.result = $result
+MERGE (t)-[:FOR]->(i)
+```
+
+Only `issues.opened` triggers a triage; edits, closes and comments are ingested only, so Aevion's own comment can't trigger another run. **Measured:** filing a real sandbox issue to label and comment took 10.5 s (SPEC target: 30 s).
+
+**Webhook setup** (on deploy, AEV-14): in the sandbox repo's Settings → Webhooks, payload URL `https://<api-host>/webhooks/github`, content type `application/json`, the `GITHUB_WEBHOOK_SECRET` from the API's environment, and the events *Issues* and *Issue comments*.
+
 ## FalkorDB Cypher notes
 
 - `ORDER BY` can't contain an aggregation directly (`ORDER BY count(x)` fails with "failed to map aggregation expression"); aggregate into an alias in `WITH`/`RETURN` and order by the alias.

@@ -120,7 +120,6 @@ def mentioned_paths(text: str) -> list[str]:
 
 
 def triage_candidates(graph: OrgGraph, args: TriageCandidatesArgs) -> ToolResult:
-    cypher = [FIND_ISSUE.strip()]
     found = as_dicts(graph.ro_query(FIND_ISSUE, {"key": args.issue}))
     if not found:
         return ToolResult(
@@ -128,18 +127,29 @@ def triage_candidates(graph: OrgGraph, args: TriageCandidatesArgs) -> ToolResult
             args=args.model_dump(),
             rows=[],
             evidence=EvidencePath(),
-            cypher=cypher,
+            cypher=[FIND_ISSUE.strip()],
         )
-    issue = found[0]
+    issue = {**found[0], "key": args.issue}
+    return triage_issue(graph, issue, args.limit, cypher=[FIND_ISSUE.strip()])
+
+
+def triage_issue(
+    graph: OrgGraph, issue: dict[str, Any], limit: int = 5, *, cypher: list[str] | None = None
+) -> ToolResult:
+    """Triage from an issue's text, so an issue that isn't in this graph (a new sandbox issue,
+    triaged against the FalkorDB graph) works the same way. `issue` needs key, title, body,
+    state, url, repo and author; `repo` is the repo whose code the issue is about."""
+    cypher = cypher or []
+    args = {"issue": issue["key"], "limit": limit}
     evidence = EvidenceBuilder()
-    me = evidence.node("Issue", args.issue, title=issue["title"], url=issue["url"])
+    me = evidence.node("Issue", issue["key"], title=issue["title"], url=issue["url"])
 
     # 1. Similar issues.
     similar: list[dict[str, Any]] = []
     query = "|".join(keywords(issue["title"] or "")[:MAX_QUERY_WORDS])
     if query:
         pool = as_dicts(
-            graph.ro_query(SIMILAR, {"query": query, "key": args.issue, "pool": SIMILAR_POOL})
+            graph.ro_query(SIMILAR, {"query": query, "key": issue["key"], "pool": SIMILAR_POOL})
         )
         wanted = keyword_stems(issue["title"] or "")
         for row in pool:
@@ -163,7 +173,7 @@ def triage_candidates(graph: OrgGraph, args: TriageCandidatesArgs) -> ToolResult
         return entry
 
     weights = {s["key"]: max(s["_rank"], 0.1) for s in similar}
-    weights[args.issue] = OWN_FIX_WEIGHT
+    weights[issue["key"]] = OWN_FIX_WEIGHT
     fixes = [
         row
         for row in as_dicts(graph.ro_query(FIX_COMPONENTS, {"issues": list(weights)}))
@@ -182,7 +192,7 @@ def triage_candidates(graph: OrgGraph, args: TriageCandidatesArgs) -> ToolResult
         seen.add((row["issue"], row["component"]))
         share = weights[row["issue"]] / len(spread[row["pr"]]) ** 0.5
         vote(row["component"], row["name"], share, row["issue"])
-        issue_id = me if row["issue"] == args.issue else f"Issue:{row['issue']}"
+        issue_id = me if row["issue"] == issue["key"] else f"Issue:{row['issue']}"
         pr_id = evidence.node("PullRequest", row["pr"], title=row["pr_title"], url=row["pr_url"])
         file_id = evidence.node("File", row["file"], title=row["path"])
         component_id = evidence.node("Component", row["component"], title=row["name"])
@@ -217,9 +227,9 @@ def triage_candidates(graph: OrgGraph, args: TriageCandidatesArgs) -> ToolResult
     for words in path_words.values():
         for word in words:
             frequency[word] = frequency.get(word, 0) + 1
-    limit = max(2, COMMON_WORD_SHARE * len(repo_components))
+    common = max(2, COMMON_WORD_SHARE * len(repo_components))
     for row in repo_components:
-        matched = {w for w in issue_words & path_words[row["key"]] if frequency[w] <= limit}
+        matched = {w for w in issue_words & path_words[row["key"]] if frequency[w] <= common}
         if matched:
             vote(
                 row["key"],
@@ -233,7 +243,7 @@ def triage_candidates(graph: OrgGraph, args: TriageCandidatesArgs) -> ToolResult
     # Similar issues go on the path even when no fixing PR links them to a Component yet.
     for s in similar:
         evidence.node("Issue", s["key"], title=s["title"], url=s["url"])
-    similar = similar[: args.limit]
+    similar = similar[:limit]
 
     ranked = sorted(votes.values(), key=lambda v: -v["votes"])[:3]
 
@@ -248,7 +258,7 @@ def triage_candidates(graph: OrgGraph, args: TriageCandidatesArgs) -> ToolResult
 
     row = {
         "issue": {k: issue[k] for k in ("title", "state", "url", "repo", "author")}
-        | {"key": args.issue},
+        | {"key": issue["key"]},
         "similar": [
             {k: s[k] for k in ("key", "title", "state", "url", "repo", "match", "fixed_by")}
             | {"likely_duplicate": s["match"] >= DUPLICATE_COVERAGE}
@@ -272,7 +282,7 @@ def triage_candidates(graph: OrgGraph, args: TriageCandidatesArgs) -> ToolResult
     }
     return ToolResult(
         tool="triage_candidates",
-        args=args.model_dump(),
+        args=args,
         rows=[row],
         evidence=evidence.build(),
         cypher=cypher,

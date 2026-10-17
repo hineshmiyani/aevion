@@ -31,6 +31,10 @@ class Settings(BaseSettings):
     sandbox_repo: str = "hineshmiyani/aevion-sandbox"
     # Fine-grained token that GitHub limits to the sandbox repo (issues read/write only).
     sandbox_github_token: str | None = None
+    # Shared with the sandbox repo's webhook settings; signs every delivery (HMAC SHA-256).
+    github_webhook_secret: str | None = None
+    # Repo whose code a freshly typed sandbox issue is triaged against (copies use their own).
+    sandbox_default_repo: str = "FalkorDB/FalkorDB"
 
     def resolved_github_token(self) -> str:
         if self.github_token:
