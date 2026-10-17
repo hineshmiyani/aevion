@@ -236,3 +236,32 @@ def test_webhook(
         assert rows == [[f"{SANDBOX}#7"]]
     finally:
         app.dependency_overrides.clear()
+
+
+def test_a_fresh_issue_is_placed_by_hints_and_similar_issues(
+    graphs: tuple[OrgGraph, OrgGraph], tmp_path: Path
+) -> None:
+    brain, sandbox = graphs
+    fresh = issue_payload(8, "Python client never times out", "The asyncio client hangs.")
+    run = triage_sandbox_issue(
+        brain,
+        sandbox,
+        _writer(FakeGitHub()),
+        REPOSITORY,
+        fresh,
+        client=None,
+        model=None,
+        default_repo="FalkorDB/FalkorDB",
+        repo_hints={"FalkorDB/falkordb-py": ("python", "asyncio")},
+    )
+    assert run.issue["context_repo"] == "FalkorDB/falkordb-py"
+    assert "mentions python, asyncio" in run.issue["context_reason"][0]
+    assert run.component and run.component["key"] == "FalkorDB/falkordb-py:falkordb"
+
+
+def test_org_config_hints() -> None:
+    from aevion.config import REPO_ROOT
+    from aevion.ingest.org_config import load_org_config
+
+    hints = load_org_config(REPO_ROOT / "config/orgs/falkordb.toml").triage_hints()
+    assert "python" in hints["FalkorDB/falkordb-py"] and "FalkorDB/FalkorDB" not in hints

@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 from aevion.api.deps import get_db
 from aevion.api.limits import enforce
 from aevion.api.routes.ask import _settings, ask_limiter, get_llm
-from aevion.api.routes.webhooks import BRAIN_ORG, SANDBOX_ORG, get_writer
+from aevion.api.routes.webhooks import BRAIN_ORG, SANDBOX_ORG, get_writer, repo_hints
 from aevion.graph.client import GraphNotFoundError, OrgGraph
 from aevion.graph.naming import graph_name_for
 from aevion.graph.schema import bootstrap
@@ -102,6 +102,7 @@ def _apply(db: Any, issue_key: str, llm: LLMClient, writer: SandboxWriter | None
             client=llm,
             model=settings.agent_model,
             default_repo=settings.sandbox_default_repo,
+            repo_hints=repo_hints(),
         )
     except GraphNotFoundError as exc:
         raise HTTPException(status_code=404, detail="The FalkorDB graph isn't loaded") from exc

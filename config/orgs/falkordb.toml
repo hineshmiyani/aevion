@@ -6,6 +6,9 @@ component_depth = 2  # directory levels that form a Component (SPEC OQ-4)
 # Logins treated as bots in addition to GitHub's own Bot accounts.
 bot_logins = ["dependabot", "renovate", "github-actions", "codecov", "coderabbitai"]
 
+# triage_hints: words that place a newly filed sandbox issue in a repo (triage only). FalkorDB
+# core has none: it is the fallback when neither the hints nor similar issues say otherwise.
+
 [[repos]]
 name = "FalkorDB"
 # graph/src holds a whole subsystem; split it one level deeper
@@ -13,28 +16,36 @@ component_depth_overrides = { "graph/src" = 3 }
 
 [[repos]]
 name = "GraphRAG-SDK"
+triage_hints = ["graphrag", "graphrag-sdk", "rag", "ontology"]
 # code lives at graphrag_sdk/src/graphrag_sdk/<area> (ingestion, retrieval, ...)
 component_depth_overrides = { "graphrag_sdk/src/graphrag_sdk" = 4, "graphrag_sdk/tests" = 3 }
 
 [[repos]]
 name = "QueryWeaver"
+triage_hints = ["queryweaver", "text2sql", "text-to-sql"]
 
 [[repos]]
 name = "code-graph"
+triage_hints = ["code-graph", "code graph"]
 
 [[repos]]
 name = "falkordb-browser"
+triage_hints = ["browser", "falkordb-browser"]
 
 [[repos]]
 name = "falkordb-py"
+triage_hints = ["python", "pip", "pypi", "asyncio", "falkordb-py"]
 component_depth = 1  # flat package: falkordb/, tests/, docs/
 
 [[repos]]
 name = "falkordb-ts"
+triage_hints = ["typescript", "javascript", "node.js", "nodejs", "npm", "falkordb-ts"]
 
 [[repos]]
 name = "FalkorDB-MCPServer"
+triage_hints = ["mcp", "model context protocol", "falkordb-mcpserver"]
 
 [[repos]]
 name = "docs"
+triage_hints = ["documentation", "docs.falkordb.com"]
 component_depth = 1

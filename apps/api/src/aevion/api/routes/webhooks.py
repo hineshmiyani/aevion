@@ -10,6 +10,7 @@ import hashlib
 import hmac
 import json
 import logging
+from functools import lru_cache
 from typing import Annotated, Any
 
 from fastapi import APIRouter, BackgroundTasks, Depends, Header, HTTPException, Request
@@ -19,6 +20,7 @@ from aevion.api.routes.ask import _settings, get_llm
 from aevion.graph.client import OrgGraph
 from aevion.graph.naming import graph_name_for
 from aevion.graph.schema import bootstrap
+from aevion.ingest.org_config import load_org_config
 from aevion.llm.client import LLMClient
 from aevion.sandbox.apply import ingest_issue, triage_sandbox_issue
 from aevion.sandbox.writer import SandboxWriter, WriteNotAllowedError
@@ -28,6 +30,11 @@ log = logging.getLogger("aevion.webhooks")
 
 BRAIN_ORG = "FalkorDB"
 SANDBOX_ORG = "aevion-sandbox"
+
+
+@lru_cache(maxsize=1)
+def repo_hints() -> dict[str, tuple[str, ...]]:
+    return load_org_config(_settings().org_config_path).triage_hints()
 
 
 def get_writer() -> SandboxWriter | None:
@@ -111,6 +118,7 @@ def _triage(
             client=llm,
             model=settings.agent_model,
             default_repo=settings.sandbox_default_repo,
+            repo_hints=repo_hints(),
         )
         log.info("triaged %s: %s", response.issue["key"], [a.status for a in response.actions])
     except Exception:  # a background task has no caller to report to; log it and move on

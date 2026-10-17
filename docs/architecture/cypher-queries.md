@@ -259,7 +259,7 @@ Each pick gets a **strength** (strong ≥ 1.0 votes, moderate ≥ 0.4, else weak
 Modules: `api/routes/webhooks.py`, `sandbox/apply.py` · `POST /webhooks/github` (HMAC-verified), and `POST /api/triage` with `mode: "apply"` on a sandbox issue.
 
 1. **Ingest** the webhook's issue (and comment, for `issue_comment`) into `org:aevion-sandbox` with the same `UNWIND … MERGE` loader as ingestion: the REST payload is reshaped into the GraphQL record shape first.
-2. **Reason on `org:falkordb`**: `triage_issue()` is `triage_candidates` from the issue's text instead of a stored key. A seeded copy is triaged in its original's repo (read from its hidden marker); a freshly typed issue against `FalkorDB/FalkorDB`.
+2. **Reason on `org:falkordb`**: `triage_issue()` is `triage_candidates` from the issue's text instead of a stored key. A seeded copy is triaged in its original's repo (read from its hidden marker). A freshly typed issue is placed by `infer_repo()`: hint words per repo from `config/orgs/falkordb.toml` (`triage_hints`, e.g. "python", "asyncio" → `falkordb-py`) plus the repos of the most similar issues across the org (the same full-text query, voting by title coverage). FalkorDB core is the fallback when neither is clear. The reasons are returned as `issue.context_reason`.
 3. **Act** through `SandboxWriter` only: the label (`area: <component>`, created on first use), assign if the Expert is a sandbox collaborator (otherwise named by profile link), and the reply, made safe by `safe_for_sandbox`.
 4. **Record** the run, so the same issue is never answered twice:
 
