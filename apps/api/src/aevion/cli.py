@@ -18,6 +18,7 @@ from aevion.ingest.loader import (
 )
 from aevion.ingest.org_config import load_org_config
 from aevion.ingest.pipeline import ingest_repo
+from aevion.llm.factory import ledger_for, llm_client
 
 DEFAULT_ORG_CONFIG = REPO_ROOT / "config" / "orgs" / "falkordb.toml"
 
@@ -36,7 +37,15 @@ def main(argv: list[str] | None = None) -> int:
         help="Rebuild File→Component links (after changing component depth in the config)",
     )
 
+    commands.add_parser("cost", help="Show LLM spend from the ledger")
+    check = commands.add_parser("llm-check", help="Make one tiny live LLM call and print its cost")
+    check.add_argument("--model", help="Model ID (default: AGENT_MODEL)")
+
     args = parser.parse_args(argv)
+    if args.command == "cost":
+        return _cost()
+    if args.command == "llm-check":
+        return _llm_check(args.model)
     if args.command == "ingest":
         return _ingest(args.org_config, args.repos, args.cache, args.reset_components)
     return 1
@@ -76,6 +85,42 @@ def _ingest(
         f"{graph.name}: {after['nodes']} nodes (+{after['nodes'] - before['nodes']}), "
         f"{after['edges']} edges (+{after['edges'] - before['edges']}) "
         f"in {time.monotonic() - started:.1f}s"
+    )
+    return 0
+
+
+def _cost() -> int:
+    settings = Settings()
+    entries = ledger_for(settings).entries()
+    by_model: dict[str, list[float]] = {}
+    for e in entries:
+        totals = by_model.setdefault(e["model"], [0, 0, 0.0])
+        totals[0] += 1
+        totals[1] += int(e["cached"])
+        totals[2] += e["cost_usd"]
+    for model, (calls, cached, usd) in sorted(by_model.items()):
+        print(f"{model:40} {int(calls):5} calls ({int(cached)} cached)  ${usd:.4f}")
+    total = sum(e["cost_usd"] for e in entries)
+    print(
+        f"{'total':40} {len(entries):5} calls  ${total:.4f}"
+        f" of ${settings.llm_budget_usd:.2f} budget"
+    )
+    return 0
+
+
+def _llm_check(model: str | None) -> int:
+    settings = Settings()
+    client = llm_client(settings)
+    chosen = model or settings.agent_model
+    result = client.chat(
+        chosen,
+        [{"role": "user", "content": "Reply with the single word: ready"}],
+        max_tokens=10,
+        purpose="llm-check",
+    )
+    print(
+        f"{result.model}: {result.content.strip()!r}  cost ${result.usage.cost_usd:.6f}"
+        f"{' (cached)' if result.cached else ''}"
     )
     return 0
 
