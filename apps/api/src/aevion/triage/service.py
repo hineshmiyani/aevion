@@ -202,11 +202,17 @@ def _draft(
                     {"role": "system", "content": REPLY_PROMPT},
                     {"role": "user", "content": json.dumps(facts)},
                 ],
-                max_tokens=900,
+                # Hidden reasoning shares this budget (see AEV-24), so leave room for the reply.
+                max_tokens=1600,
                 purpose="triage",
             )
             text = result.content.strip()
-            if text and len(text.split()) <= MAX_REPLY_WORDS * 1.5:
+            # A reply cut off at max_tokens is never posted half-finished: use the template.
+            if (
+                result.finish_reason != "length"
+                and text
+                and len(text.split()) <= MAX_REPLY_WORDS * 1.5
+            ):
                 return text, result.model
         except LLMError:
             pass  # budget or provider trouble: the template still gives a useful reply

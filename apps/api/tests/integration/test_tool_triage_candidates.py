@@ -63,3 +63,18 @@ def test_a_file_named_in_the_issue_votes_for_its_component(fixture_graph: OrgGra
 def test_unknown_issue_returns_nothing(fixture_graph: OrgGraph) -> None:
     result = triage_candidates(fixture_graph, TriageCandidatesArgs(issue=f"{REPO}#4040"))
     assert result.rows == [] and result.evidence.nodes == []
+
+
+def test_a_repo_with_one_code_area_is_a_confident_fallback(fixture_graph: OrgGraph) -> None:
+    fixture_graph.query(
+        """
+        MATCH (r:Repo {full_name: $repo})
+        CREATE (:Issue {key: $key, title: 'Zebra quokka', state: 'OPEN', url: 'u',
+                        body_excerpt: 'Nothing else in the graph looks like this.'})-[:IN_REPO]->(r)
+        """,
+        {"repo": REPO, "key": f"{REPO}#98"},
+    )
+    (row,) = triage_candidates(fixture_graph, TriageCandidatesArgs(issue=f"{REPO}#98")).rows
+    top = row["components"][0]
+    assert top["key"] == f"{REPO}:falkordb" and top["strength"] == "strong"
+    assert top["via"] == ["the repo's only code area"]

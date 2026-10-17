@@ -102,6 +102,15 @@ RETURN mentioned, f.key AS file, f.path AS path, c.key AS component, c.name AS n
 LIMIT 20
 """
 
+# The repo's code areas by merged-PR activity: the fallback when nothing else votes.
+ACTIVE_COMPONENTS = """
+MATCH (c:Component {repo: $repo})<-[:IN_COMPONENT]-(:File)<-[:MODIFIES]-(pr:PullRequest)
+WHERE pr.merged_at IS NOT NULL
+RETURN c.key AS key, c.name AS name, count(DISTINCT pr) AS prs
+ORDER BY prs DESC
+LIMIT 10
+"""
+
 REPO_COMPONENTS = """
 MATCH (c:Component)
 WHERE c.repo = $repo
@@ -286,6 +295,22 @@ def triage_issue(
     for s in similar:
         evidence.node("Issue", s["key"], title=s["title"], url=s["url"])
     similar = similar[:limit]
+
+    if not votes:
+        # Nothing pointed anywhere. A repo with one code area (falkordb-py: `falkordb`) is still
+        # a confident pick; otherwise its busiest area, weakly, so it isn't labelled.
+        active = [
+            row
+            for row in as_dicts(graph.ro_query(ACTIVE_COMPONENTS, {"repo": issue["repo"]}))
+            if not _is_infra(row["key"])
+        ]
+        cypher.append(ACTIVE_COMPONENTS.strip())
+        if len(active) == 1:
+            vote(active[0]["key"], active[0]["name"], STRONG_VOTES, "the repo's only code area")
+        elif active:
+            vote(active[0]["key"], active[0]["name"], 0.3, "the repo's most active area")
+        for row in active[:1]:
+            evidence.node("Component", row["key"], title=row["name"])
 
     ranked = sorted(votes.values(), key=lambda v: -v["votes"])[:3]
 

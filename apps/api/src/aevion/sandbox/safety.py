@@ -19,9 +19,11 @@ _ITEM_URL = (
 )
 # [text](github issue or PR url) — the whole link, so its text goes too.
 _LINKED_ITEM = re.compile(r"\[([^\]]*)\]\(" + _ITEM_URL + r"\)")
-_BARE_ITEM_URL = re.compile(r"(?<![(`<])" + _ITEM_URL)
+# Any item URL outside code: in a sentence, a link target `(...)`, or an autolink `<...>`.
+_BARE_ITEM_URL = re.compile(_ITEM_URL)
 _SHORTHAND = re.compile(r"(?<![\w/`.-])([\w.-]+/[\w.-]+)#(\d+)\b")
 _CODE = re.compile(r"(```.*?```|`[^`\n]*`)", re.S)
+_FENCED = re.compile(r"(```.*?```)", re.S)
 _BARE_REF = re.compile(r"(?<![\w/\[`\\&])#(\d+)\b")
 
 
@@ -40,11 +42,11 @@ def defuse_mentions(text: str) -> str:
 def inert_references(text: str, own_repo: str) -> str:
     """Turn references to other repos' issues and PRs into code spans; keep our own as links."""
 
-    def outside_code(segment: str) -> str:
-        def linked(m: re.Match[str]) -> str:
-            repo, number = m.group(2), m.group(3)
-            return m.group(0) if repo == own_repo else f"`{repo}#{number}`"
+    def linked(m: re.Match[str]) -> str:
+        repo, number = m.group(2), m.group(3)
+        return m.group(0) if repo == own_repo else f"`{repo}#{number}`"
 
+    def outside_code(segment: str) -> str:
         def url(m: re.Match[str]) -> str:
             repo, number = m.group(1), m.group(2)
             return m.group(0) if repo == own_repo else f"`{repo}#{number}`"
@@ -52,10 +54,13 @@ def inert_references(text: str, own_repo: str) -> str:
         def shorthand(m: re.Match[str]) -> str:
             return m.group(0) if m.group(1) == own_repo else f"`{m.group(0)}`"
 
-        segment = _LINKED_ITEM.sub(linked, segment)
         segment = _BARE_ITEM_URL.sub(url, segment)
         return _SHORTHAND.sub(shorthand, segment)
 
+    # Whole links first, before inline code splits them: the model writes
+    # [`FalkorDB/FalkorDB#1`](https://github.com/FalkorDB/FalkorDB/pull/1), text in code.
+    parts = _FENCED.split(text)
+    text = "".join(p if i % 2 else _LINKED_ITEM.sub(linked, p) for i, p in enumerate(parts))
     return _outside_code(text, outside_code)
 
 
@@ -68,6 +73,19 @@ def _outside_code(text: str, rewrite: Callable[[str], str]) -> str:
     """Apply `rewrite` to the prose only; code spans and fenced blocks pass through unchanged."""
     parts = _CODE.split(text)
     return "".join(p if i % 2 else rewrite(p) for i, p in enumerate(parts))
+
+
+def foreign_references(text: str, own_repo: str) -> list[str]:
+    """What would still reach another repo: @mentions and item references outside code."""
+    prose = _CODE.sub(" ", text)
+    found = [f"@{m.group(1)}" for m in _MENTION.finditer(prose)]
+    found += [
+        f"{m.group(1)}#{m.group(2)}"
+        for m in _BARE_ITEM_URL.finditer(prose)
+        if m.group(1) != own_repo
+    ]
+    found += [m.group(0) for m in _SHORTHAND.finditer(prose) if m.group(1) != own_repo]
+    return found
 
 
 def safe_for_sandbox(text: str, own_repo: str) -> str:

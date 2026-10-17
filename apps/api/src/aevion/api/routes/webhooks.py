@@ -10,6 +10,7 @@ import hashlib
 import hmac
 import json
 import logging
+import time
 from functools import lru_cache
 from typing import Annotated, Any
 
@@ -108,6 +109,7 @@ def _triage(
     llm: LLMClient,
 ) -> None:
     settings = _settings()
+    started = time.perf_counter()
     try:
         response = triage_sandbox_issue(
             brain,
@@ -120,6 +122,12 @@ def _triage(
             default_repo=settings.sandbox_default_repo,
             repo_hints=repo_hints(),
         )
-        log.info("triaged %s: %s", response.issue["key"], [a.status for a in response.actions])
+        log.info(
+            "triaged %s in %.1fs (repo %s): %s",
+            response.issue["key"],
+            time.perf_counter() - started,
+            response.issue.get("context_repo"),
+            [f"{a.type}={a.status}" for a in response.actions],
+        )
     except Exception:  # a background task has no caller to report to; log it and move on
         log.exception("triage failed for %s#%s", repository.get("full_name"), issue.get("number"))
