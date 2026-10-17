@@ -36,6 +36,11 @@ class Settings(BaseSettings):
     # Repo whose code a freshly typed sandbox issue is triaged against (copies use their own).
     sandbox_default_repo: str = "FalkorDB/FalkorDB"
 
+    # Browser origins allowed to call the API directly (the Vercel app, plus local dev).
+    cors_origins: list[str] = ["http://localhost:3000", "http://localhost:3001"]
+    # Shared with the Next.js proxy, which forwards each visitor's IP for rate limiting.
+    proxy_secret: str | None = None
+
     def resolved_github_token(self) -> str:
         if self.github_token:
             return self.github_token

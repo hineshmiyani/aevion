@@ -3,12 +3,20 @@
 from typing import Annotated, Any
 
 from fastapi import Depends, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from aevion.api.deps import get_db
 from aevion.api.routes import ask, tools, triage, webhooks
+from aevion.config import Settings
 
 app = FastAPI(title="Aevion API", version="0.1.0")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=Settings().cors_origins,
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type"],
+)
 app.include_router(tools.router)
 app.include_router(ask.router)
 app.include_router(triage.router)

@@ -58,6 +58,10 @@ def main(argv: list[str] | None = None) -> int:
     seed.add_argument("--count", type=int, default=30)
     seed.add_argument("--dry-run", action="store_true", help="Show the selection; write nothing")
 
+    warm = commands.add_parser("warm-cache", help="Answer the hero questions and cache them")
+    warm.add_argument("--org", default="FalkorDB")
+    warm.add_argument("--refresh", action="store_true", help="Re-ask even if already cached")
+
     args = parser.parse_args(argv)
     if args.command == "mcp":
         return _mcp(args.org)
@@ -69,6 +73,8 @@ def main(argv: list[str] | None = None) -> int:
         return _llm_check(args.model)
     if args.command == "sandbox-seed":
         return _sandbox_seed(args.org, args.count, args.dry_run)
+    if args.command == "warm-cache":
+        return _warm_cache(args.org, args.refresh)
     if args.command == "ingest":
         return _ingest(args.org_config, args.repos, args.cache, args.reset_components)
     return 1
@@ -210,4 +216,27 @@ def _sandbox_seed(org: str, count: int, dry_run: bool) -> int:
         f"{report.already_there} already in {settings.sandbox_repo}"
         + (" (dry run)" if dry_run else "")
     )
+    return 0
+
+
+def _warm_cache(org: str, refresh: bool) -> int:
+    from aevion.agent.cache import cached_answer, store_answer
+    from aevion.agent.hero import HERO_QUESTIONS
+    from aevion.agent.loop import ask
+
+    settings = Settings()
+    graph = OrgGraph(connect(settings), graph_name_for(org))
+    bootstrap(graph)
+    client = llm_client(settings)
+    for question in HERO_QUESTIONS:
+        if not refresh and cached_answer(graph, question):
+            print(f"  cached already: {question}")
+            continue
+        started = time.perf_counter()
+        response = ask(graph, client, settings.agent_model, org, question)
+        store_answer(graph, question, response)
+        print(
+            f"  {time.perf_counter() - started:5.1f}s  {len(response.citations)} citations  "
+            f"{question}"
+        )
     return 0

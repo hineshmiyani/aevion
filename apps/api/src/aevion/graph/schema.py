@@ -27,6 +27,7 @@ INDEXES: tuple[Index, ...] = (
     Index("Component", ("key",)),
     Index("Decision", ("id",)),
     Index("TriageRun", ("issue_key",)),
+    Index("CachedAnswer", ("key",)),
     Index("Issue", ("title", "body_excerpt"), "FULLTEXT"),
     Index("Decision", ("summary", "rationale"), "FULLTEXT"),
 )

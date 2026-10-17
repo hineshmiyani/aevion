@@ -14,6 +14,14 @@ function failure(status: number, error: string, retryAfterSeconds?: number) {
   });
 }
 
+// The API rate-limits per visitor, but sees this server's IP for everyone. Pass the visitor's
+// IP along, with the shared secret that tells the API to trust it.
+function visitorHeaders(request: Request): Record<string, string> {
+  const secret = process.env.AEVION_PROXY_SECRET;
+  const ip = request.headers.get("x-real-ip") ?? request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+  return secret && ip ? { "X-Aevion-Client-IP": ip, "X-Aevion-Proxy-Secret": secret } : {};
+}
+
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as Partial<AskRequest> | null;
   const question = body?.question?.trim();
@@ -30,7 +38,7 @@ export async function POST(request: Request) {
   try {
     upstream = await fetch(`${api.replace(/\/$/, "")}/api/ask`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...visitorHeaders(request) },
       body: JSON.stringify({ org: body?.org ?? DEFAULT_ORG, question }),
       signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
       cache: "no-store",

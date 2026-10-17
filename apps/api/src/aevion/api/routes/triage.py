@@ -3,11 +3,12 @@
 from typing import Annotated, Any
 
 import httpx
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from aevion.api.deps import get_db
-from aevion.api.routes.ask import _settings, get_llm
+from aevion.api.limits import enforce
+from aevion.api.routes.ask import _settings, ask_limiter, get_llm
 from aevion.api.routes.webhooks import BRAIN_ORG, SANDBOX_ORG, get_writer
 from aevion.graph.client import GraphNotFoundError, OrgGraph
 from aevion.graph.naming import graph_name_for
@@ -39,6 +40,7 @@ class TriageRequest(BaseModel):
 @router.post("/triage", response_model=TriageResponse)
 def triage_route(
     body: TriageRequest,
+    request: Request,
     db: Annotated[Any, Depends(get_db)],
     llm: Annotated[LLMClient, Depends(get_llm)],
     writer: Annotated[SandboxWriter | None, Depends(get_writer)],
@@ -52,6 +54,7 @@ def triage_route(
         graph = OrgGraph(db, graph_name_for(body.org))
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+    enforce(ask_limiter, request, settings.proxy_secret)  # a triage drafts a reply with the LLM
     if body.mode == "apply":
         return _apply(db, body.issue_key, llm, writer)
     try:
