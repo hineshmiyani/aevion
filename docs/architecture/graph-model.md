@@ -57,7 +57,7 @@ All times are **epoch milliseconds** (integers). `key` is the MERGE key and is u
 | `PullRequest` | `key` (`FalkorDB/FalkorDB#456`) | `number`, `title`, `body_excerpt`, `state`, `created_at`, `merged_at`, `closed_at`, `updated_at`, `url`, `additions`, `deletions`, `ref_keys`, `fix_keys` | GitHub API |
 | `Comment` | `id` (`ic:` / `rv:` / `rc:` + GitHub ID, since each comment type has its own ID space) | `kind` (`issue` / `review` / `review_thread`), `excerpt`, `created_at`, `url` | GitHub API; comments by bots are skipped |
 | `File` | `key` (`FalkorDB/FalkorDB:src/x.c`) | `path`, `repo`, `is_doc` | PR file lists |
-| `Component` | `key` (`FalkorDB/FalkorDB:src/execution_plan`) | `name`, `repo`, `path_prefix`, `source` (`path` / `label`) | Derived: directory prefix (default depth 2) |
+| `Component` | `key` (`FalkorDB/FalkorDB:src/execution_plan`) | `name`, `repo`, `path_prefix`, `source` (`path` / `label` / `codeowners`) | Derived: directory prefix, depth 2 by default, with per-prefix overrides in `config/orgs/*.toml` (`component_depth_overrides`, longest prefix wins). Rebuild links after changing depth with `aevion ingest --reset-components` |
 | `Label` | `key` (`FalkorDB/FalkorDB:bug`) | `name`, `color`, `repo` | GitHub API |
 | `Release` | `key` (`FalkorDB/FalkorDB@v4.8.0`) | `tag`, `name`, `published_at`, `url`, `pr_keys` | GitHub API (last 12 months) |
 | `Team` | `key` (`FalkorDB/falkordb-core`) | `name` | CODEOWNERS team owners (membership isn't public, so teams aren't expanded to people) |
