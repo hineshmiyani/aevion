@@ -54,6 +54,14 @@ _INFRA = frozenset(
         "demos",
         "benchmark",
         "benchmarks",
+        # Packaging and deployment: where the product ships from, not what it is.
+        "docker",
+        "deploy",
+        "deployment",
+        "helm",
+        "k8s",
+        "infra",
+        "terraform",
     }
 )
 COMMON_WORD_SHARE = 0.1  # a path word in more of a repo's Components than this can't vote
