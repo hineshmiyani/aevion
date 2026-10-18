@@ -21,6 +21,7 @@ export type AskResponse = {
   cypher: string[];
   model: string;
   cached: boolean;
+  elapsed_ms?: number | null; // server time to answer
   sample?: boolean; // true when served by the web app's built-in sample (no API configured)
 };
 
@@ -88,3 +89,26 @@ export type TriageResponse = {
 };
 
 export type TriageRequest = { org: string; issue_key: string; mode: TriageMode };
+
+// GET /api/stats (apps/api/src/aevion/api/routes/stats.py).
+export type GraphStats = {
+  org: string;
+  nodes: number;
+  edges: number;
+  repos: number;
+  people: number;
+  pull_requests: number;
+  issues: number;
+  decisions: number;
+  components: number;
+  sample?: boolean;
+};
+
+// POST /api/ask/stream: Server-Sent Events, one JSON object per `data:` line.
+export type StreamEvent =
+  | { type: "cached" }
+  | { type: "tool"; tool: string; args: Record<string, unknown> }
+  | { type: "tool_done"; tool: string; rows: number; ms: number }
+  | { type: "writing" }
+  | { type: "answer"; answer: AskResponse & { elapsed_ms?: number | null } }
+  | { type: "error"; status: number; detail: string };

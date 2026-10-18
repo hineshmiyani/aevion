@@ -8,6 +8,8 @@ light each one on the evidence trail.
 
 import json
 import re
+import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -44,6 +46,10 @@ class AskResponse(BaseModel):
     cypher: list[str] = Field(default_factory=list)
     model: str
     cached: bool
+    elapsed_ms: int | None = None  # server time to answer; set by the API
+
+
+Event = dict[str, Any]
 
 
 def tool_specs() -> list[dict[str, Any]]:
@@ -81,7 +87,18 @@ def org_repos(graph: OrgGraph) -> list[str]:
     ]
 
 
-def ask(graph: OrgGraph, client: LLMClient, model: str, org: str, question: str) -> AskResponse:
+def ask(
+    graph: OrgGraph,
+    client: LLMClient,
+    model: str,
+    org: str,
+    question: str,
+    on_event: Callable[[Event], None] | None = None,
+) -> AskResponse:
+    """Answer a question. `on_event`, if given, hears each real step as it happens:
+    {"type": "tool", ...} before a tool runs, {"type": "tool_done", ...} after it, and
+    {"type": "writing"} when the model writes the answer, so the UI can show progress."""
+    emit = on_event or (lambda _event: None)
     repos = ", ".join(org_repos(graph)) or "(none ingested yet)"
     system = SYSTEM_PROMPT.format(org=org, max_calls=MAX_TOOL_CALLS, repos=repos)
     messages: list[dict[str, Any]] = [
@@ -98,6 +115,8 @@ def ask(graph: OrgGraph, client: LLMClient, model: str, org: str, question: str)
 
     while True:
         out_of_calls = len(calls) >= MAX_TOOL_CALLS
+        if calls:
+            emit({"type": "writing"})
         if out_of_calls:
             messages.append({"role": "user", "content": NO_TOOLS_LEFT})
         result = client.chat(
@@ -122,7 +141,17 @@ def ask(graph: OrgGraph, client: LLMClient, model: str, org: str, question: str)
                 content = "Not run: the tool-call limit was reached."
             else:
                 calls.append(ToolCallRecord(tool=name, args=arguments))
-                content = _run_tool(graph, name, arguments, sources, evidence, cypher)
+                emit({"type": "tool", "tool": name, "args": arguments})
+                started = time.perf_counter()
+                content, found = _run_tool(graph, name, arguments, sources, evidence, cypher)
+                emit(
+                    {
+                        "type": "tool_done",
+                        "tool": name,
+                        "rows": found,
+                        "ms": round((time.perf_counter() - started) * 1000),
+                    }
+                )
             messages.append(
                 {"role": "tool", "tool_call_id": raw_call.get("id", name), "content": content}
             )
@@ -148,24 +177,27 @@ def _run_tool(
     sources: _Sources,
     evidence: "_MergedEvidence",
     cypher: list[str],
-) -> str:
+) -> tuple[str, int]:
+    """The tool's reply for the model, and how many evidence nodes it found."""
     tool = TOOLS.get(name)
     if tool is None:
-        return f"Error: there is no tool called {name!r}. Available: {', '.join(TOOLS)}."
+        return f"Error: there is no tool called {name!r}. Available: {', '.join(TOOLS)}.", 0
     try:
         args = tool.args_model.model_validate(arguments)
     except ValidationError as exc:
-        return f"Error: invalid arguments for {name}: {exc.errors()[0]['msg']}. Fix them and retry."
+        message = exc.errors()[0]["msg"]
+        return f"Error: invalid arguments for {name}: {message}. Fix them and retry.", 0
     result: ToolResult = tool.run(graph, args)
     evidence.add(result.evidence)
     cypher.extend(q for q in result.cypher if q not in cypher)
     if not result.rows:
-        return f"{name} found nothing for {json.dumps(arguments)}."
+        return f"{name} found nothing for {json.dumps(arguments)}.", 0
     numbered = [f"[{sources.number(n.id)}] {n.label}: {n.title}" for n in result.evidence.nodes]
     payload = json.dumps(result.rows, default=str)
     if len(payload) > MAX_RESULT_CHARS:
         payload = payload[:MAX_RESULT_CHARS] + " …(truncated)"
-    return f"Result rows:\n{payload}\n\nSources (cite by number):\n" + "\n".join(numbered)
+    reply = f"Result rows:\n{payload}\n\nSources (cite by number):\n" + "\n".join(numbered)
+    return reply, len(result.evidence.nodes)
 
 
 def _renumber(answer: str, sources: _Sources) -> tuple[str, list[Citation]]:

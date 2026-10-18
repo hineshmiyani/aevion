@@ -4,7 +4,7 @@ The Aevion web app (Next.js 16, App Router, Tailwind v4). See the root [README](
 
 ```bash
 corepack enable && pnpm --dir apps/web install
-pnpm --dir apps/web dev        # http://localhost:3000
+pnpm --dir apps/web dev --port 3001   # http://localhost:3001 (FalkorDB's browser UI uses 3000)
 pnpm --dir apps/web lint && pnpm --dir apps/web typecheck && pnpm --dir apps/web build
 pnpm --dir apps/web test:e2e  # Playwright smoke tests, desktop + mobile, against the sample answer
 ```
@@ -26,12 +26,16 @@ Types for API shapes are generated from FastAPI's OpenAPI schema. With the API r
 pnpm --dir apps/web gen:api    # writes lib/api-schema.ts
 ```
 
-## Design
+## Design: the survey sheet (AEV-43)
 
-Design plan from the Frontend Design skill, checked with UI-UX Pro Max:
+Direction set with the Frontend Design skill after studying 20 well-crafted products, checked with UI-UX Pro Max, Design Critique and Accessibility Review:
 
-- **Colour:** cool paper and blue-black ink; **amber means one thing, a traced evidence path**. Every node type has its own glyph shape, so colour is never the only cue. Text pairs meet WCAG AA in both themes (light amber `#8a560f` is 5.5:1 on paper).
-- **Type:** Source Serif 4 for questions and answers, IBM Plex Sans for the interface, IBM Plex Mono only for real code.
-- **The memorable element:** the evidence trail beside each answer. Clicking a citation lights its stop on the trail.
-- **The graph view:** under each answer, the same evidence path drawn as a graph. The layout is computed once (d3-force, 300 ticks) so nothing moves; selecting a node, by click or keyboard, lights it in the citations and the trail too. **Show Cypher** lists the read-only queries the tools ran.
-- **The triage view** (`/triage`): an issue key in, the graph's findings out: the area of the code with how strongly the graph backs it, who knows it, similar issues, the reply Aevion would post, and each action's status. Acting is only offered for sandbox issues, and each sandbox issue is answered once. The proxy route `/api/triage` serves a recorded dry run when `AEVION_API_URL` is unset.
+- **The idea:** the org is a map, and an answer's evidence is a **route** across it. The answer's sources are numbered stops; the route follows the graph's own edges between them and draws itself once, leg by leg, when an answer arrives. That is the one orchestrated motion; everything else moves only to show a state change, and nothing moves under `prefers-reduced-motion`.
+- **Colour:** chart paper (`#eef1ec`, cool rather than cream) and ink, **light for everyone** whatever the system setting (the "night chart" dark palette is kept in `globals.css` behind `data-theme="dark"`, off, for a future toggle); **amber means one thing, the traced evidence path** (route, citations, step markers). The survey grid appears only where the map is drawn. Every node type has its own glyph, so colour is never the only cue.
+- **Type:** Newsreader for questions and answers; IBM Plex Sans Condensed for the interface and the map's labels (cartographers use condensed type to fit dense labels); Plex Mono only for real code and keys. Sizes come from Tailwind's scale plus named role tokens in `globals.css` (`text-micro` 11, `text-code` 13, `text-ui` 15, `text-lead` 17, `text-answer` 18, `text-title` 22, `text-display`); components don't pick pixel sizes.
+- **Shape:** square corners throughout: the sheet is ruled, not rounded. Radio buttons stay native round, and map glyph shapes encode node type.
+- **Ask:** the first screen says what Aevion is, shows live graph stats, and already has a real cached answer's route on the map. Asking streams the agent's real steps (each graph query with its node count and time), then the answer with its speed ("Answered from the graph in 3 ms, cached"). Map, Path and Cypher tabs sit beside every answer.
+- **Triage** (`/triage`): the agent's six steps along a route spine, and a map whose route runs from a similar issue, through the code its fix changed, to who knows that code. Acting is only offered for sandbox issues, once per issue.
+- **Phones:** the map draws just the route (stops and the nodes linking them); the Path tab lists everything.
+
+Checks: text contrast is 5.4:1 or better and control borders 3.2:1 or better; `e2e/a11y.spec.ts` checks the page stays light on dark-mode systems and runs axe (WCAG 2.2 AA) on both pages, desktop and mobile.

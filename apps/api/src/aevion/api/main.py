@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from aevion.api.deps import get_db
-from aevion.api.routes import ask, tools, triage, webhooks
+from aevion.api.routes import ask, stats, tools, triage, webhooks
 from aevion.config import Settings
 
 # Uvicorn only configures its own loggers; show ours (webhook triage outcomes and timings) too.
@@ -28,6 +28,7 @@ app.add_middleware(
 )
 app.include_router(tools.router)
 app.include_router(ask.router)
+app.include_router(stats.router)
 app.include_router(triage.router)
 app.include_router(webhooks.router)
 

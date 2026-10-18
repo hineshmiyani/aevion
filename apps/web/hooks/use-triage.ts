@@ -8,7 +8,7 @@ export type TriageState =
   | { status: "idle" }
   | { status: "loading"; issueKey: string; mode: TriageMode }
   | { status: "success"; issueKey: string; data: TriageResponse }
-  | { status: "error"; issueKey: string; error: string; retryAfterSeconds?: number };
+  | { status: "error"; issueKey: string; error: string; retryAfterSeconds?: number; notFound?: boolean };
 
 /** Triage one issue. A new request cancels the one in flight. */
 export function useTriage(org: string) {
@@ -36,6 +36,7 @@ export function useTriage(org: string) {
             issueKey,
             error: failure.error ?? "Something went wrong triaging that issue.",
             retryAfterSeconds: failure.retryAfterSeconds,
+            notFound: response.status === 404,
           });
           return;
         }

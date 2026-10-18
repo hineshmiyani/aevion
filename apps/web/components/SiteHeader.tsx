@@ -6,21 +6,36 @@ const PAGES = [
   { href: "/triage", label: "Triage" },
 ] as const;
 
+/** Three stops joined by a route: the evidence path, which is what Aevion draws. */
+function RouteMark() {
+  return (
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden className="shrink-0">
+      <polyline points="4,17 10,8 20,13" fill="none" stroke="var(--path)" strokeWidth="2.5" strokeLinecap="square" />
+      <rect x="1.5" y="14.5" width="5" height="5" fill="var(--ink)" />
+      <rect x="7.5" y="5.5" width="5" height="5" fill="var(--ink)" />
+      <rect x="17.5" y="10.5" width="5" height="5" fill="var(--ink)" />
+    </svg>
+  );
+}
+
 /** The masthead shared by every page: product, sections, and which org is loaded. */
 export function SiteHeader({ current }: { current: (typeof PAGES)[number]["href"] }) {
   return (
-    <header className="mb-10 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-b border-rule pb-4">
-      <div className="flex items-baseline gap-6">
-        <p className="text-base font-semibold tracking-tight">Aevion</p>
+    <header className="mb-10 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 lg:mb-12">
+      <div className="flex items-center gap-7">
+        <Link href="/" className="flex items-center gap-2 text-lg font-semibold tracking-tight text-ink">
+          <RouteMark />
+          Aevion
+        </Link>
         <nav aria-label="Sections">
-          <ul className="flex gap-4 text-sm">
+          <ul className="flex gap-1 text-ui">
             {PAGES.map(({ href, label }) => (
               <li key={href}>
                 <Link
                   href={href}
                   aria-current={href === current ? "page" : undefined}
-                  className={`inline-flex min-h-11 items-center underline-offset-4 ${
-                    href === current ? "font-medium text-ink underline decoration-path decoration-2" : "text-muted hover:text-ink"
+                  className={`inline-flex min-h-11 items-center px-3 transition-colors ${
+                    href === current ? "bg-surface font-medium text-ink shadow-[inset_0_0_0_1px_var(--rule)]" : "text-muted hover:text-ink"
                   }`}
                 >
                   {label}
@@ -31,10 +46,11 @@ export function SiteHeader({ current }: { current: (typeof PAGES)[number]["href"
         </nav>
       </div>
       <p className="text-sm text-muted">
+        Reading the{" "}
         <a href={`https://github.com/${ORG}`} className="text-ink underline decoration-rule-strong underline-offset-4 hover:decoration-path">
-          {ORG} on GitHub
+          {ORG} organisation on GitHub
         </a>
-        , 9 repositories, last 12 months
+        , last 12 months
       </p>
     </header>
   );

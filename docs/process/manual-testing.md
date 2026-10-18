@@ -68,17 +68,17 @@ corepack enable && pnpm --dir apps/web install
 ```
 
 ```bash
-AEVION_API_URL=https://api-production-ae7a.up.railway.app pnpm --dir apps/web dev
+AEVION_API_URL=https://api-production-ae7a.up.railway.app pnpm --dir apps/web dev --port 3001
 ```
 
-Open http://localhost:3000 and http://localhost:3000/triage. Live questions count toward your rate limit, the same as in production.
+Open http://localhost:3001 and http://localhost:3001/triage. Live questions count toward your rate limit, the same as in production.
 
 ### Option B: web app only, with recorded answers
 
 With `AEVION_API_URL` unset, the app serves a built-in sample answer and a sample triage. This is useful for UI work and is what the Playwright tests use.
 
 ```bash
-pnpm --dir apps/web dev
+pnpm --dir apps/web dev --port 3001
 ```
 
 ### Option C: everything on your machine
@@ -103,9 +103,9 @@ You need Docker, [uv](https://docs.astral.sh/uv/) 0.13+, Node 22 with Corepack, 
    ```bash
    uv run --project apps/api uvicorn aevion.api.main:app --port 8000
    ```
-4. Start the web app, then open http://localhost:3000:
+4. Start the web app, then open http://localhost:3001 (FalkorDB's Docker image serves its own browser UI on port 3000, so the web app uses 3001.):
    ```bash
-   AEVION_API_URL=http://localhost:8000 pnpm --dir apps/web dev
+   AEVION_API_URL=http://localhost:8000 pnpm --dir apps/web dev --port 3001
    ```
 5. Check http://localhost:8000/healthz lists `org:falkordb`.
 
