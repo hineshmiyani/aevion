@@ -78,3 +78,9 @@ def test_a_repo_with_one_code_area_is_a_confident_fallback(fixture_graph: OrgGra
     top = row["components"][0]
     assert top["key"] == f"{REPO}:falkordb" and top["strength"] == "strong"
     assert top["via"] == ["the repo's only code area"]
+
+
+def test_the_only_code_area_is_strong_even_with_weak_votes(fixture_graph: OrgGraph) -> None:
+    (row,) = triage_candidates(fixture_graph, TriageCandidatesArgs(issue=f"{REPO}#95")).rows
+    top = row["components"][0]
+    assert top["key"] == f"{REPO}:falkordb" and top["strength"] == "strong"
