@@ -54,6 +54,14 @@ _INFRA = frozenset(
         "demos",
         "benchmark",
         "benchmarks",
+        # Packaging and deployment: where the product ships from, not what it is.
+        "docker",
+        "deploy",
+        "deployment",
+        "helm",
+        "k8s",
+        "infra",
+        "terraform",
     }
 )
 COMMON_WORD_SHARE = 0.1  # a path word in more of a repo's Components than this can't vote
@@ -294,7 +302,8 @@ def triage_issue(
     # Similar issues go on the path even when no fixing PR links them to a Component yet.
     for s in similar:
         evidence.node("Issue", s["key"], title=s["title"], url=s["url"])
-    similar = similar[:limit]
+    # Shown: the issue's own repo first (a maintainer triages within their repo), then by match.
+    similar = sorted(similar, key=lambda r: (r["repo"] != issue["repo"], -r["_rank"]))[:limit]
 
     if not votes:
         # Nothing pointed anywhere. A repo with one code area (falkordb-py: `falkordb`) is still
@@ -311,6 +320,17 @@ def triage_issue(
             vote(active[0]["key"], active[0]["name"], 0.3, "the repo's most active area")
         for row in active[:1]:
             evidence.node("Component", row["key"], title=row["name"])
+
+    if len(repo_components) == 1:
+        only = repo_components[0]
+        entry = votes.get(only["key"])
+        if entry is None or entry["votes"] < STRONG_VOTES:
+            vote(
+                only["key"],
+                only["name"],
+                STRONG_VOTES - (entry["votes"] if entry else 0.0),
+                "the repo's only code area",
+            )
 
     ranked = sorted(votes.values(), key=lambda v: -v["votes"])[:3]
 

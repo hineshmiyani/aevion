@@ -301,6 +301,20 @@ MERGE (a)-[:CITES]->(n)
 
 So the graph can answer "which cached answers rely on this PR?" (`MATCH (a:CachedAnswer)-[:CITES]->(:PullRequest {key: $k}) RETURN a.question`), and `--refresh` rebuilds them after a re-ingest. **Measured:** 14 ms per cached answer over HTTP (SPEC target: under 200 ms); the five hero answers carry 71 citations.
 
+## Graph stats for the first screen (AEV-43)
+
+Module: `api/routes/stats.py` · `GET /api/stats?org=FalkorDB`, kept for 60 seconds.
+
+```cypher
+MATCH (n) RETURN labels(n)[0] AS label, count(n) AS n
+```
+
+```cypher
+MATCH ()-[r]->() RETURN count(r) AS n
+```
+
+**Measured:** both under 10 ms on the 20,961-node graph.
+
 ## FalkorDB Cypher notes
 
 - `ORDER BY` can't contain an aggregation directly (`ORDER BY count(x)` fails with "failed to map aggregation expression"); aggregate into an alias in `WITH`/`RETURN` and order by the alias.

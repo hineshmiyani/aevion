@@ -117,7 +117,7 @@ uv run --project apps/api aevion mcp --org FalkorDB
 
 # Frontend (apps/web)
 corepack enable && pnpm --dir apps/web install
-pnpm --dir apps/web dev
+pnpm --dir apps/web dev --port 3001
 pnpm --dir apps/web lint && pnpm --dir apps/web typecheck && pnpm --dir apps/web build
 ```
 
@@ -205,7 +205,9 @@ def experts_for(graph: OrgGraph, component: str, limit: int = 5) -> ToolResult:
 
 | Method + path | Request | Response | Module |
 |---|---|---|---|
-| `POST /api/ask` | `{org, question}` | `{answer, citations: [{n, node_id}], tool_calls: [{tool, args}], evidence: EvidencePath, cypher: [string], model, cached}` | `api` → `agent` |
+| `POST /api/ask` | `{org, question}` | `{answer, citations: [{n, node_id}], tool_calls: [{tool, args}], evidence: EvidencePath, cypher: [string], model, cached, elapsed_ms}` | `api` → `agent` |
+| `POST /api/ask/stream` | `{org, question}` | Server-Sent Events: `cached`, `tool`, `tool_done` `{rows, ms}`, `writing`, then `answer` (the `/api/ask` body) or `error` `{status, detail}` | `api` → `agent` |
+| `GET /api/stats` | `?org` | `{nodes, edges, repos, people, pull_requests, issues, decisions, components}` (kept for 60 s) | `api` → `graph-core` |
 | `POST /api/tools/{tool}` | tool parameters | `ToolResult` | `api` → `tools` |
 | `POST /api/triage` | `{org, issue_key, mode: "dry_run" \| "apply"}` | `{issue, mode, duplicates, related, component, expert, draft_reply, actions: [{type, value, status, detail}], evidence, cypher, model}`; `403` for apply outside the allow-list | `api` → `triage` |
 | `GET /api/graph/neighborhood` | `?org&key&depth≤2` | `EvidencePath` | `api` → `graph-core` |

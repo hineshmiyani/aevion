@@ -204,14 +204,14 @@ uv run --project apps/api aevion extract
 uv run --project apps/api aevion warm-cache
 ```
 
-Start the API and the web app, then open http://localhost:3000:
+Start the API and the web app, then open http://localhost:3001 (FalkorDB's Docker image serves its own browser UI on port 3000, so the web app uses 3001.):
 
 ```bash
 uv run --project apps/api uvicorn aevion.api.main:app --port 8000
 ```
 
 ```bash
-AEVION_API_URL=http://localhost:8000 pnpm --dir apps/web dev
+AEVION_API_URL=http://localhost:8000 pnpm --dir apps/web dev --port 3001
 ```
 
 Without `AEVION_API_URL` the web app serves a built-in sample answer, so the UI works with no backend. Every variable is listed in [.env.example](.env.example).
