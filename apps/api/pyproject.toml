@@ -1,0 +1,57 @@
+[project]
+name = "aevion"
+version = "0.1.0"
+description = "Aevion: a company brain for GitHub organisations, built on FalkorDB"
+readme = "README.md"
+authors = [
+    { name = "Hinesh Miyani", email = "hineshmiyani@gmail.com" },
+    { name = "Jignesh Dabhi", email = "jignesh-dabhi@outlook.com" },
+    { name = "Jaydeep Prajapati", email = "prajapatijaydeep664@gmail.com" },
+    { name = "Het Thummar", email = "hetthummar1234@gmail.com" },
+]
+requires-python = ">=3.13"
+dependencies = [
+    "falkordb>=1.8.0",
+    "fastapi>=0.143.3",
+    "httpx>=0.28.1",
+    "mcp==2.2.0",
+    "pydantic-settings>=2.16.0",
+    "uvicorn[standard]>=0.54.0",
+]
+
+[project.scripts]
+aevion = "aevion.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.13.1,<0.14.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "mypy>=2.4.0",
+    "pytest>=9.1.1",
+    "ruff>=0.17.1",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "integration: needs a running FalkorDB (docker compose -f infra/docker-compose.yml up -d)",
+]
+addopts = "-ra"
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
+
+[tool.mypy]
+strict = true
+python_version = "3.13"
+
+[[tool.mypy.overrides]]
+module = ["falkordb", "falkordb.*", "redis", "redis.*"]
+ignore_missing_imports = true

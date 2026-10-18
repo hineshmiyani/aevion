@@ -1,0 +1,281 @@
+{
+  "tool": "experts_for",
+  "args": {
+    "component": "falkordb",
+    "repo": "FalkorDB/falkordb-py",
+    "limit": 3
+  },
+  "rows": [
+    {
+      "login": "gkorland",
+      "score": 13.69,
+      "authored_prs": 5,
+      "reviewed_prs": 4,
+      "comments": 14,
+      "evidence": [
+        {
+          "pr": "FalkorDB/falkordb-py#247",
+          "title": "chore(release): prepare v1.6.2",
+          "url": "https://github.com/FalkorDB/falkordb-py/pull/247",
+          "role": "AUTHORED"
+        },
+        {
+          "pr": "FalkorDB/falkordb-py#236",
+          "title": "Fix async unix-socket connection crashing in Is_Cluster (#235)",
+          "url": "https://github.com/FalkorDB/falkordb-py/pull/236",
+          "role": "REVIEWED"
+        },
+        {
+          "pr": "FalkorDB/falkordb-py#198",
+          "title": "feat(connection): add Unix socket documentation and tests",
+          "url": "https://github.com/FalkorDB/falkordb-py/pull/198",
+          "role": "AUTHORED"
+        }
+      ]
+    },
+    {
+      "login": "Naseem77",
+      "score": 6.61,
+      "authored_prs": 2,
+      "reviewed_prs": 1,
+      "comments": 1,
+      "evidence": [
+        {
+          "pr": "FalkorDB/falkordb-py#267",
+          "title": "test: assert the client parses execution plans, and fix a plan parser bug",
+          "url": "https://github.com/FalkorDB/falkordb-py/pull/267",
+          "role": "AUTHORED"
+        },
+        {
+          "pr": "FalkorDB/falkordb-py#262",
+          "title": "fix: only forward accepted kwargs from Is_Cluster to redis.Redis",
+          "url": "https://github.com/FalkorDB/falkordb-py/pull/262",
+          "role": "AUTHORED"
+        },
+        {
+          "pr": "FalkorDB/falkordb-py#276",
+          "title": "fix(asyncio): prevent connection pool kwargs mutation and await schema refresh",
+          "url": "https://github.com/FalkorDB/falkordb-py/pull/276",
+          "role": "REVIEWED"
+        }
+      ]
+    },
+    {
+      "login": "swilly22",
+      "score": 6.08,
+      "authored_prs": 2,
+      "reviewed_prs": 3,
+      "comments": 1,
+      "evidence": [
+        {
+          "pr": "FalkorDB/falkordb-py#267",
+          "title": "test: assert the client parses execution plans, and fix a plan parser bug",
+          "url": "https://github.com/FalkorDB/falkordb-py/pull/267",
+          "role": "REVIEWED"
+        },
+        {
+          "pr": "FalkorDB/falkordb-py#262",
+          "title": "fix: only forward accepted kwargs from Is_Cluster to redis.Redis",
+          "url": "https://github.com/FalkorDB/falkordb-py/pull/262",
+          "role": "REVIEWED"
+        },
+        {
+          "pr": "FalkorDB/falkordb-py#141",
+          "title": "propagate udf commands",
+          "url": "https://github.com/FalkorDB/falkordb-py/pull/141",
+          "role": "AUTHORED"
+        }
+      ]
+    }
+  ],
+  "evidence": {
+    "nodes": [
+      {
+        "id": "Component:FalkorDB/falkordb-py:falkordb",
+        "label": "Component",
+        "title": "falkordb",
+        "url": null
+      },
+      {
+        "id": "Person:gkorland",
+        "label": "Person",
+        "title": "gkorland",
+        "url": "https://github.com/gkorland"
+      },
+      {
+        "id": "PullRequest:FalkorDB/falkordb-py#247",
+        "label": "PullRequest",
+        "title": "chore(release): prepare v1.6.2",
+        "url": "https://github.com/FalkorDB/falkordb-py/pull/247"
+      },
+      {
+        "id": "File:FalkorDB/falkordb-py:falkordb/falkordb.py",
+        "label": "File",
+        "title": "falkordb/falkordb.py",
+        "url": null
+      },
+      {
+        "id": "PullRequest:FalkorDB/falkordb-py#236",
+        "label": "PullRequest",
+        "title": "Fix async unix-socket connection crashing in Is_Cluster (#235)",
+        "url": "https://github.com/FalkorDB/falkordb-py/pull/236"
+      },
+      {
+        "id": "File:FalkorDB/falkordb-py:falkordb/asyncio/cluster.py",
+        "label": "File",
+        "title": "falkordb/asyncio/cluster.py",
+        "url": null
+      },
+      {
+        "id": "PullRequest:FalkorDB/falkordb-py#198",
+        "label": "PullRequest",
+        "title": "feat(connection): add Unix socket documentation and tests",
+        "url": "https://github.com/FalkorDB/falkordb-py/pull/198"
+      },
+      {
+        "id": "Person:Naseem77",
+        "label": "Person",
+        "title": "Naseem77",
+        "url": "https://github.com/Naseem77"
+      },
+      {
+        "id": "PullRequest:FalkorDB/falkordb-py#267",
+        "label": "PullRequest",
+        "title": "test: assert the client parses execution plans, and fix a plan parser bug",
+        "url": "https://github.com/FalkorDB/falkordb-py/pull/267"
+      },
+      {
+        "id": "PullRequest:FalkorDB/falkordb-py#262",
+        "label": "PullRequest",
+        "title": "fix: only forward accepted kwargs from Is_Cluster to redis.Redis",
+        "url": "https://github.com/FalkorDB/falkordb-py/pull/262"
+      },
+      {
+        "id": "PullRequest:FalkorDB/falkordb-py#276",
+        "label": "PullRequest",
+        "title": "fix(asyncio): prevent connection pool kwargs mutation and await schema refresh",
+        "url": "https://github.com/FalkorDB/falkordb-py/pull/276"
+      },
+      {
+        "id": "File:FalkorDB/falkordb-py:falkordb/cluster.py",
+        "label": "File",
+        "title": "falkordb/cluster.py",
+        "url": null
+      },
+      {
+        "id": "Person:swilly22",
+        "label": "Person",
+        "title": "swilly22",
+        "url": "https://github.com/swilly22"
+      },
+      {
+        "id": "PullRequest:FalkorDB/falkordb-py#141",
+        "label": "PullRequest",
+        "title": "propagate udf commands",
+        "url": "https://github.com/FalkorDB/falkordb-py/pull/141"
+      }
+    ],
+    "edges": [
+      {
+        "source": "Person:gkorland",
+        "target": "PullRequest:FalkorDB/falkordb-py#247",
+        "type": "AUTHORED"
+      },
+      {
+        "source": "PullRequest:FalkorDB/falkordb-py#247",
+        "target": "File:FalkorDB/falkordb-py:falkordb/falkordb.py",
+        "type": "MODIFIES"
+      },
+      {
+        "source": "File:FalkorDB/falkordb-py:falkordb/falkordb.py",
+        "target": "Component:FalkorDB/falkordb-py:falkordb",
+        "type": "IN_COMPONENT"
+      },
+      {
+        "source": "Person:gkorland",
+        "target": "PullRequest:FalkorDB/falkordb-py#236",
+        "type": "REVIEWED"
+      },
+      {
+        "source": "PullRequest:FalkorDB/falkordb-py#236",
+        "target": "File:FalkorDB/falkordb-py:falkordb/asyncio/cluster.py",
+        "type": "MODIFIES"
+      },
+      {
+        "source": "File:FalkorDB/falkordb-py:falkordb/asyncio/cluster.py",
+        "target": "Component:FalkorDB/falkordb-py:falkordb",
+        "type": "IN_COMPONENT"
+      },
+      {
+        "source": "Person:gkorland",
+        "target": "PullRequest:FalkorDB/falkordb-py#198",
+        "type": "AUTHORED"
+      },
+      {
+        "source": "PullRequest:FalkorDB/falkordb-py#198",
+        "target": "File:FalkorDB/falkordb-py:falkordb/falkordb.py",
+        "type": "MODIFIES"
+      },
+      {
+        "source": "Person:Naseem77",
+        "target": "PullRequest:FalkorDB/falkordb-py#267",
+        "type": "AUTHORED"
+      },
+      {
+        "source": "PullRequest:FalkorDB/falkordb-py#267",
+        "target": "File:FalkorDB/falkordb-py:falkordb/asyncio/cluster.py",
+        "type": "MODIFIES"
+      },
+      {
+        "source": "Person:Naseem77",
+        "target": "PullRequest:FalkorDB/falkordb-py#262",
+        "type": "AUTHORED"
+      },
+      {
+        "source": "PullRequest:FalkorDB/falkordb-py#262",
+        "target": "File:FalkorDB/falkordb-py:falkordb/asyncio/cluster.py",
+        "type": "MODIFIES"
+      },
+      {
+        "source": "Person:Naseem77",
+        "target": "PullRequest:FalkorDB/falkordb-py#276",
+        "type": "REVIEWED"
+      },
+      {
+        "source": "PullRequest:FalkorDB/falkordb-py#276",
+        "target": "File:FalkorDB/falkordb-py:falkordb/cluster.py",
+        "type": "MODIFIES"
+      },
+      {
+        "source": "File:FalkorDB/falkordb-py:falkordb/cluster.py",
+        "target": "Component:FalkorDB/falkordb-py:falkordb",
+        "type": "IN_COMPONENT"
+      },
+      {
+        "source": "Person:swilly22",
+        "target": "PullRequest:FalkorDB/falkordb-py#267",
+        "type": "REVIEWED"
+      },
+      {
+        "source": "Person:swilly22",
+        "target": "PullRequest:FalkorDB/falkordb-py#262",
+        "type": "REVIEWED"
+      },
+      {
+        "source": "Person:swilly22",
+        "target": "PullRequest:FalkorDB/falkordb-py#141",
+        "type": "AUTHORED"
+      },
+      {
+        "source": "PullRequest:FalkorDB/falkordb-py#141",
+        "target": "File:FalkorDB/falkordb-py:falkordb/falkordb.py",
+        "type": "MODIFIES"
+      }
+    ]
+  },
+  "cypher": [
+    "MATCH (c:Component)\nWHERE (c.key = $component OR toLower(c.path_prefix) CONTAINS toLower($component))\n  AND ($repo IS NULL OR c.repo = $repo)\nRETURN c.key, c.name, c.repo\nORDER BY c.key = $component DESC, size(c.path_prefix)\nLIMIT 5",
+    "MATCH (c:Component)<-[:IN_COMPONENT]-(f:File)<-[:MODIFIES]-(pr:PullRequest)\nWHERE c.key IN $components AND pr.merged_at IS NOT NULL\nMATCH (p:Person)-[r:AUTHORED|REVIEWED]->(pr)\nWHERE NOT p.is_bot\nWITH p, pr, type(r) AS role, collect(f.key)[0] AS file, collect(c.key)[0] AS component,\n     exp(-((timestamp() - pr.merged_at) / 86400000.0) / $decay) AS recency\nRETURN p.login AS login, pr.key AS pr, pr.title AS title, pr.url AS url, pr.merged_at AS at,\n       role, file, component,\n       CASE role WHEN 'AUTHORED' THEN $authored ELSE $reviewed END * recency AS points",
+    "MATCH (c:Component)<-[:IN_COMPONENT]-(:File)<-[:MODIFIES]-(pr:PullRequest)\nWHERE c.key IN $components AND pr.merged_at IS NOT NULL\nMATCH (p:Person)-[:AUTHORED]->(cm:Comment)-[:ON]->(pr)\nWHERE NOT p.is_bot\nWITH DISTINCT p, cm, pr\nRETURN p.login AS login, cm.id AS comment, cm.url AS url, pr.key AS pr,\n       $comment * exp(-((timestamp() - cm.created_at) / 86400000.0) / $decay) AS points"
+  ]
+}

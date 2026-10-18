@@ -16,8 +16,9 @@ Every planning, design and process document lives here, grouped by purpose. Code
 │   ├── adr/                   Accepted decisions (Architecture Decision Records)
 │   ├── product/               SPEC.md: what we build and how we know it's done
 │   ├── architecture/          System design, graph data model, Cypher reference
+│   ├── demo/                  Demo video storyboard
 │   └── process/               AI workflow and AI-usage disclosure
-├── tasks/                     plan.md + todo.md (implementation plan, task list)
+├── tasks/                     plan.md (implementation plan; tasks themselves live in Notion)
 └── apps/ · infra/             Code (created once the stack is locked)
 ```
 
@@ -35,10 +36,27 @@ Every planning, design and process document lives here, grouped by purpose. Code
 | hackathon | [brief.md](hackathon/brief.md) | Done |
 | hackathon | [submission-checklist.md](hackathon/submission-checklist.md) | Living |
 | research | [track-analysis.md](research/track-analysis.md) | Done |
-| grilling | [round-01.md](grilling/round-01.md) | **Awaiting answers** |
+| grilling | [round-01.md](grilling/round-01.md) | Answered |
+| grilling | [round-02.md](grilling/round-02.md) | Answered (work split provisional) |
 | adr | [0001-company-brain-direction.md](adr/0001-company-brain-direction.md) | Accepted |
-| adr | [0002-hybrid-ai-skills-workflow.md](adr/0002-hybrid-ai-skills-workflow.md) | Accepted |
+| adr | [0002-hybrid-ai-skills-workflow.md](adr/0002-hybrid-ai-skills-workflow.md) | Accepted (partly superseded by 0003) |
+| adr | [0003-notion-task-tracking-and-git-conventions.md](adr/0003-notion-task-tracking-and-git-conventions.md) | Accepted |
+| adr | [0004-product-scope-and-data.md](adr/0004-product-scope-and-data.md) | Accepted |
+| adr | [0005-triage-agent-writes-only-to-sandbox.md](adr/0005-triage-agent-writes-only-to-sandbox.md) | Accepted |
+| adr | [0006-graph-freshness.md](adr/0006-graph-freshness.md) | Accepted |
+| adr | [0007-graph-query-strategy.md](adr/0007-graph-query-strategy.md) | Accepted |
+| adr | [0008-tech-stack.md](adr/0008-tech-stack.md) | Accepted |
+| adr | [0009-llm-via-openrouter.md](adr/0009-llm-via-openrouter.md) | Accepted (model choice superseded by 0010) |
+| adr | [0010-llm-model-bake-off.md](adr/0010-llm-model-bake-off.md) | Accepted |
+| adr | [0011-graph-data-model.md](adr/0011-graph-data-model.md) | Accepted |
+| adr | [0012-deployment-and-sandbox.md](adr/0012-deployment-and-sandbox.md) | Accepted |
+| adr | [0013-triage-never-pings-real-people.md](adr/0013-triage-never-pings-real-people.md) (also: no references to FalkorDB issues) | Accepted |
 | process | [ai-workflow.md](process/ai-workflow.md) | Done |
 | process | [ai-usage-disclosure.md](process/ai-usage-disclosure.md) | Living |
-| product | SPEC.md | Not started (after grilling) |
-| architecture | graph-model.md, system-design.md, cypher-queries.md | Not started |
+| product | [SPEC.md](product/SPEC.md) | Approved v1 |
+| tasks | [plan.md](../tasks/plan.md) | v1; tasks tracked in Notion |
+| architecture | [graph-model.md](architecture/graph-model.md) | v1 design |
+| architecture | [cypher-queries.md](architecture/cypher-queries.md) | Living (experts_for) |
+| architecture | system-design.md | Not started |
+| demo | [storyboard.md](demo/storyboard.md) | v1 |
+| root | [GLOSSARY.md](../GLOSSARY.md) | Living |

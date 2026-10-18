@@ -1,0 +1,247 @@
+{
+  "nameWithOwner": "FalkorDB/falkordb-py",
+  "url": "https://github.com/FalkorDB/falkordb-py",
+  "stargazerCount": 69,
+  "defaultBranchRef": {
+    "name": "main"
+  },
+  "pullRequests": {
+    "pageInfo": {
+      "hasNextPage": false,
+      "endCursor": null
+    },
+    "nodes": [
+      {
+        "number": 101,
+        "title": "Add async query timeout",
+        "body": "Adds a timeout parameter to async queries. Fixes #90.",
+        "url": "https://github.com/FalkorDB/falkordb-py/pull/101",
+        "state": "MERGED",
+        "createdAt": "2026-09-01T10:00:00Z",
+        "updatedAt": "2026-09-03T12:00:00Z",
+        "mergedAt": "2026-09-03T12:00:00Z",
+        "closedAt": "2026-09-03T12:00:00Z",
+        "additions": 120,
+        "deletions": 10,
+        "author": {
+          "__typename": "User",
+          "login": "alice",
+          "avatarUrl": "https://a/alice"
+        },
+        "reviews": {
+          "nodes": [
+            {
+              "author": {
+                "__typename": "User",
+                "login": "bob",
+                "avatarUrl": "https://a/bob"
+              },
+              "state": "COMMENTED",
+              "submittedAt": "2026-09-02T09:00:00Z",
+              "databaseId": 11,
+              "body": "Please add a test for the timeout path",
+              "url": "https://github.com/FalkorDB/falkordb-py/pull/101#pullrequestreview-11",
+              "comments": {
+                "nodes": [
+                  {
+                    "databaseId": 21,
+                    "body": "Use asyncio.wait_for here",
+                    "url": "https://github.com/FalkorDB/falkordb-py/pull/101#discussion_r21",
+                    "createdAt": "2026-09-02T09:00:00Z"
+                  }
+                ]
+              }
+            },
+            {
+              "author": {
+                "__typename": "User",
+                "login": "bob",
+                "avatarUrl": "https://a/bob"
+              },
+              "state": "APPROVED",
+              "submittedAt": "2026-09-03T11:00:00Z",
+              "databaseId": 12,
+              "body": "",
+              "url": "https://github.com/FalkorDB/falkordb-py/pull/101#pullrequestreview-12",
+              "comments": {
+                "nodes": []
+              }
+            },
+            {
+              "author": {
+                "__typename": "User",
+                "login": "alice",
+                "avatarUrl": "https://a/alice"
+              },
+              "state": "COMMENTED",
+              "submittedAt": "2026-09-03T11:30:00Z",
+              "databaseId": 13,
+              "body": "",
+              "url": "https://github.com/FalkorDB/falkordb-py/pull/101#pullrequestreview-13",
+              "comments": {
+                "nodes": []
+              }
+            },
+            {
+              "author": {
+                "__typename": "Bot",
+                "login": "coderabbitai",
+                "avatarUrl": null
+              },
+              "state": "COMMENTED",
+              "submittedAt": "2026-09-01T10:05:00Z",
+              "databaseId": 14,
+              "body": "Long AI summary mentioning #77",
+              "url": "https://github.com/FalkorDB/falkordb-py/pull/101#pullrequestreview-14",
+              "comments": {
+                "nodes": []
+              }
+            }
+          ]
+        },
+        "files": {
+          "nodes": [
+            {
+              "path": "falkordb/asyncio/graph.py",
+              "additions": 100,
+              "deletions": 8
+            },
+            {
+              "path": "tests/test_async.py",
+              "additions": 20,
+              "deletions": 2
+            },
+            {
+              "path": "README.md",
+              "additions": 0,
+              "deletions": 0
+            }
+          ]
+        },
+        "labels": {
+          "nodes": [
+            {
+              "name": "enhancement",
+              "color": "a2eeef"
+            }
+          ]
+        },
+        "comments": {
+          "nodes": [
+            {
+              "databaseId": 501,
+              "body": "Looks related to #95 and FalkorDB/FalkorDB#1200",
+              "url": "https://github.com/FalkorDB/falkordb-py/pull/101#issuecomment-501",
+              "createdAt": "2026-09-02T08:00:00Z",
+              "author": {
+                "__typename": "User",
+                "login": "carol",
+                "avatarUrl": null
+              }
+            },
+            {
+              "databaseId": 502,
+              "body": "Summary by bot: see #999",
+              "url": "https://github.com/FalkorDB/falkordb-py/pull/101#issuecomment-502",
+              "createdAt": "2026-09-02T08:01:00Z",
+              "author": {
+                "__typename": "Bot",
+                "login": "coderabbitai",
+                "avatarUrl": null
+              }
+            }
+          ]
+        },
+        "closingIssuesReferences": {
+          "nodes": [
+            {
+              "number": 90,
+              "repository": {
+                "nameWithOwner": "FalkorDB/falkordb-py"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "number": 102,
+        "title": "Bump redis from 5.0 to 5.1",
+        "body": null,
+        "url": "https://github.com/FalkorDB/falkordb-py/pull/102",
+        "state": "OPEN",
+        "createdAt": "2026-09-05T08:00:00Z",
+        "updatedAt": "2026-09-05T08:00:00Z",
+        "mergedAt": null,
+        "closedAt": null,
+        "additions": 3,
+        "deletions": 3,
+        "author": {
+          "__typename": "Bot",
+          "login": "dependabot",
+          "avatarUrl": null
+        },
+        "reviews": {
+          "nodes": []
+        },
+        "files": {
+          "nodes": [
+            {
+              "path": "pyproject.toml",
+              "additions": 3,
+              "deletions": 3
+            }
+          ]
+        },
+        "labels": {
+          "nodes": [
+            {
+              "name": "dependencies",
+              "color": "0366d6"
+            }
+          ]
+        },
+        "comments": {
+          "nodes": []
+        },
+        "closingIssuesReferences": {
+          "nodes": []
+        }
+      },
+      {
+        "number": 103,
+        "title": "Fix docs link",
+        "body": "",
+        "url": "https://github.com/FalkorDB/falkordb-py/pull/103",
+        "state": "CLOSED",
+        "createdAt": "2026-08-01T08:00:00Z",
+        "updatedAt": "2026-08-02T08:00:00Z",
+        "mergedAt": null,
+        "closedAt": "2026-08-02T08:00:00Z",
+        "additions": 1,
+        "deletions": 1,
+        "author": null,
+        "reviews": {
+          "nodes": []
+        },
+        "files": {
+          "nodes": [
+            {
+              "path": "docs/index.md",
+              "additions": 1,
+              "deletions": 1
+            }
+          ]
+        },
+        "labels": {
+          "nodes": []
+        },
+        "comments": {
+          "nodes": []
+        },
+        "closingIssuesReferences": {
+          "nodes": []
+        }
+      }
+    ]
+  }
+}

@@ -1,8 +1,8 @@
 # Grilling round 1: core product decisions
 
-**Status:** 🟡 Awaiting answers · **Opened:** 2026-10-17 · **Deciders:** the team (Hinesh, Jignesh, Jaydeep, Het)
+**Status:** ✅ Answered 2026-10-17 · **Opened:** 2026-10-17 · **Deciders:** the team (Hinesh, Jignesh, Jaydeep, Het)
 
-This round covers the decisions that don't depend on each other. Each question has a recommended answer. **Reply "yes" to accept it, or write your change in the Answer line.** Teammates: add a comment line under any question you disagree with, starting with your name.
+This round covered the decisions that don't depend on each other. All nine are answered; the outcomes are recorded as ADRs 0004–0009 (linked under each answer). To reopen one, raise it in the current round rather than editing this file.
 
 Once every question is answered, the significant ones become ADRs in [`docs/adr/`](../adr/) and round 2 opens.
 
@@ -20,7 +20,7 @@ Submit to **Track 03 (Company Brain)** as the main track and **Track 01 (Agents 
 
 ➡️ **Recommended:** 03 + 01, skip 02.
 
-**Answer:** _pending_
+**Answer:** **Accepted:** Track 03 (main) + Track 01. We do not claim Track 02. The team, 2026-10-17. → [ADR-0004](../adr/0004-product-scope-and-data.md)
 
 ---
 
@@ -30,7 +30,7 @@ Pull everything from public GitHub: issues, PRs, review comments, commits, CODEO
 
 ➡️ **Recommended:** GitHub only.
 
-**Answer:** _pending_
+**Answer:** **Accepted:** GitHub only. The team, 2026-10-17. → [ADR-0004](../adr/0004-product-scope-and-data.md)
 
 ---
 
@@ -40,7 +40,7 @@ Pin about 9 core repos (FalkorDB, GraphRAG-SDK, QueryWeaver, code-graph, falkord
 
 ➡️ **Recommended:** those 9 repos, 12 months, bots filtered out, generic ingester.
 
-**Answer:** _pending_
+**Answer:** **Accepted:** 9 core repos, last 12 months, bots filtered out, generic ingester. The team, 2026-10-17. → [ADR-0004](../adr/0004-product-scope-and-data.md)
 
 ---
 
@@ -56,7 +56,7 @@ The persona is a **maintainer or new contributor** at an open-source company. Th
 
 ➡️ **Recommended:** lock these five; nothing else until all five are polished.
 
-**Answer:** _pending_
+**Answer:** **Accepted:** maintainer / new contributor persona and the five questions; nothing else until all five are polished. The team, 2026-10-17. → [ADR-0004](../adr/0004-product-scope-and-data.md)
 
 ---
 
@@ -66,7 +66,7 @@ When a new issue arrives, the triage agent finds duplicates and related issues, 
 
 ➡️ **Recommended:** real actions on our sandbox, dry-run on the real org.
 
-**Answer:** _pending_
+**Answer:** **Accepted:** real write actions only on our sandbox repo; dry-run on FalkorDB's repos. The team, 2026-10-17. → [ADR-0005](../adr/0005-triage-agent-writes-only-to-sandbox.md)
 
 ---
 
@@ -81,7 +81,7 @@ Superseded facts are kept with time ranges rather than overwritten.
 
 ➡️ **Recommended:** polling for the org, webhooks for the sandbox, history kept.
 
-**Answer:** _pending_
+**Answer:** **Accepted:** poll the org for changes, webhooks on the sandbox, history kept with time ranges. The team, 2026-10-17. → [ADR-0006](../adr/0006-graph-freshness.md)
 
 ---
 
@@ -91,7 +91,7 @@ Mainly **a curated set of fixed, parameterised Cypher tools**, roughly one per h
 
 ➡️ **Recommended:** curated tools first, guarded text-to-Cypher fallback.
 
-**Answer:** _pending_
+**Answer:** **Accepted:** fixed parameterised Cypher tools first, guarded read-only text-to-Cypher fallback. The team, 2026-10-17. → [ADR-0007](../adr/0007-graph-query-strategy.md)
 
 ---
 
@@ -103,7 +103,7 @@ A **Python FastAPI backend** for ingestion, the agent, the MCP server and the Fa
 
 ➡️ **Recommended:** FastAPI (Python) + Next.js (TS).
 
-**Answer:** _pending_
+**Answer:** **Accepted:** FastAPI (Python, uv) + Next.js (TypeScript). The team, 2026-10-17. Jignesh and Jaydeep can still object in round 2. → [ADR-0008](../adr/0008-tech-stack.md)
 
 ---
 
@@ -113,11 +113,11 @@ Claude **Sonnet 5.5** for the agent's reasoning and tool use; **Haiku 5.5** for 
 
 ➡️ **Recommended:** Sonnet 5.5 + Haiku 5.5, assuming we have a key with enough budget for one ingestion of about 10k threads plus demo traffic.
 
-**Answer:** _pending_
+**Answer:** **Accepted with a change:** Claude Sonnet 5.5 + Haiku 5.5, accessed **through OpenRouter** (team has $16 of credit) instead of an Anthropic key. The team, 2026-10-17. → [ADR-0009](../adr/0009-llm-via-openrouter.md)
 
 ---
 
-## Coming in round 2 (blocked on this round)
+## Unblocked for round 2
 
 - Graph schema: node labels, relationships, temporal properties (depends on Q2, Q3, Q4)
 - Deployment: FalkorDB Cloud vs. self-hosted; where the backend and frontend run (depends on Q8)

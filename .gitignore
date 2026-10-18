@@ -18,13 +18,16 @@ __pycache__/
 .mypy_cache/
 
 # Node
+.vercel/
 node_modules/
 .next/
 out/
 dist/
 build/
 *.tsbuildinfo
+test-results/
+playwright-report/
 
-# Local data
-data/raw/
+# Local data: raw GitHub responses, LLM cache and spend ledger (never commit)
+data/
 *.rdb

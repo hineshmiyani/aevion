@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+/* Design tokens (frontend-design plan, AEV-28). Components use these names, never raw hex.
+   Amber means one thing: a traced evidence path. */
+:root {
+  --paper: #f2f3ef;
+  --surface: #fbfbf9;
+  --ink: #17202b;
+  --muted: #5a6472;
+  --rule: #d3d7db;
+  --rule-strong: #b9bfc5;
+  --path: #8a560f; /* 5.5:1 on paper, for 11px citation text */
+  --path-soft: #f6ead6;
+  --danger: #a3271a;
+  --danger-soft: #f7e3df;
+
+  /* Node types. Each also has its own glyph shape, so colour is never the only cue. */
+  --node-person: #2c6e63;
+  --node-pullrequest: #3b5bab;
+  --node-issue: #8a3f8f;
+  --node-component: #17202b;
+  --node-file: #6d747d;
+  --node-decision: #8a560f;
+  --node-comment: #5f7a2e;
+  --node-release: #a3271a;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #141b24;
+    --surface: #1a2330;
+    --ink: #e4e8ee;
+    --muted: #9aa5b3;
+    --rule: #2b3646;
+    --rule-strong: #3d4a5c;
+    --path: #e2a447;
+    --path-soft: #3a2c16;
+    --danger: #f08b7d;
+    --danger-soft: #3a1d1a;
+
+    --node-person: #6fc2b2;
+    --node-pullrequest: #8ea9ef;
+    --node-issue: #d39ad7;
+    --node-component: #e4e8ee;
+    --node-file: #9aa5b3;
+    --node-decision: #e2a447;
+    --node-comment: #a9c46f;
+    --node-release: #f08b7d;
+  }
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-rule: var(--rule);
+  --color-rule-strong: var(--rule-strong);
+  --color-path: var(--path);
+  --color-path-soft: var(--path-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --font-sans: var(--font-plex-sans);
+  --font-serif: var(--font-source-serif);
+  --font-mono: var(--font-plex-mono);
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-plex-sans), system-ui, sans-serif;
+}
+
+/* Tailwind v4 no longer sets a pointer on buttons. */
+button:not(:disabled),
+summary {
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--path);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
