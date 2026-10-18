@@ -33,6 +33,9 @@ NAME_WEIGHT = 0.5  # per issue keyword found in a Component's path words
 STRONG_VOTES = 1.0  # e.g. this issue's own fix, or several similar fixes agreeing
 MODERATE_VOTES = 0.4
 VOTERS = 12  # similar issues whose fixes vote (more than are shown)
+# A similar issue is shown when its fix changed the picked Component (it is evidence for the pick)
+# or when its title shares at least this much of this issue's title keywords.
+MIN_SHOWN_MATCH = 0.3
 MAX_QUERY_WORDS = 12
 # Folders that say nothing about which part of the product an issue is about, at any depth.
 _INFRA = frozenset(
@@ -302,8 +305,6 @@ def triage_issue(
     # Similar issues go on the path even when no fixing PR links them to a Component yet.
     for s in similar:
         evidence.node("Issue", s["key"], title=s["title"], url=s["url"])
-    # Shown: the issue's own repo first (a maintainer triages within their repo), then by match.
-    similar = sorted(similar, key=lambda r: (r["repo"] != issue["repo"], -r["_rank"]))[:limit]
 
     if not votes:
         # Nothing pointed anywhere. A repo with one code area (falkordb-py: `falkordb`) is still
@@ -333,6 +334,19 @@ def triage_issue(
             )
 
     ranked = sorted(votes.values(), key=lambda v: -v["votes"])[:3]
+
+    # Shown similar issues: first the ones whose fix changed the picked Component, because they are
+    # the evidence for it; then any other close title match. A loose match on generic words
+    # ("replace", "function") that played no part in the pick is left out. Within each group the
+    # issue's own repo comes first (a maintainer triages within their repo), then by match.
+    picked = ranked[0]["key"] if ranked else None
+    backing = {
+        row["issue"] for row in fixes if row["component"] == picked and row["issue"] != issue["key"]
+    }
+    similar = sorted(
+        (s for s in similar if s["key"] in backing or s["match"] >= MIN_SHOWN_MATCH),
+        key=lambda r: (r["key"] not in backing, r["repo"] != issue["repo"], -r["_rank"]),
+    )[:limit]
 
     # 3. Experts for the top Component.
     experts: list[dict[str, Any]] = []
