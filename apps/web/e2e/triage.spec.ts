@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test("a starter issue gets an area, an expert, a reply and proposed actions", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("link", { name: "Triage" }).click();
-  await expect(page.getByRole("heading", { name: "Triage an issue." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Which issue needs attention?" })).toBeVisible();
 
   await page.getByRole("button", { name: /FalkorDB\/FalkorDB#3357/ }).click();
   const findings = page.getByRole("region", { name: "Triage result" });

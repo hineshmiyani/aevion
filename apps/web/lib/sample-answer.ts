@@ -1,4 +1,5 @@
-// A built-in sample answer, used when AEVION_API_URL isn't set (local UI work, previews).
+// A compact fixture for isolated UI tests. The app serves full saved production answers
+// from recorded-answers.ts when AEVION_API_URL is not configured.
 // It is assembled from a real experts_for result recorded from the FalkorDB graph, so the
 // sample shows genuine names, PRs and evidence edges rather than invented data.
 import experts from "./experts-sample.json";

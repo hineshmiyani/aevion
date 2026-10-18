@@ -101,5 +101,11 @@ export function useAskStream(org: string, initial?: { question: string; data: As
     [org],
   );
 
-  return { state, ask, show };
+  const reset = useCallback(() => {
+    inFlight.current?.abort();
+    inFlight.current = null;
+    setState({ status: "idle" });
+  }, []);
+
+  return { state, ask, show, reset };
 }

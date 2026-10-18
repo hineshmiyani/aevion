@@ -1,0 +1,1662 @@
+{
+  "source": "https://aevion-alpha.vercel.app",
+  "recorded_at": "2026-10-18T08:24:32.275Z",
+  "answers": [
+    {
+      "question": "Who knows the falkordb-py client code best?",
+      "answer": {
+        "answer": "**gkorland** is the strongest contributor to the falkordb-py client code. They authored 5 merged PRs and reviewed 4, including the Unix socket connection work [1][2][3] and the v1.6.2 release prep [4].\n\nNext are **Naseem77**, who fixed the execution plan parser and kwargs forwarding in `Is_Cluster` [5][6], and **swilly22**, who authored the UDF command propagation change and reviewed several recent fixes [7][8].\n\nOthers with narrower but relevant work are **SantoshDhaladhuli**, who fixed async connection pool kwargs mutation [9][10], and **AviAvni**, who reviewed parameter-escaping and async connection fixes [11][12][13][14].\n\nThe client code is spread across `falkordb/falkordb.py`, `falkordb/cluster.py`, and `falkordb/asyncio/cluster.py` [15][16][17], so the sync and async paths may have different experts.",
+        "citations": [
+          {
+            "n": 1,
+            "node_id": "Person:gkorland"
+          },
+          {
+            "n": 2,
+            "node_id": "PullRequest:FalkorDB/falkordb-py#236"
+          },
+          {
+            "n": 3,
+            "node_id": "PullRequest:FalkorDB/falkordb-py#198"
+          },
+          {
+            "n": 4,
+            "node_id": "PullRequest:FalkorDB/falkordb-py#247"
+          },
+          {
+            "n": 5,
+            "node_id": "PullRequest:FalkorDB/falkordb-py#267"
+          },
+          {
+            "n": 6,
+            "node_id": "PullRequest:FalkorDB/falkordb-py#262"
+          },
+          {
+            "n": 7,
+            "node_id": "Person:swilly22"
+          },
+          {
+            "n": 8,
+            "node_id": "PullRequest:FalkorDB/falkordb-py#141"
+          },
+          {
+            "n": 9,
+            "node_id": "PullRequest:FalkorDB/falkordb-py#276"
+          },
+          {
+            "n": 10,
+            "node_id": "Person:SantoshDhaladhuli"
+          },
+          {
+            "n": 11,
+            "node_id": "Person:AviAvni"
+          },
+          {
+            "n": 12,
+            "node_id": "PullRequest:FalkorDB/falkordb-py#212"
+          },
+          {
+            "n": 13,
+            "node_id": "PullRequest:FalkorDB/falkordb-py#121"
+          },
+          {
+            "n": 14,
+            "node_id": "PullRequest:FalkorDB/falkordb-py#127"
+          },
+          {
+            "n": 15,
+            "node_id": "File:FalkorDB/falkordb-py:falkordb/falkordb.py"
+          },
+          {
+            "n": 16,
+            "node_id": "File:FalkorDB/falkordb-py:falkordb/asyncio/cluster.py"
+          },
+          {
+            "n": 17,
+            "node_id": "File:FalkorDB/falkordb-py:falkordb/cluster.py"
+          }
+        ],
+        "tool_calls": [
+          {
+            "tool": "experts_for",
+            "args": {
+              "component": "falkordb-py",
+              "repo": "FalkorDB/falkordb-py"
+            }
+          },
+          {
+            "tool": "experts_for",
+            "args": {
+              "component": "falkordb",
+              "repo": "FalkorDB/falkordb-py",
+              "limit": 5
+            }
+          }
+        ],
+        "evidence": {
+          "nodes": [
+            {
+              "id": "Component:FalkorDB/falkordb-py:falkordb",
+              "label": "Component",
+              "title": "falkordb",
+              "url": null
+            },
+            {
+              "id": "Person:gkorland",
+              "label": "Person",
+              "title": "gkorland",
+              "url": "https://github.com/gkorland"
+            },
+            {
+              "id": "PullRequest:FalkorDB/falkordb-py#247",
+              "label": "PullRequest",
+              "title": "chore(release): prepare v1.6.2",
+              "url": "https://github.com/FalkorDB/falkordb-py/pull/247"
+            },
+            {
+              "id": "File:FalkorDB/falkordb-py:falkordb/falkordb.py",
+              "label": "File",
+              "title": "falkordb/falkordb.py",
+              "url": null
+            },
+            {
+              "id": "PullRequest:FalkorDB/falkordb-py#236",
+              "label": "PullRequest",
+              "title": "Fix async unix-socket connection crashing in Is_Cluster (#235)",
+              "url": "https://github.com/FalkorDB/falkordb-py/pull/236"
+            },
+            {
+              "id": "File:FalkorDB/falkordb-py:falkordb/asyncio/cluster.py",
+              "label": "File",
+              "title": "falkordb/asyncio/cluster.py",
+              "url": null
+            },
+            {
+              "id": "PullRequest:FalkorDB/falkordb-py#198",
+              "label": "PullRequest",
+              "title": "feat(connection): add Unix socket documentation and tests",
+              "url": "https://github.com/FalkorDB/falkordb-py/pull/198"
+            },
+            {
+              "id": "Person:Naseem77",
+              "label": "Person",
+              "title": "Naseem77",
+              "url": "https://github.com/Naseem77"
+            },
+            {
+              "id": "PullRequest:FalkorDB/falkordb-py#267",
+              "label": "PullRequest",
+              "title": "test: assert the client parses execution plans, and fix a plan parser bug",
+              "url": "https://github.com/FalkorDB/falkordb-py/pull/267"
+            },
+            {
+              "id": "PullRequest:FalkorDB/falkordb-py#262",
+              "label": "PullRequest",
+              "title": "fix: only forward accepted kwargs from Is_Cluster to redis.Redis",
+              "url": "https://github.com/FalkorDB/falkordb-py/pull/262"
+            },
+            {
+              "id": "PullRequest:FalkorDB/falkordb-py#276",
+              "label": "PullRequest",
+              "title": "fix(asyncio): prevent connection pool kwargs mutation and await schema refresh",
+              "url": "https://github.com/FalkorDB/falkordb-py/pull/276"
+            },
+            {
+              "id": "File:FalkorDB/falkordb-py:falkordb/cluster.py",
+              "label": "File",
+              "title": "falkordb/cluster.py",
+              "url": null
+            },
+            {
+              "id": "Person:swilly22",
+              "label": "Person",
+              "title": "swilly22",
+              "url": "https://github.com/swilly22"
+            },
+            {
+              "id": "PullRequest:FalkorDB/falkordb-py#141",
+              "label": "PullRequest",
+              "title": "propagate udf commands",
+              "url": "https://github.com/FalkorDB/falkordb-py/pull/141"
+            },
+            {
+              "id": "Person:SantoshDhaladhuli",
+              "label": "Person",
+              "title": "SantoshDhaladhuli",
+              "url": "https://github.com/SantoshDhaladhuli"
+            },
+            {
+              "id": "Person:AviAvni",
+              "label": "Person",
+              "title": "AviAvni",
+              "url": "https://github.com/AviAvni"
+            },
+            {
+              "id": "PullRequest:FalkorDB/falkordb-py#212",
+              "label": "PullRequest",
+              "title": "fix(params): wrap parameter and dict-map keys in backticks",
+              "url": "https://github.com/FalkorDB/falkordb-py/pull/212"
+            },
+            {
+              "id": "File:FalkorDB/falkordb-py:falkordb/helpers.py",
+              "label": "File",
+              "title": "falkordb/helpers.py",
+              "url": null
+            },
+            {
+              "id": "PullRequest:FalkorDB/falkordb-py#121",
+              "label": "PullRequest",
+              "title": "Fix async from_url() connecting to localhost instead of provided URL",
+              "url": "https://github.com/FalkorDB/falkordb-py/pull/121"
+            },
+            {
+              "id": "PullRequest:FalkorDB/falkordb-py#127",
+              "label": "PullRequest",
+              "title": "add close and aclose on FalkorDB connections",
+              "url": "https://github.com/FalkorDB/falkordb-py/pull/127"
+            }
+          ],
+          "edges": [
+            {
+              "source": "Person:gkorland",
+              "target": "PullRequest:FalkorDB/falkordb-py#247",
+              "type": "AUTHORED"
+            },
+            {
+              "source": "PullRequest:FalkorDB/falkordb-py#247",
+              "target": "File:FalkorDB/falkordb-py:falkordb/falkordb.py",
+              "type": "MODIFIES"
+            },
+            {
+              "source": "File:FalkorDB/falkordb-py:falkordb/falkordb.py",
+              "target": "Component:FalkorDB/falkordb-py:falkordb",
+              "type": "IN_COMPONENT"
+            },
+            {
+              "source": "Person:gkorland",
+              "target": "PullRequest:FalkorDB/falkordb-py#236",
+              "type": "REVIEWED"
+            },
+            {
+              "source": "PullRequest:FalkorDB/falkordb-py#236",
+              "target": "File:FalkorDB/falkordb-py:falkordb/asyncio/cluster.py",
+              "type": "MODIFIES"
+            },
+            {
+              "source": "File:FalkorDB/falkordb-py:falkordb/asyncio/cluster.py",
+              "target": "Component:FalkorDB/falkordb-py:falkordb",
+              "type": "IN_COMPONENT"
+            },
+            {
+              "source": "Person:gkorland",
+              "target": "PullRequest:FalkorDB/falkordb-py#198",
+              "type": "AUTHORED"
+            },
+            {
+              "source": "PullRequest:FalkorDB/falkordb-py#198",
+              "target": "File:FalkorDB/falkordb-py:falkordb/falkordb.py",
+              "type": "MODIFIES"
+            },
+            {
+              "source": "Person:Naseem77",
+              "target": "PullRequest:FalkorDB/falkordb-py#267",
+              "type": "AUTHORED"
+            },
+            {
+              "source": "PullRequest:FalkorDB/falkordb-py#267",
+              "target": "File:FalkorDB/falkordb-py:falkordb/asyncio/cluster.py",
+              "type": "MODIFIES"
+            },
+            {
+              "source": "Person:Naseem77",
+              "target": "PullRequest:FalkorDB/falkordb-py#262",
+              "type": "AUTHORED"
+            },
+            {
+              "source": "PullRequest:FalkorDB/falkordb-py#262",
+              "target": "File:FalkorDB/falkordb-py:falkordb/asyncio/cluster.py",
+              "type": "MODIFIES"
+            },
+            {
+              "source": "Person:Naseem77",
+              "target": "PullRequest:FalkorDB/falkordb-py#276",
+              "type": "REVIEWED"
+            },
+            {
+              "source": "PullRequest:FalkorDB/falkordb-py#276",
+              "target": "File:FalkorDB/falkordb-py:falkordb/cluster.py",
+              "type": "MODIFIES"
+            },
+            {
+              "source": "File:FalkorDB/falkordb-py:falkordb/cluster.py",
+              "target": "Component:FalkorDB/falkordb-py:falkordb",
+              "type": "IN_COMPONENT"
+            },
+            {
+              "source": "Person:swilly22",
+              "target": "PullRequest:FalkorDB/falkordb-py#267",
+              "type": "REVIEWED"
+            },
+            {
+              "source": "Person:swilly22",
+              "target": "PullRequest:FalkorDB/falkordb-py#262",
+              "type": "REVIEWED"
+            },
+            {
+              "source": "Person:swilly22",
+              "target": "PullRequest:FalkorDB/falkordb-py#141",
+              "type": "AUTHORED"
+            },
+            {
+              "source": "PullRequest:FalkorDB/falkordb-py#141",
+              "target": "File:FalkorDB/falkordb-py:falkordb/falkordb.py",
+              "type": "MODIFIES"
+            },
+            {
+              "source": "Person:SantoshDhaladhuli",
+              "target": "PullRequest:FalkorDB/falkordb-py#276",
+              "type": "AUTHORED"
+            },
+            {
+              "source": "Person:AviAvni",
+              "target": "PullRequest:FalkorDB/falkordb-py#212",
+              "type": "REVIEWED"
+            },
+            {
+              "source": "PullRequest:FalkorDB/falkordb-py#212",
+              "target": "File:FalkorDB/falkordb-py:falkordb/helpers.py",
+              "type": "MODIFIES"
+            },
+            {
+              "source": "File:FalkorDB/falkordb-py:falkordb/helpers.py",
+              "target": "Component:FalkorDB/falkordb-py:falkordb",
+              "type": "IN_COMPONENT"
+            },
+            {
+              "source": "Person:AviAvni",
+              "target": "PullRequest:FalkorDB/falkordb-py#121",
+              "type": "REVIEWED"
+            },
+            {
+              "source": "PullRequest:FalkorDB/falkordb-py#121",
+              "target": "File:FalkorDB/falkordb-py:falkordb/falkordb.py",
+              "type": "MODIFIES"
+            },
+            {
+              "source": "Person:AviAvni",
+              "target": "PullRequest:FalkorDB/falkordb-py#127",
+              "type": "REVIEWED"
+            },
+            {
+              "source": "PullRequest:FalkorDB/falkordb-py#127",
+              "target": "File:FalkorDB/falkordb-py:falkordb/falkordb.py",
+              "type": "MODIFIES"
+            }
+          ]
+        },
+        "cypher": [
+          "MATCH (c:Component)\nWHERE (c.key = $component OR toLower(c.path_prefix) CONTAINS toLower($component))\n  AND ($repo IS NULL OR c.repo = $repo)\nRETURN c.key, c.name, c.repo\nORDER BY c.key = $component DESC, size(c.path_prefix)\nLIMIT 5",
+          "MATCH (c:Component)<-[:IN_COMPONENT]-(f:File)<-[:MODIFIES]-(pr:PullRequest)\nWHERE c.key IN $components AND pr.merged_at IS NOT NULL\nMATCH (p:Person)-[r:AUTHORED|REVIEWED]->(pr)\nWHERE NOT p.is_bot\nWITH p, pr, type(r) AS role, collect(f.key)[0] AS file, collect(c.key)[0] AS component,\n     exp(-((timestamp() - pr.merged_at) / 86400000.0) / $decay) AS recency\nRETURN p.login AS login, pr.key AS pr, pr.title AS title, pr.url AS url, pr.merged_at AS at,\n       role, file, component,\n       CASE role WHEN 'AUTHORED' THEN $authored ELSE $reviewed END * recency AS points",
+          "MATCH (c:Component)<-[:IN_COMPONENT]-(:File)<-[:MODIFIES]-(pr:PullRequest)\nWHERE c.key IN $components AND pr.merged_at IS NOT NULL\nMATCH (p:Person)-[:AUTHORED]->(cm:Comment)-[:ON]->(pr)\nWHERE NOT p.is_bot\nWITH DISTINCT p, cm, pr\nRETURN p.login AS login, cm.id AS comment, cm.url AS url, pr.key AS pr,\n       $comment * exp(-((timestamp() - cm.created_at) / 86400000.0) / $decay) AS points"
+        ],
+        "model": "anthropic/claude-haiku-5.5",
+        "cached": true,
+        "elapsed_ms": 1
+      }
+    },
+    {
+      "question": "Why did FalkorDB gate main on a merge queue?",
+      "answer": {
+        "answer": "FalkorDB gated `main` on a merge queue so that fork PR CI could run without giving fork-authored code a writable token. **DvirDukhan** made the decision in `FalkorDB/FalkorDB#2718` on 2026-09-17 [1][2].\n\nFork PRs get a read-only `GITHUB_TOKEN`, so pushing the `rc-pr-<N>` images failed and dependent jobs were skipped, which blocked external contributors [1][3]. The main alternative was `pull_request_target` behind an approval label, which would hand a writable token to fork code and need heavy containment [1]. A merge queue run gets a writable token natively [1].\n\nThe same change set explicit `timeout-minutes` on every job and stopped cancelling queue entries. A cancelled run reports no conclusion, which would hang the queue [1][4].",
+        "citations": [
+          {
+            "n": 1,
+            "node_id": "Decision:dec:e0c260391b96f966"
+          },
+          {
+            "n": 2,
+            "node_id": "PullRequest:FalkorDB/FalkorDB#2718"
+          },
+          {
+            "n": 3,
+            "node_id": "Issue:FalkorDB/FalkorDB#2632"
+          },
+          {
+            "n": 4,
+            "node_id": "Comment:rc:4027609104"
+          }
+        ],
+        "tool_calls": [
+          {
+            "tool": "decision_trail",
+            "args": {
+              "topic": "merge queue for CI gating main branch",
+              "repo": "FalkorDB/FalkorDB"
+            }
+          }
+        ],
+        "evidence": {
+          "nodes": [
+            {
+              "id": "Decision:dec:e0c260391b96f966",
+              "label": "Decision",
+              "title": "Gate main with a merge queue (merge_group) and run fork PR CI through it, instead of using pull_request_target behind an approval label.",
+              "url": null
+            },
+            {
+              "id": "PullRequest:FalkorDB/FalkorDB#2718",
+              "label": "PullRequest",
+              "title": "ci: make PR CI fork-safe and gate main on a merge queue",
+              "url": "https://github.com/FalkorDB/FalkorDB/pull/2718"
+            },
+            {
+              "id": "Issue:FalkorDB/FalkorDB#2632",
+              "label": "Issue",
+              "title": "PR CI cannot run for external contributors: fork PRs get a read-only GITHUB_TOKEN and the rc-pr image push is denied",
+              "url": "https://github.com/FalkorDB/FalkorDB/issues/2632"
+            },
+            {
+              "id": "Person:DvirDukhan",
+              "label": "Person",
+              "title": "DvirDukhan",
+              "url": "https://github.com/DvirDukhan"
+            },
+            {
+              "id": "Component:FalkorDB/FalkorDB:tests/flow",
+              "label": "Component",
+              "title": "tests/flow",
+              "url": null
+            },
+            {
+              "id": "Component:FalkorDB/FalkorDB:(root)",
+              "label": "Component",
+              "title": "(root)",
+              "url": null
+            },
+            {
+              "id": "Component:FalkorDB/FalkorDB:.github/workflows",
+              "label": "Component",
+              "title": ".github/workflows",
+              "url": null
+            },
+            {
+              "id": "Comment:rc:4027609104",
+              "label": "Comment",
+              "title": "DvirDukhan: Agreed, and better than what I had. Every job now carries an explicit `timeout-m",
+              "url": "https://github.com/FalkorDB/FalkorDB/pull/2718#discussion_r4027609104"
+            },
+            {
+              "id": "Comment:rc:4027608010",
+              "label": "Comment",
+              "title": "DvirDukhan: Removed. It went in to force a maintainer to read a fork's Dockerfile before que",
+              "url": "https://github.com/FalkorDB/FalkorDB/pull/2718#discussion_r4027608010"
+            },
+            {
+              "id": "Decision:dec:1e6e11e1a1e1a352",
+              "label": "Decision",
+              "title": "The image build stops reusing cached OS-package layers and runs apt-get upgrade on every image build, so the runtime image picks up Debian security updates.",
+              "url": null
+            },
+            {
+              "id": "Decision:dec:790c416f4093b6da",
+              "label": "Decision",
+              "title": "Graph update runs are serialized through a shared concurrency group keyed on the target branch, with cancel-in-progress disabled.",
+              "url": null
+            },
+            {
+              "id": "PullRequest:FalkorDB/docs#478",
+              "label": "PullRequest",
+              "title": "ci: incrementally update docs graph on PR merge",
+              "url": "https://github.com/FalkorDB/docs/pull/478"
+            },
+            {
+              "id": "Person:galshubeli",
+              "label": "Person",
+              "title": "galshubeli",
+              "url": "https://github.com/galshubeli"
+            },
+            {
+              "id": "Component:FalkorDB/docs:.github",
+              "label": "Component",
+              "title": ".github",
+              "url": null
+            },
+            {
+              "id": "Comment:rc:3233697552",
+              "label": "Comment",
+              "title": "galshubeli: Real bug — agreed and fixed in `c7ae19a`. You're right that `github.ref` in a `p",
+              "url": "https://github.com/FalkorDB/docs/pull/478#discussion_r3233697552"
+            },
+            {
+              "id": "Decision:dec:77af06491761c54c",
+              "label": "Decision",
+              "title": "Every CI job sets an explicit timeout-minutes, and merge queue entries are not cancelled.",
+              "url": null
+            },
+            {
+              "id": "Comment:rc:4024909566",
+              "label": "Comment",
+              "title": "AviAvni: or the timeout should be lower or we can cancel the ci so we don't need to wait ",
+              "url": "https://github.com/FalkorDB/FalkorDB/pull/2718#discussion_r4024909566"
+            }
+          ],
+          "edges": [
+            {
+              "source": "Decision:dec:e0c260391b96f966",
+              "target": "PullRequest:FalkorDB/FalkorDB#2718",
+              "type": "DECIDED_IN"
+            },
+            {
+              "source": "PullRequest:FalkorDB/FalkorDB#2718",
+              "target": "Issue:FalkorDB/FalkorDB#2632",
+              "type": "FIXES"
+            },
+            {
+              "source": "Decision:dec:e0c260391b96f966",
+              "target": "Person:DvirDukhan",
+              "type": "MADE_BY"
+            },
+            {
+              "source": "Decision:dec:e0c260391b96f966",
+              "target": "Component:FalkorDB/FalkorDB:tests/flow",
+              "type": "AFFECTS"
+            },
+            {
+              "source": "Decision:dec:e0c260391b96f966",
+              "target": "Component:FalkorDB/FalkorDB:(root)",
+              "type": "AFFECTS"
+            },
+            {
+              "source": "Decision:dec:e0c260391b96f966",
+              "target": "Component:FalkorDB/FalkorDB:.github/workflows",
+              "type": "AFFECTS"
+            },
+            {
+              "source": "Decision:dec:e0c260391b96f966",
+              "target": "Comment:rc:4027609104",
+              "type": "EVIDENCED_BY"
+            },
+            {
+              "source": "Decision:dec:e0c260391b96f966",
+              "target": "Comment:rc:4027608010",
+              "type": "EVIDENCED_BY"
+            },
+            {
+              "source": "Decision:dec:1e6e11e1a1e1a352",
+              "target": "Decision:dec:e0c260391b96f966",
+              "type": "SUPERSEDES"
+            },
+            {
+              "source": "Decision:dec:790c416f4093b6da",
+              "target": "PullRequest:FalkorDB/docs#478",
+              "type": "DECIDED_IN"
+            },
+            {
+              "source": "Decision:dec:790c416f4093b6da",
+              "target": "Person:galshubeli",
+              "type": "MADE_BY"
+            },
+            {
+              "source": "Decision:dec:790c416f4093b6da",
+              "target": "Component:FalkorDB/docs:.github",
+              "type": "AFFECTS"
+            },
+            {
+              "source": "Decision:dec:790c416f4093b6da",
+              "target": "Comment:rc:3233697552",
+              "type": "EVIDENCED_BY"
+            },
+            {
+              "source": "Decision:dec:77af06491761c54c",
+              "target": "PullRequest:FalkorDB/FalkorDB#2718",
+              "type": "DECIDED_IN"
+            },
+            {
+              "source": "Decision:dec:77af06491761c54c",
+              "target": "Person:DvirDukhan",
+              "type": "MADE_BY"
+            },
+            {
+              "source": "Decision:dec:77af06491761c54c",
+              "target": "Component:FalkorDB/FalkorDB:.github/workflows",
+              "type": "AFFECTS"
+            },
+            {
+              "source": "Decision:dec:77af06491761c54c",
+              "target": "Comment:rc:4027609104",
+              "type": "EVIDENCED_BY"
+            },
+            {
+              "source": "Decision:dec:77af06491761c54c",
+              "target": "Comment:rc:4024909566",
+              "type": "EVIDENCED_BY"
+            },
+            {
+              "source": "Decision:dec:1e6e11e1a1e1a352",
+              "target": "Decision:dec:77af06491761c54c",
+              "type": "SUPERSEDES"
+            }
+          ]
+        },
+        "cypher": [
+          "CALL db.idx.fulltext.queryNodes('Decision', $query) YIELD node, score\nOPTIONAL MATCH (node)-[:AFFECTS]->(c:Component)\nWITH node, score, collect(c.key) AS affects\nWHERE size($components) = 0 OR any(k IN affects WHERE k IN $components)\nRETURN node.id AS id, score, node.confidence AS confidence,\n       node.summary + ' ' + node.rationale AS text\nORDER BY score DESC\nLIMIT $pool",
+          "MATCH (d:Decision {id: $id})-[:DECIDED_IN]->(t)\nOPTIONAL MATCH (t)-[:FIXES]->(fixed:Issue)\nOPTIONAL MATCH (d)-[:MADE_BY]->(p:Person)\nOPTIONAL MATCH (d)-[:AFFECTS]->(c:Component)\nRETURN d.summary AS summary, d.rationale AS rationale, d.alternatives AS alternatives,\n       d.decided_at AS decided_at, d.confidence AS confidence,\n       labels(t)[0] AS thread_label, t.key AS thread_key, t.title AS thread_title,\n       t.url AS thread_url,\n       collect(DISTINCT [fixed.key, fixed.title, fixed.url]) AS fixed,\n       collect(DISTINCT p.login) AS made_by,\n       collect(DISTINCT [c.key, c.name]) AS components",
+          "MATCH (d:Decision {id: $id})-[:EVIDENCED_BY]->(cm:Comment)\nOPTIONAL MATCH (a:Person)-[:AUTHORED]->(cm)\nRETURN cm.id AS id, cm.excerpt AS excerpt, cm.url AS url, a.login AS author\nLIMIT 4",
+          "MATCH (d:Decision {id: $id})\nOPTIONAL MATCH (d)-[:SUPERSEDES]->(older:Decision)\nOPTIONAL MATCH (newer:Decision)-[:SUPERSEDES]->(d)\nRETURN collect(DISTINCT [older.id, older.summary, older.decided_at]) AS replaces,\n       collect(DISTINCT [newer.id, newer.summary, newer.decided_at]) AS replaced_by"
+        ],
+        "model": "anthropic/claude-haiku-5.5",
+        "cached": true,
+        "elapsed_ms": 1
+      }
+    },
+    {
+      "question": "What's been happening in GraphRAG-SDK's ingestion code lately?",
+      "answer": {
+        "answer": "Most of the recent ingestion work in GraphRAG-SDK is on deduplication and entity extraction, mainly from **Naseem77**, with **galshubeli** on structured data and update handling. Activity runs from 9 to 30 September 2026.\n\n- **Deduplication:** Several PRs reworked entity resolution. Cross-document dedup in `finalize()` is LLM-judged [1], and `LLMVerifiedResolution` was reworked with a second vote, opt-in [2]. Merges now keep all descriptions and labels, and ingest uses exact match only [3]. Unreachable resolution strategies were removed [4].\n- **Extraction:** Spacy and Composite NER backends were added as opt-in [5]. GLiNER now runs over long chunks with per-model thresholds [6]. Entity-name hygiene was tightened [7], and relation extraction got a default vocabulary [8].\n- **Structured data:** Tables can be declared on the ontology, so a row and its prose mention become one node [9].\n- **Updates:** A fix preserves document structure on update [10], merged 30 September.\n\nOpen performance issues cover range indexes on id [11], a bulk write path for relationships [12], and making concurrent `update()` safe [13].",
+        "citations": [
+          {
+            "n": 1,
+            "node_id": "PullRequest:FalkorDB/GraphRAG-SDK#327"
+          },
+          {
+            "n": 2,
+            "node_id": "PullRequest:FalkorDB/GraphRAG-SDK#326"
+          },
+          {
+            "n": 3,
+            "node_id": "PullRequest:FalkorDB/GraphRAG-SDK#325"
+          },
+          {
+            "n": 4,
+            "node_id": "PullRequest:FalkorDB/GraphRAG-SDK#324"
+          },
+          {
+            "n": 5,
+            "node_id": "PullRequest:FalkorDB/GraphRAG-SDK#322"
+          },
+          {
+            "n": 6,
+            "node_id": "PullRequest:FalkorDB/GraphRAG-SDK#320"
+          },
+          {
+            "n": 7,
+            "node_id": "PullRequest:FalkorDB/GraphRAG-SDK#319"
+          },
+          {
+            "n": 8,
+            "node_id": "PullRequest:FalkorDB/GraphRAG-SDK#321"
+          },
+          {
+            "n": 9,
+            "node_id": "PullRequest:FalkorDB/GraphRAG-SDK#328"
+          },
+          {
+            "n": 10,
+            "node_id": "PullRequest:FalkorDB/GraphRAG-SDK#336"
+          },
+          {
+            "n": 11,
+            "node_id": "Issue:FalkorDB/GraphRAG-SDK#282"
+          },
+          {
+            "n": 12,
+            "node_id": "Issue:FalkorDB/GraphRAG-SDK#283"
+          },
+          {
+            "n": 13,
+            "node_id": "Issue:FalkorDB/GraphRAG-SDK#284"
+          }
+        ],
+        "tool_calls": [
+          {
+            "tool": "area_history",
+            "args": {
+              "component": "graphrag_sdk/src/graphrag_sdk/ingestion",
+              "repo": "FalkorDB/GraphRAG-SDK"
+            }
+          }
+        ],
+        "evidence": {
+          "nodes": [
+            {
+              "id": "Component:FalkorDB/GraphRAG-SDK:graphrag_sdk/src/graphrag_sdk/ingestion",
+              "label": "Component",
+              "title": "graphrag_sdk/src/graphrag_sdk/ingestion",
+              "url": null
+            },
+            {
+              "id": "PullRequest:FalkorDB/GraphRAG-SDK#336",
+              "label": "PullRequest",
+              "title": "fix(ingestion): preserve document structure on update",
+              "url": "https://github.com/FalkorDB/GraphRAG-SDK/pull/336"
+            },
+            {
+              "id": "File:FalkorDB/GraphRAG-SDK:graphrag_sdk/src/graphrag_sdk/ingestion/pipeline.py",
+              "label": "File",
+              "title": "graphrag_sdk/src/graphrag_sdk/ingestion/pipeline.py",
+              "url": null
+            },
+            {
+              "id": "Person:galshubeli",
+              "label": "Person",
+              "title": "galshubeli",
+              "url": null
+            },
+            {
+              "id": "PullRequest:FalkorDB/GraphRAG-SDK#327",
+              "label": "PullRequest",
+              "title": "Deduplication: LLM-judged cross-document dedup in finalize() — nominate, group, judge twice, merge or link",
+              "url": "https://github.com/FalkorDB/GraphRAG-SDK/pull/327"
+            },
+            {
+              "id": "File:FalkorDB/GraphRAG-SDK:graphrag_sdk/src/graphrag_sdk/ingestion/extraction_strategies/graph_extraction.py",
+              "label": "File",
+              "title": "graphrag_sdk/src/graphrag_sdk/ingestion/extraction_strategies/graph_extraction.py",
+              "url": null
+            },
+            {
+              "id": "Person:Naseem77",
+              "label": "Person",
+              "title": "Naseem77",
+              "url": null
+            },
+            {
+              "id": "PullRequest:FalkorDB/GraphRAG-SDK#326",
+              "label": "PullRequest",
+              "title": "Deduplication: LLMVerifiedResolution rework — unified candidates, batching, family gate, second vote (opt-in)",
+              "url": "https://github.com/FalkorDB/GraphRAG-SDK/pull/326"
+            },
+            {
+              "id": "File:FalkorDB/GraphRAG-SDK:graphrag_sdk/src/graphrag_sdk/ingestion/resolution_strategies/llm_verified_resolution.py",
+              "label": "File",
+              "title": "graphrag_sdk/src/graphrag_sdk/ingestion/resolution_strategies/llm_verified_resolution.py",
+              "url": null
+            },
+            {
+              "id": "PullRequest:FalkorDB/GraphRAG-SDK#325",
+              "label": "PullRequest",
+              "title": "Deduplication: every merge keeps all descriptions and labels; ingest resolves with exact match only",
+              "url": "https://github.com/FalkorDB/GraphRAG-SDK/pull/325"
+            },
+            {
+              "id": "PullRequest:FalkorDB/GraphRAG-SDK#324",
+              "label": "PullRequest",
+              "title": "Deduplication: remove the unreachable SemanticResolution and DescriptionMergeResolution",
+              "url": "https://github.com/FalkorDB/GraphRAG-SDK/pull/324"
+            },
+            {
+              "id": "PullRequest:FalkorDB/GraphRAG-SDK#328",
+              "label": "PullRequest",
+              "title": "feat(structured): tables declared on the ontology, one node for a row and its prose mention",
+              "url": "https://github.com/FalkorDB/GraphRAG-SDK/pull/328"
+            },
+            {
+              "id": "PullRequest:FalkorDB/GraphRAG-SDK#322",
+              "label": "PullRequest",
+              "title": "Extraction: SpacyExtractor and CompositeExtractor as opt-in NER backends",
+              "url": "https://github.com/FalkorDB/GraphRAG-SDK/pull/322"
+            },
+            {
+              "id": "File:FalkorDB/GraphRAG-SDK:graphrag_sdk/src/graphrag_sdk/ingestion/extraction_strategies/entity_extractors.py",
+              "label": "File",
+              "title": "graphrag_sdk/src/graphrag_sdk/ingestion/extraction_strategies/entity_extractors.py",
+              "url": null
+            },
+            {
+              "id": "PullRequest:FalkorDB/GraphRAG-SDK#321",
+              "label": "PullRequest",
+              "title": "Extraction: default relation vocabulary and no early stop in relation extraction",
+              "url": "https://github.com/FalkorDB/GraphRAG-SDK/pull/321"
+            },
+            {
+              "id": "PullRequest:FalkorDB/GraphRAG-SDK#320",
+              "label": "PullRequest",
+              "title": "Extraction: GLiNER windows over long chunks, per-model thresholds, 'Unknown' band",
+              "url": "https://github.com/FalkorDB/GraphRAG-SDK/pull/320"
+            },
+            {
+              "id": "PullRequest:FalkorDB/GraphRAG-SDK#319",
+              "label": "PullRequest",
+              "title": "Extraction: dates, acronyms, junk tokens and reserved labels — entity-name hygiene",
+              "url": "https://github.com/FalkorDB/GraphRAG-SDK/pull/319"
+            },
+            {
+              "id": "Issue:FalkorDB/GraphRAG-SDK#227",
+              "label": "Issue",
+              "title": "Expose token usage stats on ingest/completion/retrieve responses",
+              "url": "https://github.com/FalkorDB/GraphRAG-SDK/issues/227"
+            },
+            {
+              "id": "PullRequest:FalkorDB/GraphRAG-SDK#249",
+              "label": "PullRequest",
+              "title": "Feature/issue 227 expose token usage stats",
+              "url": "https://github.com/FalkorDB/GraphRAG-SDK/pull/249"
+            },
+            {
+              "id": "Issue:FalkorDB/GraphRAG-SDK#282",
+              "label": "Issue",
+              "title": "perf(storage): auto-create range indexes on id — writes degrade to label scans as the graph grows",
+              "url": "https://github.com/FalkorDB/GraphRAG-SDK/issues/282"
+            },
+            {
+              "id": "PullRequest:FalkorDB/GraphRAG-SDK#310",
+              "label": "PullRequest",
+              "title": "Extraction: entity and relation quality, memory and throughput fixes",
+              "url": "https://github.com/FalkorDB/GraphRAG-SDK/pull/310"
+            },
+            {
+              "id": "Issue:FalkorDB/GraphRAG-SDK#283",
+              "label": "Issue",
+              "title": "perf(ingestion): bulk write path for relationships — avoid per-doc per-type sequential UNWIND round trips",
+              "url": "https://github.com/FalkorDB/GraphRAG-SDK/issues/283"
+            },
+            {
+              "id": "Issue:FalkorDB/GraphRAG-SDK#284",
+              "label": "Issue",
+              "title": "perf(update): make concurrent update() safe by design — update_concurrency=1 serializes incremental refreshes",
+              "url": "https://github.com/FalkorDB/GraphRAG-SDK/issues/284"
+            }
+          ],
+          "edges": [
+            {
+              "source": "PullRequest:FalkorDB/GraphRAG-SDK#336",
+              "target": "File:FalkorDB/GraphRAG-SDK:graphrag_sdk/src/graphrag_sdk/ingestion/pipeline.py",
+              "type": "MODIFIES"
+            },
+            {
+              "source": "File:FalkorDB/GraphRAG-SDK:graphrag_sdk/src/graphrag_sdk/ingestion/pipeline.py",
+              "target": "Component:FalkorDB/GraphRAG-SDK:graphrag_sdk/src/graphrag_sdk/ingestion",
+              "type": "IN_COMPONENT"
+            },
+            {
+              "source": "Person:galshubeli",
+              "target": "PullRequest:FalkorDB/GraphRAG-SDK#336",
+              "type": "AUTHORED"
+            },
+            {
+              "source": "PullRequest:FalkorDB/GraphRAG-SDK#327",
+              "target": "File:FalkorDB/GraphRAG-SDK:graphrag_sdk/src/graphrag_sdk/ingestion/extraction_strategies/graph_extraction.py",
+              "type": "MODIFIES"
+            },
+            {
+              "source": "File:FalkorDB/GraphRAG-SDK:graphrag_sdk/src/graphrag_sdk/ingestion/extraction_strategies/graph_extraction.py",
+              "target": "Component:FalkorDB/GraphRAG-SDK:graphrag_sdk/src/graphrag_sdk/ingestion",
+              "type": "IN_COMPONENT"
+            },
+            {
+              "source": "Person:Naseem77",
+              "target": "PullRequest:FalkorDB/GraphRAG-SDK#327",
+              "type": "AUTHORED"
+            },
+            {
+              "source": "PullRequest:FalkorDB/GraphRAG-SDK#326",
+              "target": "File:FalkorDB/GraphRAG-SDK:graphrag_sdk/src/graphrag_sdk/ingestion/resolution_strategies/llm_verified_resolution.py",
+              "type": "MODIFIES"
+            },
+            {
+              "source": "File:FalkorDB/GraphRAG-SDK:graphrag_sdk/src/graphrag_sdk/ingestion/resolution_strategies/llm_verified_resolution.py",
+              "target": "Component:FalkorDB/GraphRAG-SDK:graphrag_sdk/src/graphrag_sdk/ingestion",
+              "type": "IN_COMPONENT"
+            },
+            {
+              "source": "Person:Naseem77",
+              "target": "PullRequest:FalkorDB/GraphRAG-SDK#326",
+              "type": "AUTHORED"
+            },
+            {
+              "source": "PullRequest:FalkorDB/GraphRAG-SDK#325",
+              "target": "File:FalkorDB/GraphRAG-SDK:graphrag_sdk/src/graphrag_sdk/ingestion/resolution_strategies/llm_verified_resolution.py",
+              "type": "MODIFIES"
+            },
+            {
+              "source": "Person:Naseem77",
+              "target": "PullRequest:FalkorDB/GraphRAG-SDK#325",
+              "type": "AUTHORED"
+            },
+            {
+              "source": "PullRequest:FalkorDB/GraphRAG-SDK#324",
+              "target": "File:FalkorDB/GraphRAG-SDK:graphrag_sdk/src/graphrag_sdk/ingestion/resolution_strategies/llm_verified_resolution.py",
+              "type": "MODIFIES"
+            },
+            {
+              "source": "Person:Naseem77",
+              "target": "PullRequest:FalkorDB/GraphRAG-SDK#324",
+              "type": "AUTHORED"
+            },
+            {
+              "source": "PullRequest:FalkorDB/GraphRAG-SDK#328",
+              "target": "File:FalkorDB/GraphRAG-SDK:graphrag_sdk/src/graphrag_sdk/ingestion/extraction_strategies/graph_extraction.py",
+              "type": "MODIFIES"
+            },
+            {
+              "source": "Person:galshubeli",
+              "target": "PullRequest:FalkorDB/GraphRAG-SDK#328",
+              "type": "AUTHORED"
+            },
+            {
+              "source": "PullRequest:FalkorDB/GraphRAG-SDK#322",
+              "target": "File:FalkorDB/GraphRAG-SDK:graphrag_sdk/src/graphrag_sdk/ingestion/extraction_strategies/entity_extractors.py",
+              "type": "MODIFIES"
+            },
+            {
+              "source": "File:FalkorDB/GraphRAG-SDK:graphrag_sdk/src/graphrag_sdk/ingestion/extraction_strategies/entity_extractors.py",
+              "target": "Component:FalkorDB/GraphRAG-SDK:graphrag_sdk/src/graphrag_sdk/ingestion",
+              "type": "IN_COMPONENT"
+            },
+            {
+              "source": "Person:Naseem77",
+              "target": "PullRequest:FalkorDB/GraphRAG-SDK#322",
+              "type": "AUTHORED"
+            },
+            {
+              "source": "PullRequest:FalkorDB/GraphRAG-SDK#321",
+              "target": "File:FalkorDB/GraphRAG-SDK:graphrag_sdk/src/graphrag_sdk/ingestion/extraction_strategies/graph_extraction.py",
+              "type": "MODIFIES"
+            },
+            {
+              "source": "Person:Naseem77",
+              "target": "PullRequest:FalkorDB/GraphRAG-SDK#321",
+              "type": "AUTHORED"
+            },
+            {
+              "source": "PullRequest:FalkorDB/GraphRAG-SDK#320",
+              "target": "File:FalkorDB/GraphRAG-SDK:graphrag_sdk/src/graphrag_sdk/ingestion/extraction_strategies/entity_extractors.py",
+              "type": "MODIFIES"
+            },
+            {
+              "source": "Person:Naseem77",
+              "target": "PullRequest:FalkorDB/GraphRAG-SDK#320",
+              "type": "AUTHORED"
+            },
+            {
+              "source": "PullRequest:FalkorDB/GraphRAG-SDK#319",
+              "target": "File:FalkorDB/GraphRAG-SDK:graphrag_sdk/src/graphrag_sdk/ingestion/extraction_strategies/graph_extraction.py",
+              "type": "MODIFIES"
+            },
+            {
+              "source": "Person:Naseem77",
+              "target": "PullRequest:FalkorDB/GraphRAG-SDK#319",
+              "type": "AUTHORED"
+            },
+            {
+              "source": "PullRequest:FalkorDB/GraphRAG-SDK#249",
+              "target": "File:FalkorDB/GraphRAG-SDK:graphrag_sdk/src/graphrag_sdk/ingestion/extraction_strategies/graph_extraction.py",
+              "type": "MODIFIES"
+            },
+            {
+              "source": "PullRequest:FalkorDB/GraphRAG-SDK#249",
+              "target": "Issue:FalkorDB/GraphRAG-SDK#227",
+              "type": "REFERENCES"
+            },
+            {
+              "source": "PullRequest:FalkorDB/GraphRAG-SDK#310",
+              "target": "File:FalkorDB/GraphRAG-SDK:graphrag_sdk/src/graphrag_sdk/ingestion/extraction_strategies/graph_extraction.py",
+              "type": "MODIFIES"
+            },
+            {
+              "source": "PullRequest:FalkorDB/GraphRAG-SDK#310",
+              "target": "Issue:FalkorDB/GraphRAG-SDK#282",
+              "type": "REFERENCES"
+            },
+            {
+              "source": "PullRequest:FalkorDB/GraphRAG-SDK#310",
+              "target": "Issue:FalkorDB/GraphRAG-SDK#283",
+              "type": "REFERENCES"
+            },
+            {
+              "source": "PullRequest:FalkorDB/GraphRAG-SDK#310",
+              "target": "Issue:FalkorDB/GraphRAG-SDK#284",
+              "type": "REFERENCES"
+            }
+          ]
+        },
+        "cypher": [
+          "MATCH (c:Component)<-[:IN_COMPONENT]-(f:File)<-[:MODIFIES]-(pr:PullRequest)\nWHERE c.key IN $components AND pr.merged_at >= $since\nWITH pr, collect(f.key)[0] AS file, collect(c.key)[0] AS component\nOPTIONAL MATCH (a:Person)-[:AUTHORED]->(pr)\nRETURN pr.key AS key, pr.title AS title, pr.url AS url, pr.merged_at AS merged_at,\n       a.login AS author, file, component\nORDER BY merged_at DESC\nLIMIT $limit",
+          "MATCH (c:Component)<-[:IN_COMPONENT]-(f:File)<-[:MODIFIES]-(pr:PullRequest)\nWHERE c.key IN $components\nMATCH (pr)-[r:FIXES|REFERENCES]-(i:Issue)\nWHERE i.state = 'OPEN'\nWITH i, pr, r, f, c\nRETURN DISTINCT i.key AS key, i.title AS title, i.url AS url, i.created_at AS created_at,\n       pr.key AS via_pr, pr.title AS via_title, pr.url AS via_url, type(r) AS link,\n       startNode(r) = pr AS from_pr, f.key AS file, c.key AS component\nLIMIT $limit",
+          "MATCH (c:Component)<-[:IN_COMPONENT]-(:File)<-[:MODIFIES]-(pr:PullRequest)\nWHERE c.key IN $components AND pr.merged_at >= $since\nMATCH (p:Person)-[r:AUTHORED|REVIEWED]->(pr)\nWHERE NOT p.is_bot\nWITH p, count(DISTINCT CASE type(r) WHEN 'AUTHORED' THEN pr END) AS authored,\n     count(DISTINCT CASE type(r) WHEN 'REVIEWED' THEN pr END) AS reviewed\nRETURN p.login AS login, authored, reviewed\nORDER BY authored + reviewed DESC\nLIMIT 5"
+        ],
+        "model": "anthropic/claude-haiku-5.5",
+        "cached": true,
+        "elapsed_ms": 2
+      }
+    },
+    {
+      "question": "What else does FalkorDB/FalkorDB#3176 touch?",
+      "answer": {
+        "answer": "**FalkorDB/FalkorDB#3176** fixes the `RESTORE... REPLACE` crash by stopping a RESTORE payload from merging into a live graph. It is linked to the open issue #3175 [1][2]. It also references the older issues #259 (integer overflow) and #479 (an UndoLog_DeleteEdge crash) [3][4].\n\nThe PR touches the `src/serializers` component and `tests/flow` [5][6]. Its files are `src/serializers/decoders/current/v20/decode_graph.c` and `tests/flow/test_rdb_load.py` [7][8].\n\nOther PRs that share those files:\n- **Open:** #2510, a fix for RESTORE.. REPLACE of an indexed graph's own dump [9]. Also #2321, which uses GxB_atfork for BGSAVE and GRAPH.COPY [10].\n- **Merged:** #3141 and #3329 (RDB short-read handling) [11][12], #3339 (bounding value nesting on RDB/RESTORE decode) [13], and #3161 (saving virtual keys as graphmeta) [14].\n- **Release PRs:** #3342 and #3184 (both titled 4.22.1) [15][16].",
+        "citations": [
+          {
+            "n": 1,
+            "node_id": "PullRequest:FalkorDB/FalkorDB#3176"
+          },
+          {
+            "n": 2,
+            "node_id": "Issue:FalkorDB/FalkorDB#3175"
+          },
+          {
+            "n": 3,
+            "node_id": "Issue:FalkorDB/FalkorDB#259"
+          },
+          {
+            "n": 4,
+            "node_id": "Issue:FalkorDB/FalkorDB#479"
+          },
+          {
+            "n": 5,
+            "node_id": "Component:FalkorDB/FalkorDB:tests/flow"
+          },
+          {
+            "n": 6,
+            "node_id": "Component:FalkorDB/FalkorDB:src/serializers"
+          },
+          {
+            "n": 7,
+            "node_id": "File:FalkorDB/FalkorDB:tests/flow/test_rdb_load.py"
+          },
+          {
+            "n": 8,
+            "node_id": "File:FalkorDB/FalkorDB:src/serializers/decoders/current/v20/decode_graph.c"
+          },
+          {
+            "n": 9,
+            "node_id": "PullRequest:FalkorDB/FalkorDB#2510"
+          },
+          {
+            "n": 10,
+            "node_id": "PullRequest:FalkorDB/FalkorDB#2321"
+          },
+          {
+            "n": 11,
+            "node_id": "PullRequest:FalkorDB/FalkorDB#3329"
+          },
+          {
+            "n": 12,
+            "node_id": "PullRequest:FalkorDB/FalkorDB#3141"
+          },
+          {
+            "n": 13,
+            "node_id": "PullRequest:FalkorDB/FalkorDB#3339"
+          },
+          {
+            "n": 14,
+            "node_id": "PullRequest:FalkorDB/FalkorDB#3161"
+          },
+          {
+            "n": 15,
+            "node_id": "PullRequest:FalkorDB/FalkorDB#3342"
+          },
+          {
+            "n": 16,
+            "node_id": "PullRequest:FalkorDB/FalkorDB#3184"
+          }
+        ],
+        "tool_calls": [
+          {
+            "tool": "related_work",
+            "args": {
+              "key": "FalkorDB/FalkorDB#3176"
+            }
+          }
+        ],
+        "evidence": {
+          "nodes": [
+            {
+              "id": "PullRequest:FalkorDB/FalkorDB#3176",
+              "label": "PullRequest",
+              "title": "fix(decode): don't merge a RESTORE payload into a live graph (#259, #…",
+              "url": "https://github.com/FalkorDB/FalkorDB/pull/3176"
+            },
+            {
+              "id": "Issue:FalkorDB/FalkorDB#3175",
+              "label": "Issue",
+              "title": "RESTORE ... REPLACE onto an existing graph crashes the server",
+              "url": "https://github.com/FalkorDB/FalkorDB/issues/3175"
+            },
+            {
+              "id": "Issue:FalkorDB/FalkorDB#259",
+              "label": "Issue",
+              "title": "Integer overflow is not handled",
+              "url": "https://github.com/FalkorDB/FalkorDB/issues/259"
+            },
+            {
+              "id": "Issue:FalkorDB/FalkorDB#479",
+              "label": "Issue",
+              "title": "Crash on Accessing address: (nil) on UndoLog_DeleteEdge",
+              "url": "https://github.com/FalkorDB/FalkorDB/issues/479"
+            },
+            {
+              "id": "File:FalkorDB/FalkorDB:tests/flow/test_rdb_load.py",
+              "label": "File",
+              "title": "tests/flow/test_rdb_load.py",
+              "url": null
+            },
+            {
+              "id": "Component:FalkorDB/FalkorDB:tests/flow",
+              "label": "Component",
+              "title": "tests/flow",
+              "url": null
+            },
+            {
+              "id": "File:FalkorDB/FalkorDB:src/serializers/decoders/current/v20/decode_graph.c",
+              "label": "File",
+              "title": "src/serializers/decoders/current/v20/decode_graph.c",
+              "url": null
+            },
+            {
+              "id": "Component:FalkorDB/FalkorDB:src/serializers",
+              "label": "Component",
+              "title": "src/serializers",
+              "url": null
+            },
+            {
+              "id": "PullRequest:FalkorDB/FalkorDB#2510",
+              "label": "PullRequest",
+              "title": "fix(rdb): don't abort on RESTORE .. REPLACE of an indexed graph's own dump",
+              "url": "https://github.com/FalkorDB/FalkorDB/pull/2510"
+            },
+            {
+              "id": "PullRequest:FalkorDB/FalkorDB#2321",
+              "label": "PullRequest",
+              "title": "Use GxB_atfork methods for BGSAVE and GRAPH.COPY",
+              "url": "https://github.com/FalkorDB/FalkorDB/pull/2321"
+            },
+            {
+              "id": "PullRequest:FalkorDB/FalkorDB#3342",
+              "label": "PullRequest",
+              "title": "4.22.1",
+              "url": "https://github.com/FalkorDB/FalkorDB/pull/3342"
+            },
+            {
+              "id": "PullRequest:FalkorDB/FalkorDB#3329",
+              "label": "PullRequest",
+              "title": "support RDB decode short read",
+              "url": "https://github.com/FalkorDB/FalkorDB/pull/3329"
+            },
+            {
+              "id": "PullRequest:FalkorDB/FalkorDB#3141",
+              "label": "PullRequest",
+              "title": "Handle short reads gracefully during RDB decode",
+              "url": "https://github.com/FalkorDB/FalkorDB/pull/3141"
+            },
+            {
+              "id": "PullRequest:FalkorDB/FalkorDB#3184",
+              "label": "PullRequest",
+              "title": "4.22.1",
+              "url": "https://github.com/FalkorDB/FalkorDB/pull/3184"
+            },
+            {
+              "id": "PullRequest:FalkorDB/FalkorDB#3339",
+              "label": "PullRequest",
+              "title": "fix: bound value nesting on RDB/RESTORE decode, property writes and bulk insert",
+              "url": "https://github.com/FalkorDB/FalkorDB/pull/3339"
+            },
+            {
+              "id": "PullRequest:FalkorDB/FalkorDB#3161",
+              "label": "PullRequest",
+              "title": "fix(rdb): save virtual keys as graphmeta so C keeps graphs in GRAPH.LIST",
+              "url": "https://github.com/FalkorDB/FalkorDB/pull/3161"
+            }
+          ],
+          "edges": [
+            {
+              "source": "PullRequest:FalkorDB/FalkorDB#3176",
+              "target": "Issue:FalkorDB/FalkorDB#3175",
+              "type": "FIXES"
+            },
+            {
+              "source": "PullRequest:FalkorDB/FalkorDB#3176",
+              "target": "Issue:FalkorDB/FalkorDB#259",
+              "type": "REFERENCES"
+            },
+            {
+              "source": "Issue:FalkorDB/FalkorDB#479",
+              "target": "PullRequest:FalkorDB/FalkorDB#3176",
+              "type": "REFERENCES"
+            },
+            {
+              "source": "PullRequest:FalkorDB/FalkorDB#3176",
+              "target": "File:FalkorDB/FalkorDB:tests/flow/test_rdb_load.py",
+              "type": "MODIFIES"
+            },
+            {
+              "source": "File:FalkorDB/FalkorDB:tests/flow/test_rdb_load.py",
+              "target": "Component:FalkorDB/FalkorDB:tests/flow",
+              "type": "IN_COMPONENT"
+            },
+            {
+              "source": "PullRequest:FalkorDB/FalkorDB#3176",
+              "target": "File:FalkorDB/FalkorDB:src/serializers/decoders/current/v20/decode_graph.c",
+              "type": "MODIFIES"
+            },
+            {
+              "source": "File:FalkorDB/FalkorDB:src/serializers/decoders/current/v20/decode_graph.c",
+              "target": "Component:FalkorDB/FalkorDB:src/serializers",
+              "type": "IN_COMPONENT"
+            },
+            {
+              "source": "PullRequest:FalkorDB/FalkorDB#2510",
+              "target": "File:FalkorDB/FalkorDB:tests/flow/test_rdb_load.py",
+              "type": "MODIFIES"
+            },
+            {
+              "source": "PullRequest:FalkorDB/FalkorDB#2321",
+              "target": "File:FalkorDB/FalkorDB:src/serializers/decoders/current/v20/decode_graph.c",
+              "type": "MODIFIES"
+            },
+            {
+              "source": "PullRequest:FalkorDB/FalkorDB#3342",
+              "target": "File:FalkorDB/FalkorDB:src/serializers/decoders/current/v20/decode_graph.c",
+              "type": "MODIFIES"
+            },
+            {
+              "source": "PullRequest:FalkorDB/FalkorDB#3342",
+              "target": "File:FalkorDB/FalkorDB:tests/flow/test_rdb_load.py",
+              "type": "MODIFIES"
+            },
+            {
+              "source": "PullRequest:FalkorDB/FalkorDB#3329",
+              "target": "File:FalkorDB/FalkorDB:src/serializers/decoders/current/v20/decode_graph.c",
+              "type": "MODIFIES"
+            },
+            {
+              "source": "PullRequest:FalkorDB/FalkorDB#3329",
+              "target": "File:FalkorDB/FalkorDB:tests/flow/test_rdb_load.py",
+              "type": "MODIFIES"
+            },
+            {
+              "source": "PullRequest:FalkorDB/FalkorDB#3141",
+              "target": "File:FalkorDB/FalkorDB:src/serializers/decoders/current/v20/decode_graph.c",
+              "type": "MODIFIES"
+            },
+            {
+              "source": "PullRequest:FalkorDB/FalkorDB#3141",
+              "target": "File:FalkorDB/FalkorDB:tests/flow/test_rdb_load.py",
+              "type": "MODIFIES"
+            },
+            {
+              "source": "PullRequest:FalkorDB/FalkorDB#3184",
+              "target": "File:FalkorDB/FalkorDB:src/serializers/decoders/current/v20/decode_graph.c",
+              "type": "MODIFIES"
+            },
+            {
+              "source": "PullRequest:FalkorDB/FalkorDB#3184",
+              "target": "File:FalkorDB/FalkorDB:tests/flow/test_rdb_load.py",
+              "type": "MODIFIES"
+            },
+            {
+              "source": "PullRequest:FalkorDB/FalkorDB#3339",
+              "target": "File:FalkorDB/FalkorDB:tests/flow/test_rdb_load.py",
+              "type": "MODIFIES"
+            },
+            {
+              "source": "PullRequest:FalkorDB/FalkorDB#3161",
+              "target": "File:FalkorDB/FalkorDB:tests/flow/test_rdb_load.py",
+              "type": "MODIFIES"
+            }
+          ]
+        },
+        "cypher": [
+          "OPTIONAL MATCH (pr:PullRequest {key: $key})\nOPTIONAL MATCH (i:Issue {key: $key})\nRETURN CASE WHEN pr IS NOT NULL THEN 'PullRequest' WHEN i IS NOT NULL THEN 'Issue' END AS label,\n       coalesce(pr.title, i.title) AS title, coalesce(pr.url, i.url) AS url,\n       coalesce(pr.state, i.state) AS state",
+          "MATCH (n:PullRequest {key: $key})-[r:FIXES|REFERENCES]->(m)\nRETURN 'out' AS direction, type(r) AS link, labels(m)[0] AS label, m.key AS key,\n       m.title AS title, m.url AS url, m.state AS state\nUNION\nMATCH (m)-[r:FIXES|REFERENCES]->(n:PullRequest {key: $key})\nRETURN 'in' AS direction, type(r) AS link, labels(m)[0] AS label, m.key AS key,\n       m.title AS title, m.url AS url, m.state AS state",
+          "MATCH (n:PullRequest {key: $key})\nOPTIONAL MATCH (n)-[:FIXES|REFERENCES]-(linked:PullRequest)\nWITH n, CASE WHEN n:PullRequest THEN [n] ELSE [] END + collect(DISTINCT linked) AS prs\nUNWIND prs AS pr\nMATCH (pr)-[:MODIFIES]->(f:File)-[:IN_COMPONENT]->(c:Component)\nRETURN DISTINCT pr.key AS pr, pr.title AS pr_title, pr.url AS pr_url,\n       f.key AS file, f.path AS path, c.key AS component, c.name AS component_name\nLIMIT 60",
+          "UNWIND $files AS file_key\nMATCH (f:File {key: file_key})<-[:MODIFIES]-(other:PullRequest)\nWHERE NOT other.key IN $exclude\nWITH other, collect(DISTINCT f.key) AS shared\nRETURN other.key AS key, other.title AS title, other.url AS url, other.state AS state,\n       other.merged_at AS merged_at, shared\nORDER BY other.state = 'OPEN' DESC, size(shared) DESC, coalesce(other.merged_at, 0) DESC\nLIMIT $limit"
+        ],
+        "model": "anthropic/claude-haiku-5.5",
+        "cached": true,
+        "elapsed_ms": 1
+      }
+    },
+    {
+      "question": "Catch me up on falkordb-browser since October 1.",
+      "answer": {
+        "answer": "Since October 1, `FalkorDB/falkordb-browser` merged 23 PRs and shipped four releases, v2.6.0 through v2.7.0 (latest published October 15) [1][2][3][4]. **Anchel123** drove most of the work, with 20 merged PRs [5].\n\nMain changes:\n- A 3D graph view, which closed issue #34 [6][7].\n- Desktop and mobile apps, with an OS-aware \"Get the app\" prompt, which closed issue #197 [8][9].\n- mTLS client-certificate authentication, by **Ignalina** [10][11].\n- A \"What's New\" announcement popup, which closed issue #1539 [12][13].\n- Shared primitives now sourced from `@falkordb/ui`, which fixed clickable-node issue #1084 [14][15].\n- Helm fixes: `fsGroup` so the persistence PVC is writable [16], and a pod security check alignment by **shahar-biron** [17][18].\n\nMost of the remaining merges were staging syncs, release-version bumps and Dependabot batching [19][20][21].",
+        "citations": [
+          {
+            "n": 1,
+            "node_id": "Release:FalkorDB/falkordb-browser@v2.6.0"
+          },
+          {
+            "n": 2,
+            "node_id": "Release:FalkorDB/falkordb-browser@v2.6.1"
+          },
+          {
+            "n": 3,
+            "node_id": "Release:FalkorDB/falkordb-browser@v2.6.2"
+          },
+          {
+            "n": 4,
+            "node_id": "Release:FalkorDB/falkordb-browser@v2.7.0"
+          },
+          {
+            "n": 5,
+            "node_id": "Person:Anchel123"
+          },
+          {
+            "n": 6,
+            "node_id": "PullRequest:FalkorDB/falkordb-browser#2136"
+          },
+          {
+            "n": 7,
+            "node_id": "Issue:FalkorDB/falkordb-browser#34"
+          },
+          {
+            "n": 8,
+            "node_id": "PullRequest:FalkorDB/falkordb-browser#2139"
+          },
+          {
+            "n": 9,
+            "node_id": "Issue:FalkorDB/falkordb-browser#197"
+          },
+          {
+            "n": 10,
+            "node_id": "PullRequest:FalkorDB/falkordb-browser#2084"
+          },
+          {
+            "n": 11,
+            "node_id": "Person:Ignalina"
+          },
+          {
+            "n": 12,
+            "node_id": "PullRequest:FalkorDB/falkordb-browser#2144"
+          },
+          {
+            "n": 13,
+            "node_id": "Issue:FalkorDB/falkordb-browser#1539"
+          },
+          {
+            "n": 14,
+            "node_id": "PullRequest:FalkorDB/falkordb-browser#2108"
+          },
+          {
+            "n": 15,
+            "node_id": "Issue:FalkorDB/falkordb-browser#1084"
+          },
+          {
+            "n": 16,
+            "node_id": "PullRequest:FalkorDB/falkordb-browser#2142"
+          },
+          {
+            "n": 17,
+            "node_id": "PullRequest:FalkorDB/falkordb-browser#2143"
+          },
+          {
+            "n": 18,
+            "node_id": "Person:shahar-biron"
+          },
+          {
+            "n": 19,
+            "node_id": "PullRequest:FalkorDB/falkordb-browser#2146"
+          },
+          {
+            "n": 20,
+            "node_id": "PullRequest:FalkorDB/falkordb-browser#2145"
+          },
+          {
+            "n": 21,
+            "node_id": "PullRequest:FalkorDB/falkordb-browser#2140"
+          }
+        ],
+        "tool_calls": [
+          {
+            "tool": "catch_up",
+            "args": {
+              "since": "2026-10-01",
+              "repo": "FalkorDB/falkordb-browser"
+            }
+          }
+        ],
+        "evidence": {
+          "nodes": [
+            {
+              "id": "PullRequest:FalkorDB/falkordb-browser#2146",
+              "label": "PullRequest",
+              "title": "Staging",
+              "url": "https://github.com/FalkorDB/falkordb-browser/pull/2146"
+            },
+            {
+              "id": "Person:Anchel123",
+              "label": "Person",
+              "title": "Anchel123",
+              "url": null
+            },
+            {
+              "id": "PullRequest:FalkorDB/falkordb-browser#2150",
+              "label": "PullRequest",
+              "title": "chore: sync main into staging",
+              "url": "https://github.com/FalkorDB/falkordb-browser/pull/2150"
+            },
+            {
+              "id": "PullRequest:FalkorDB/falkordb-browser#2149",
+              "label": "PullRequest",
+              "title": "feat(ci): polish release notes for a range of releases",
+              "url": "https://github.com/FalkorDB/falkordb-browser/pull/2149"
+            },
+            {
+              "id": "PullRequest:FalkorDB/falkordb-browser#2084",
+              "label": "PullRequest",
+              "title": "Add mTLS client-certificate authentication",
+              "url": "https://github.com/FalkorDB/falkordb-browser/pull/2084"
+            },
+            {
+              "id": "Person:Ignalina",
+              "label": "Person",
+              "title": "Ignalina",
+              "url": null
+            },
+            {
+              "id": "PullRequest:FalkorDB/falkordb-browser#2147",
+              "label": "PullRequest",
+              "title": "fix: address review comments on the staging PR (#2146)",
+              "url": "https://github.com/FalkorDB/falkordb-browser/pull/2147"
+            },
+            {
+              "id": "PullRequest:FalkorDB/falkordb-browser#2136",
+              "label": "PullRequest",
+              "title": "feat: let the user view the graph in 3D",
+              "url": "https://github.com/FalkorDB/falkordb-browser/pull/2136"
+            },
+            {
+              "id": "PullRequest:FalkorDB/falkordb-browser#2139",
+              "label": "PullRequest",
+              "title": "feat: desktop and mobile apps, with an OS-aware \"Get the app\" in the browser",
+              "url": "https://github.com/FalkorDB/falkordb-browser/pull/2139"
+            },
+            {
+              "id": "PullRequest:FalkorDB/falkordb-browser#2145",
+              "label": "PullRequest",
+              "title": "chore: update version to 2.7.0 in package.json and package-lock.json",
+              "url": "https://github.com/FalkorDB/falkordb-browser/pull/2145"
+            },
+            {
+              "id": "PullRequest:FalkorDB/falkordb-browser#2108",
+              "label": "PullRequest",
+              "title": "refactor: source the shared primitives from @falkordb/ui",
+              "url": "https://github.com/FalkorDB/falkordb-browser/pull/2108"
+            },
+            {
+              "id": "PullRequest:FalkorDB/falkordb-browser#2140",
+              "label": "PullRequest",
+              "title": "chore(deps): combine open Dependabot updates",
+              "url": "https://github.com/FalkorDB/falkordb-browser/pull/2140"
+            },
+            {
+              "id": "PullRequest:FalkorDB/falkordb-browser#2144",
+              "label": "PullRequest",
+              "title": "Feat/whats new",
+              "url": "https://github.com/FalkorDB/falkordb-browser/pull/2144"
+            },
+            {
+              "id": "PullRequest:FalkorDB/falkordb-browser#2143",
+              "label": "PullRequest",
+              "title": "fix(ci): align Helm pod security check with fsGroup defaults",
+              "url": "https://github.com/FalkorDB/falkordb-browser/pull/2143"
+            },
+            {
+              "id": "Person:shahar-biron",
+              "label": "Person",
+              "title": "shahar-biron",
+              "url": null
+            },
+            {
+              "id": "PullRequest:FalkorDB/falkordb-browser#2142",
+              "label": "PullRequest",
+              "title": "fix(helm): set fsGroup so the persistence PVC is writable",
+              "url": "https://github.com/FalkorDB/falkordb-browser/pull/2142"
+            },
+            {
+              "id": "PullRequest:FalkorDB/falkordb-browser#2129",
+              "label": "PullRequest",
+              "title": "Staging",
+              "url": "https://github.com/FalkorDB/falkordb-browser/pull/2129"
+            },
+            {
+              "id": "PullRequest:FalkorDB/falkordb-browser#2138",
+              "label": "PullRequest",
+              "title": "fix: bump version to 2.6.2",
+              "url": "https://github.com/FalkorDB/falkordb-browser/pull/2138"
+            },
+            {
+              "id": "Issue:FalkorDB/falkordb-browser#34",
+              "label": "Issue",
+              "title": "Add 3D Graph view",
+              "url": "https://github.com/FalkorDB/falkordb-browser/issues/34"
+            },
+            {
+              "id": "Issue:FalkorDB/falkordb-browser#197",
+              "label": "Issue",
+              "title": "Pack as a FalkorDB-Browser as a desktop app (Electron?)",
+              "url": "https://github.com/FalkorDB/falkordb-browser/issues/197"
+            },
+            {
+              "id": "Issue:FalkorDB/falkordb-browser#1084",
+              "label": "Issue",
+              "title": "Some nodes are clickable to see details and some others are not",
+              "url": "https://github.com/FalkorDB/falkordb-browser/issues/1084"
+            },
+            {
+              "id": "Issue:FalkorDB/falkordb-browser#1539",
+              "label": "Issue",
+              "title": "[Browser] feat: Add What's New announcement popup with Dynamic Island animation",
+              "url": "https://github.com/FalkorDB/falkordb-browser/issues/1539"
+            },
+            {
+              "id": "Release:FalkorDB/falkordb-browser@v2.7.0",
+              "label": "Release",
+              "title": "v2.7.0",
+              "url": "https://github.com/FalkorDB/falkordb-browser/releases/tag/v2.7.0"
+            },
+            {
+              "id": "Repo:FalkorDB/falkordb-browser",
+              "label": "Repo",
+              "title": "FalkorDB/falkordb-browser",
+              "url": null
+            },
+            {
+              "id": "Release:FalkorDB/falkordb-browser@v2.6.2",
+              "label": "Release",
+              "title": "v2.6.2",
+              "url": "https://github.com/FalkorDB/falkordb-browser/releases/tag/v2.6.2"
+            },
+            {
+              "id": "Release:FalkorDB/falkordb-browser@v2.6.1",
+              "label": "Release",
+              "title": "v2.6.1",
+              "url": "https://github.com/FalkorDB/falkordb-browser/releases/tag/v2.6.1"
+            },
+            {
+              "id": "Release:FalkorDB/falkordb-browser@v2.6.0",
+              "label": "Release",
+              "title": "v2.6.0",
+              "url": "https://github.com/FalkorDB/falkordb-browser/releases/tag/v2.6.0"
+            }
+          ],
+          "edges": [
+            {
+              "source": "Person:Anchel123",
+              "target": "PullRequest:FalkorDB/falkordb-browser#2146",
+              "type": "AUTHORED"
+            },
+            {
+              "source": "Person:Anchel123",
+              "target": "PullRequest:FalkorDB/falkordb-browser#2150",
+              "type": "AUTHORED"
+            },
+            {
+              "source": "Person:Anchel123",
+              "target": "PullRequest:FalkorDB/falkordb-browser#2149",
+              "type": "AUTHORED"
+            },
+            {
+              "source": "Person:Ignalina",
+              "target": "PullRequest:FalkorDB/falkordb-browser#2084",
+              "type": "AUTHORED"
+            },
+            {
+              "source": "Person:Anchel123",
+              "target": "PullRequest:FalkorDB/falkordb-browser#2147",
+              "type": "AUTHORED"
+            },
+            {
+              "source": "Person:Anchel123",
+              "target": "PullRequest:FalkorDB/falkordb-browser#2136",
+              "type": "AUTHORED"
+            },
+            {
+              "source": "Person:Anchel123",
+              "target": "PullRequest:FalkorDB/falkordb-browser#2139",
+              "type": "AUTHORED"
+            },
+            {
+              "source": "Person:Anchel123",
+              "target": "PullRequest:FalkorDB/falkordb-browser#2145",
+              "type": "AUTHORED"
+            },
+            {
+              "source": "Person:Anchel123",
+              "target": "PullRequest:FalkorDB/falkordb-browser#2108",
+              "type": "AUTHORED"
+            },
+            {
+              "source": "Person:Anchel123",
+              "target": "PullRequest:FalkorDB/falkordb-browser#2140",
+              "type": "AUTHORED"
+            },
+            {
+              "source": "Person:Anchel123",
+              "target": "PullRequest:FalkorDB/falkordb-browser#2144",
+              "type": "AUTHORED"
+            },
+            {
+              "source": "Person:shahar-biron",
+              "target": "PullRequest:FalkorDB/falkordb-browser#2143",
+              "type": "AUTHORED"
+            },
+            {
+              "source": "Person:Anchel123",
+              "target": "PullRequest:FalkorDB/falkordb-browser#2142",
+              "type": "AUTHORED"
+            },
+            {
+              "source": "Person:Anchel123",
+              "target": "PullRequest:FalkorDB/falkordb-browser#2129",
+              "type": "AUTHORED"
+            },
+            {
+              "source": "Person:Anchel123",
+              "target": "PullRequest:FalkorDB/falkordb-browser#2138",
+              "type": "AUTHORED"
+            },
+            {
+              "source": "PullRequest:FalkorDB/falkordb-browser#2136",
+              "target": "Issue:FalkorDB/falkordb-browser#34",
+              "type": "FIXES"
+            },
+            {
+              "source": "PullRequest:FalkorDB/falkordb-browser#2139",
+              "target": "Issue:FalkorDB/falkordb-browser#197",
+              "type": "FIXES"
+            },
+            {
+              "source": "PullRequest:FalkorDB/falkordb-browser#2108",
+              "target": "Issue:FalkorDB/falkordb-browser#1084",
+              "type": "FIXES"
+            },
+            {
+              "source": "PullRequest:FalkorDB/falkordb-browser#2144",
+              "target": "Issue:FalkorDB/falkordb-browser#1539",
+              "type": "FIXES"
+            },
+            {
+              "source": "Release:FalkorDB/falkordb-browser@v2.7.0",
+              "target": "Repo:FalkorDB/falkordb-browser",
+              "type": "IN_REPO"
+            },
+            {
+              "source": "Release:FalkorDB/falkordb-browser@v2.6.2",
+              "target": "Repo:FalkorDB/falkordb-browser",
+              "type": "IN_REPO"
+            },
+            {
+              "source": "Release:FalkorDB/falkordb-browser@v2.6.1",
+              "target": "Repo:FalkorDB/falkordb-browser",
+              "type": "IN_REPO"
+            },
+            {
+              "source": "Release:FalkorDB/falkordb-browser@v2.6.0",
+              "target": "Repo:FalkorDB/falkordb-browser",
+              "type": "IN_REPO"
+            }
+          ]
+        },
+        "cypher": [
+          "MATCH (pr:PullRequest)-[:IN_REPO]->(r:Repo {full_name: $repo})\nWHERE pr.merged_at >= $since\nOPTIONAL MATCH (a:Person)-[:AUTHORED]->(pr)\nRETURN pr.key AS key, pr.title AS title, pr.url AS url, pr.merged_at AS merged_at,\n       a.login AS author, coalesce(a.is_bot, false) AS bot, r.full_name AS repo\nORDER BY merged_at DESC",
+          "UNWIND $prs AS pr_key\nMATCH (pr:PullRequest {key: pr_key})-[:FIXES]->(i:Issue)\nWHERE i.closed_at >= $since\nRETURN DISTINCT i.key AS key, i.title AS title, i.url AS url, i.closed_at AS closed_at,\n       pr.key AS fixed_by, pr.title AS fixed_by_title, pr.url AS fixed_by_url",
+          "MATCH (rel:Release)-[:IN_REPO]->(r:Repo)\nWHERE rel.published_at >= $since AND ($repo IS NULL OR r.full_name = $repo)\n  AND (size($repos) = 0 OR r.full_name IN $repos)\nRETURN rel.key AS key, rel.tag AS tag, rel.url AS url, rel.published_at AS published_at,\n       r.full_name AS repo\nORDER BY published_at DESC\nLIMIT 10"
+        ],
+        "model": "anthropic/claude-haiku-5.5",
+        "cached": true,
+        "elapsed_ms": 2
+      }
+    }
+  ]
+}
