@@ -105,6 +105,36 @@ body {
   font-size: 16px;
 }
 
+/* Scrollbars: thin, with a square thumb in the rule colour, on the page and in every inner
+   scroll area (Path and Cypher tabs, the question box). scrollbar-color inherits;
+   scrollbar-width doesn't, so it goes on every element. */
+:root {
+  scrollbar-color: var(--rule-strong) transparent;
+}
+* {
+  scrollbar-width: thin;
+}
+/* Browsers without the standard properties (older Safari) use the WebKit pseudo-elements.
+   Where scrollbar-width works, Chrome ignores these, so they only apply as a fallback. */
+@supports not (scrollbar-width: thin) {
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--rule-strong);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--muted);
+    background-clip: padding-box;
+  }
+}
+
 /* Tailwind v4 no longer sets a pointer on buttons. */
 button:not(:disabled),
 summary {
