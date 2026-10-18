@@ -1,3 +1,4 @@
+import { CheckIcon } from "@/components/WorkspaceIcons";
 import type { Step } from "@/hooks/use-ask-stream";
 
 // What each tool is doing, in words a reader would use.
@@ -43,10 +44,10 @@ export function ProgressLog({ steps, working }: { steps: Step[]; working: boolea
                 ? "Reading the question"
                 : "Writing the answer from what the graph returned"
               : describe(step.tool, step.args);
-        const marker = empty ? "border border-rule-strong" : done ? "bg-path" : "working bg-muted";
+        const marker = empty ? "is-empty" : done ? "is-done" : "is-working";
         return (
-          <li key={i} className="arrive flex flex-wrap items-baseline gap-x-2.5">
-            <span aria-hidden className={`inline-block size-2 shrink-0 translate-y-[-1px] ${marker}`} />
+          <li key={i} className="arrive progress-step">
+            <span aria-hidden className={`progress-marker ${marker}`}>{done && !empty && <CheckIcon size={11} />}</span>
             <span className={done && !empty ? "text-ink" : "text-muted"}>{text}</span>
             {step.kind === "tool" && step.done && (
               <span className="text-muted tabular-nums">

@@ -3,7 +3,7 @@
 // is configured (local UI work, previews, Playwright). Import from server components only.
 
 import { apiBase } from "./proxy";
-import { sampleAnswer } from "./sample-answer";
+import { recordedAnswer } from "./recorded-answers";
 import { HERO_QUESTIONS } from "./hero-questions";
 import type { AskResponse, GraphStats } from "./types";
 
@@ -30,7 +30,9 @@ export async function getStats(): Promise<GraphStats> {
 /** A cached hero answer: free, instant, and not counted toward anyone's rate limit. */
 export async function getFeatured(): Promise<{ question: string; data: AskResponse }> {
   const api = apiBase();
-  const fallback = { question: HERO_QUESTIONS[0].question, data: sampleAnswer(HERO_QUESTIONS[0].question) };
+  const recorded = recordedAnswer(HERO_QUESTIONS[0].question);
+  if (!recorded) throw new Error("Missing the recorded featured answer");
+  const fallback = { question: HERO_QUESTIONS[0].question, data: recorded };
   if (!api) return fallback;
   try {
     const response = await fetch(`${api}/api/ask`, {

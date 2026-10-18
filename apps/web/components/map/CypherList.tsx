@@ -27,13 +27,13 @@ function Highlighted({ query, params }: { query: string; params: Record<string, 
       const name = part.slice(1);
       return (
         <Fragment key={i}>
-          <span className="text-path">{part}</span>
-          {name in params && <span className="text-muted">{` /* ${show(params[name])} */`}</span>}
+          <span className="cy-param">{part}</span>
+          {name in params && <span className="cy-note">{` /* ${show(params[name])} */`}</span>}
         </Fragment>
       );
     }
-    if (part.startsWith("'")) return <span key={i} className="text-muted">{part}</span>;
-    if (new RegExp(`^${KEYWORDS.source}$`).test(part)) return <span key={i} className="font-semibold">{part}</span>;
+    if (part.startsWith("'")) return <span key={i} className="cy-string">{part}</span>;
+    if (new RegExp(`^${KEYWORDS.source}$`).test(part)) return <span key={i} className="cy-keyword">{part}</span>;
     return <Fragment key={i}>{part}</Fragment>;
   });
 }
@@ -49,9 +49,15 @@ function CopyButton({ text }: { text: string }) {
           setTimeout(() => setCopied(false), 1500);
         });
       }}
-      className="min-h-11 px-2 text-xs font-medium text-muted underline decoration-rule-strong underline-offset-2 hover:text-ink"
+      className="cypher-copy"
+      data-copied={copied || undefined}
+      aria-label={copied ? "Copied" : "Copy"}
+      title={copied ? "Copied" : "Copy query"}
     >
-      <span aria-live="polite">{copied ? "Copied" : "Copy"}</span>
+      {copied
+        ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg>
+        : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V6a2 2 0 0 1 2-2h9" /></svg>}
+      <span className="sr-only" aria-live="polite">{copied ? "Copied" : ""}</span>
     </button>
   );
 }
@@ -62,29 +68,37 @@ export function CypherList({ cypher, calls = [], params = {} }: { cypher: string
   for (const call of calls) for (const [k, v] of Object.entries(call.args)) if (!(k in values)) values[k] = v;
 
   return (
-    <div className="space-y-4">
-      <p className="text-sm text-muted">The read-only queries that ran against FalkorDB, with the values they were given.</p>
+    <div className="cypher">
+      <p className="cypher-intro">The read-only queries that ran against FalkorDB, with the values they were given.</p>
       {calls.length > 0 && (
-        <ol className="space-y-1 border-l-[3px] border-path pl-3 text-sm">
-          {calls.map((call, i) => (
-            <li key={i}>
-              <span className="font-mono text-code text-ink">{call.tool}</span>
-              <span className="text-muted">: {describe(call.tool, call.args)}</span>
+        <section aria-labelledby="cypher-calls">
+          <h3 id="cypher-calls" className="cypher-heading">Tool calls</h3>
+          <ol className="cypher-calls">
+            {calls.map((call, i) => (
+              <li key={i}>
+                <code className="cypher-tool">{call.tool}</code>
+                <span>{describe(call.tool, call.args)}</span>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
+      <section aria-labelledby="cypher-queries">
+        <h3 id="cypher-queries" className="cypher-heading">Queries</h3>
+        {/* In the order each query first ran; a repeated query appears once, at its first run. */}
+        <ol className="cypher-steps">
+          {cypher.map((query, i) => (
+            <li key={i} className="cypher-step">
+              <figure className="cypher-block" aria-label={`Query ${i + 1} of ${cypher.length}`}>
+                <CopyButton text={query} />
+                <pre className="cypher-code">
+                  <Highlighted query={query} params={values} />
+                </pre>
+              </figure>
             </li>
           ))}
         </ol>
-      )}
-      {cypher.map((query, i) => (
-        <figure key={i} className="m-0 border border-rule bg-surface">
-          <figcaption className="flex items-center justify-between border-b border-rule pl-3 text-xs text-muted">
-            Query {i + 1} of {cypher.length}
-            <CopyButton text={query} />
-          </figcaption>
-          <pre className="p-3 font-mono text-xs leading-relaxed whitespace-pre-wrap text-ink">
-            <Highlighted query={query} params={values} />
-          </pre>
-        </figure>
-      ))}
+      </section>
     </div>
   );
 }

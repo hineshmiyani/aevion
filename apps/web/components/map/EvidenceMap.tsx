@@ -1,399 +1,300 @@
 "use client";
 
-import {
-  forceCenter,
-  forceCollide,
-  forceLink,
-  forceManyBody,
-  forceSimulation,
-  forceX,
-  forceY,
-  type SimulationNodeDatum,
-} from "d3-force";
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { Background, BackgroundVariant, getViewportForBounds, ReactFlow, ReactFlowProvider, useReactFlow, useStore, type Edge } from "@xyflow/react";
+import { AnimatePresence, motion as m } from "motion/react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type RefObject } from "react";
+import { useTheme } from "@/hooks/use-theme";
+import { NodeGlyph, NODE_TYPE_NAMES } from "@/components/ask/NodeGlyph";
+import { EDGE_VERBS } from "@/components/ask/EvidenceTrail";
+import { CloseIcon, CollapseIcon, ExpandIcon, ExternalIcon, GitHubMark, LayersIcon, MinusIcon, PlusIcon, SearchIcon } from "@/components/WorkspaceIcons";
+import type { EvidencePath } from "@/lib/types";
+import { EvidenceGraphNode, NetworkFocus, type GraphNode } from "./EvidenceGraphNode";
+import { layout } from "./graph-layout";
 
-import { NODE_SHAPES, NODE_TYPE_NAMES } from "@/components/ask/NodeGlyph";
-import type { EvidenceNode, EvidencePath } from "@/lib/types";
+import { NetworkEdge } from "./NetworkEdge";
 
-/*
- * The evidence map (AEV-43). The answer's sources are stops on a route; the route follows the
- * graph's own edges between consecutive stops ([1] → [2] → [3]) and draws itself once, leg by
- * leg, when an answer arrives. Only the clusters the answer cites are drawn.
- */
+const edgeTypes = { network: NetworkEdge };
+// Positions name the node's centre, so a node can grow at overview zoom and stay put.
+const CENTRE: [number, number] = [0.5, 0.5];
+const nodeTypes = { evidence: EvidenceGraphNode };
+const reduced = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+// The camera glides between views; zoom buttons answer quickly.
+const glide = (t: number) => (t < 0.5 ? 8 * t ** 4 : 1 - (-2 * t + 2) ** 4 / 2);
+const settle = (t: number) => 1 - (1 - t) ** 3;
+// Linear, not the default fly-to curve: that one pulls back mid-flight before closing in.
+const camera = () => ({ duration: reduced() ? 0 : 700, ease: glide, interpolate: "linear" as const });
+const nudge = () => ({ duration: reduced() ? 0 : 260, ease: settle, interpolate: "linear" as const });
+// A line can stand for several relationship types (the graph model joins them): "authored · reviewed".
+const verbOf = (type: string) => type.split("|").map(t => EDGE_VERBS[t] ?? t.toLowerCase().replaceAll("_", " ")).join(" · ");
 
-const W = 760;
-const GLYPH = 16;
-const LEG_STAGGER_MS = 320;
-
-type Placed = EvidenceNode & SimulationNodeDatum & { x: number; y: number };
-type Link = { source: string; target: string; type: string };
-
-/** A short map label: what a reader would call the node, not its full title. */
-export function shortLabel(node: EvidenceNode, max = 28): string {
-  const key = node.id.split(":").slice(1).join(":");
-  const trim = (s: string, n: number) => (s.length > n ? `${s.slice(0, n - 1)}…` : s);
-  switch (node.label) {
-    case "PullRequest":
-    case "Issue":
-      return `#${key.split("#").pop()}`;
-    case "File":
-      return key.split("/").pop() ?? node.title;
-    case "Component":
-      return node.title === "(root)" ? "repo root" : trim(node.title, max - 2);
-    case "Comment":
-      return "";
-    default:
-      return trim(node.title, max);
-  }
-}
-
-const EMPTY = {
-  nodes: [] as Placed[],
-  links: [] as Link[],
-  viewBox: "0 0 1 1",
-  vbWidth: 1,
-  vbHeight: 1,
-  max: 28,
-  legs: [] as Placed[][],
-  onRoute: new Set<string>(),
-  present: [] as string[],
-  placed: new Map<string, Placed>(),
-};
-
-const ALWAYS_LABELLED = new Set(["Person", "Component", "Decision", "PullRequest", "Issue", "Release"]);
-
-function components(nodes: string[], links: Link[]): Map<string, number> {
-  const adj = new Map<string, string[]>(nodes.map((n) => [n, []]));
-  for (const l of links) {
-    adj.get(l.source)?.push(l.target);
-    adj.get(l.target)?.push(l.source);
-  }
-  const group = new Map<string, number>();
-  let g = 0;
-  for (const start of nodes) {
-    if (group.has(start)) continue;
-    const queue = [start];
-    group.set(start, g);
-    while (queue.length) {
-      const id = queue.shift()!;
-      for (const next of adj.get(id) ?? []) {
-        if (group.has(next)) continue;
-        group.set(next, g);
-        queue.push(next);
-      }
-    }
-    g += 1;
-  }
-  return group;
-}
-
-/** Shortest path between two nodes over the (undirected) evidence edges. */
-function shortestPath(from: string, to: string, links: Link[]): string[] | null {
-  const adj = new Map<string, string[]>();
-  for (const l of links) {
-    adj.set(l.source, [...(adj.get(l.source) ?? []), l.target]);
-    adj.set(l.target, [...(adj.get(l.target) ?? []), l.source]);
-  }
-  const prev = new Map<string, string | null>([[from, null]]);
-  const queue = [from];
-  while (queue.length) {
-    const id = queue.shift()!;
-    if (id === to) break;
-    for (const next of adj.get(id) ?? []) {
-      if (prev.has(next)) continue;
-      prev.set(next, id);
-      queue.push(next);
-    }
-  }
-  if (!prev.has(to)) return null;
-  const path: string[] = [];
-  for (let at: string | null = to; at !== null; at = prev.get(at) ?? null) path.unshift(at);
-  return path;
-}
-
-function layout(evidence: EvidencePath, stops: string[], aspect: number, boxWidth: number) {
-  // Narrow boxes (phones) get shorter labels; label width is budgeted at the zoom in use.
-  const max = boxWidth < 520 ? 14 : 28;
-  const label = (n: EvidenceNode) => shortLabel(n, max);
-  const charWidth = 6.6 * Math.min(Math.max(W / boxWidth, 0.7), 2.2);
-  // Lay out for the box the map is drawn in, so a tall panel gets a tall map.
-  const H = Math.round(W * Math.min(Math.max(aspect, 0.5), 1.6));
-  const known = new Set(evidence.nodes.map((n) => n.id));
-  let links: Link[] = evidence.edges.filter((e) => known.has(e.source) && known.has(e.target));
-  const group = components([...known], links);
-  // Keep the clusters the route visits; without stops, the largest cluster.
-  const stopGroups = new Set(stops.filter((s) => known.has(s)).map((s) => group.get(s)));
-  if (stopGroups.size === 0) {
-    const sizes = new Map<number, number>();
-    group.forEach((g) => sizes.set(g, (sizes.get(g) ?? 0) + 1));
-    const largest = [...sizes.entries()].sort((a, b) => b[1] - a[1])[0]?.[0];
-    if (largest !== undefined) stopGroups.add(largest);
-  }
-  let kept = evidence.nodes.filter((n) => stopGroups.has(group.get(n.id)));
-  let keptIds = new Set(kept.map((n) => n.id));
-  links = links.filter((l) => keptIds.has(l.source) && keptIds.has(l.target));
-
-  // The route, from the graph's shape alone: consecutive stops joined by shortest paths.
-  const present = stops.filter((s) => keptIds.has(s));
-  const legIds: string[][] = [];
-  for (let i = 1; i < present.length; i++) {
-    const path = shortestPath(present[i - 1], present[i], links);
-    if (path && path.length > 1) legIds.push(path);
-  }
-  // A phone can't show 50 nodes legibly: draw the route itself; the Path tab lists the rest.
-  if (boxWidth < 520 && legIds.length > 0) {
-    keptIds = new Set([...legIds.flat(), ...present]);
-    kept = kept.filter((n) => keptIds.has(n.id));
-    links = links.filter((l) => keptIds.has(l.source) && keptIds.has(l.target));
-  }
-
-  // Clusters the route doesn't run through, and loose nodes, have nothing tying them to the
-  // rest, so charge alone pushes them to the edges. They get a stronger pull to the middle.
-  const degree = new Map<string, number>();
-  for (const l of links) for (const id of [l.source, l.target]) degree.set(id, (degree.get(id) ?? 0) + 1);
-  const mainGroup = group.get(present[0] ?? kept[0]?.id ?? "");
-  const loose = (d: Placed) => group.get(d.id) !== mainGroup || !degree.get(d.id);
-  const pullX = H > W ? 0.09 : 0.03;
-  const pullY = H > W ? 0.03 : 0.09;
-
-  const nodes = kept.map((n) => ({ ...n })) as Placed[];
-  const simulation = forceSimulation(nodes)
-    .force("link", forceLink<Placed, { source: string | Placed; target: string | Placed }>(links.map((l) => ({ ...l }))).id((d) => d.id).distance(70))
-    .force("charge", forceManyBody().strength(-420))
-    // Room for each label at the zoom it will be drawn at (wider on phones).
-    .force("collide", forceCollide<Placed>((d) => (label(d) ? Math.min(14 + label(d).length * charWidth * 0.42, 96) : 16)))
-    .force("center", forceCenter(W / 2, H / 2))
-    // Pull harder along the box's short side, so the drawing fills its shape.
-    .force("x", forceX<Placed>(W / 2).strength((d) => (loose(d) ? 0.2 : pullX)))
-    .force("y", forceY<Placed>(H / 2).strength((d) => (loose(d) ? 0.2 : pullY)))
-    .stop();
-  simulation.tick(320);
-
-  const pad = 56;
-  const minX = Math.min(...nodes.map((n) => n.x)) - pad;
-  const minY = Math.min(...nodes.map((n) => n.y)) - pad;
-  const maxX = Math.max(...nodes.map((n) => n.x + (label(n) ? 16 + label(n).length * charWidth : 0))) + pad / 2;
-  const maxY = Math.max(...nodes.map((n) => n.y)) + pad;
-  const vbWidth = Math.max(maxX - minX, 320);
-  const vbHeight = Math.max(maxY - minY, 240);
-  const viewBox = `${minX} ${minY} ${vbWidth} ${vbHeight}`;
-
-  const placed = new Map(nodes.map((n) => [n.id, n]));
-  const legs = legIds.map((path) => path.map((id) => placed.get(id)!));
-  const onRoute = new Set(legs.flat().map((n) => n.id).concat(present));
-  return { nodes, links, viewBox, vbWidth, vbHeight, legs, onRoute, present, placed, max };
-}
-
-type EvidenceMapProps = {
+type Props = {
   evidence: EvidencePath;
-  /** Node ids in reading order (the answer's citations); the route visits them in turn. */
   stops: string[];
   highlighted: string | null;
+  /** A source hovered in the answer; lit here without moving the camera. */
+  hovered?: string | null;
+  onHover?: (nodeId: string | null) => void;
   onSelect: (nodeId: string) => void;
   label: string;
-  /** What the route means here, for the legend. */
   routeLabel?: string;
+  /** The node the map is built around and opens on; defaults to the first stop. */
+  anchor?: string;
+  revision?: string;
+  busy?: boolean;
+  preview?: boolean;
+  /** Nodes to light without selecting them or moving the camera, e.g. where a starter lands. */
+  lit?: string[];
+  /** Label every node at any zoom and draw it at full size, for small maps whose names are the point. */
+  labelled?: boolean;
+  /** Hand-placed positions, for a drawing designed rather than found by the forces. */
+  positions?: Record<string, [number, number]>;
 };
 
-export function EvidenceMap({ evidence, stops, highlighted, onSelect, label, routeLabel = "route through the cited sources" }: EvidenceMapProps) {
-  const box = useRef<HTMLDivElement>(null);
-  const [aspect, setAspect] = useState<number | null>(null); // unknown until measured
-  const [boxWidth, setBoxWidth] = useState(620);
-  useEffect(() => {
-    const el = box.current;
-    if (!el) return;
-    const measure = () => {
-      const { width, height } = el.getBoundingClientRect();
-      // Re-lay out only when the shape really changes, not on every pixel of a resize.
-      if (width > 0 && height > 0) {
-        setBoxWidth((prev) => (Math.abs(prev - width) > 60 ? width : prev));
-        setAspect((prev) => (prev !== null && Math.abs(prev - height / width) <= 0.12 ? prev : height / width));
-      }
-    };
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-  const drawn = useMemo(() => (aspect === null ? null : layout(evidence, stops, aspect, boxWidth)), [evidence, stops, aspect, boxWidth]);
-  const { nodes, links, viewBox, vbWidth, vbHeight, legs, onRoute, present, placed, max } = drawn ?? EMPTY;
-  // SVG units per screen pixel: glyphs, labels and strokes keep their on-screen size at any zoom.
-  // "meet" fits the tighter axis, so a tall layout in a wide box is scaled by its height.
-  const boxHeight = boxWidth * (aspect ?? 1);
-  const k = Math.min(Math.max(vbWidth / boxWidth, vbHeight / boxHeight, 0.7), 2.2);
-  const G = GLYPH * k;
-  const stopNumber = new Map(present.map((id, i) => [id, i + 1]));
-  const selected = highlighted ? placed.get(highlighted) : undefined;
-  // The detail card takes the corner (or, on phones, the edge) furthest from the selected node,
-  // so it never covers what it describes.
-  const [vbX, vbY] = viewBox.split(" ").map(Number);
-  const cardTop = selected ? (selected.y - vbY) / vbHeight > 0.55 : false;
-  const cardRight = selected ? (selected.x - vbX) / vbWidth < 0.45 : false;
+/** Writes the zoom to a CSS variable, so nodes can keep a 26px target at overview zoom without
+ * handing React Flow new node objects on every camera frame. */
+function ZoomVariable({ target }: { target: RefObject<HTMLDivElement | null> }) {
+  const zoom = useStore(s => s.transform[2]);
+  useEffect(() => { target.current?.style.setProperty("--zoom", String(zoom)); }, [zoom, target]);
+  return null;
+}
+
+export function EvidenceMap(props: Props) {
+  return <ReactFlowProvider><Network {...props} /></ReactFlowProvider>;
+}
+
+function Network({ evidence, stops, highlighted, hovered = null, onHover, onSelect, label, routeLabel = "route through the cited sources", anchor, revision, busy, preview = false, lit, labelled = false, positions }: Props) {
+  const theme = useTheme();
+  const container = useRef<HTMLDivElement>(null);
+  const canvas = useRef<HTMLDivElement>(null);
+  const optionsRef = useRef<HTMLDivElement>(null);
+  const [fullscreen, setFullscreen] = useState(false);
+  const [fullscreenError, setFullscreenError] = useState("");
+  const [search, setSearch] = useState("");
+  const [edgeLabels, setEdgeLabels] = useState(false);
+  const [options, setOptions] = useState(false);
+  const flow = useReactFlow<GraphNode>();
+  const width = useStore(s => s.width);
+  const height = useStore(s => s.height);
+  const stopKey = JSON.stringify(stops);
+  const drawn = useMemo(() => layout(evidence, JSON.parse(stopKey), 0.85, 760, anchor, positions), [evidence, stopKey, anchor, positions]);
+  // A crowded map opens on its route, centred on the anchor; a small one opens whole.
+  const dense = evidence.nodes.length > 30;
   const neighbours = useMemo(() => {
-    const set = new Set<string>();
-    for (const l of links) {
-      if (l.source === highlighted) set.add(l.target);
-      if (l.target === highlighted) set.add(l.source);
+    const ids = new Set<string>();
+    for (const e of drawn.links) {
+      if (e.source === highlighted) ids.add(e.target);
+      if (e.target === highlighted) ids.add(e.source);
     }
-    return set;
-  }, [links, highlighted]);
-  const types = [...new Set(nodes.map((n) => n.label))];
+    return ids;
+  }, [drawn, highlighted]);
+  // While an answer loads, the previous one is drawn plain: the route is coloured, and drawn,
+  // only once the new answer lands.
+  const plain = preview || Boolean(busy);
+  // Node objects change only when that node does. React Flow re-measures every node it is handed
+  // as a new object, and edges unmount until it has: rebuilding all of them on hover made the
+  // whole map blink and the route draw itself again. Hover and dimming travel by context instead.
+  const baseNodes: GraphNode[] = useMemo(() => drawn.nodes.map((n, order) => {
+    const index = drawn.present.indexOf(n.id);
+    return {
+      id: n.id, type: "evidence", position: { x: n.x, y: n.y },
+      data: { evidence: n, order, anchor: !plain && n.id === drawn.anchor, onRoute: !plain && drawn.onRoute.has(n.id), stop: plain || index < 0 ? undefined : index + 1, labelled },
+      selected: false, draggable: false, ariaRole: "button",
+      ariaLabel: `${index < 0 ? "" : `Source ${index + 1}, `}${NODE_TYPE_NAMES[n.label] ?? n.label}: ${n.title}`,
+      domAttributes: { "aria-pressed": false },
+    };
+  }), [drawn, plain, labelled]);
+  const nodes = useMemo(() => baseNodes.map(n => n.id === highlighted ? { ...n, selected: true, domAttributes: { "aria-pressed": true } } : n), [baseNodes, highlighted]);
+  const litKey = lit?.length ? lit.join("|") : "";
+  const litSet = useMemo(() => litKey ? new Set(litKey.split("|")) : null, [litKey]);
+  const focusState = useMemo(() => ({ highlighted, hovered, neighbours, lit: litSet }), [highlighted, hovered, neighbours, litSet]);
+  const edges: Edge[] = useMemo(() => {
+    // Each leg remembers its place in citation order, so the route draws itself in that order.
+    const route = new Map(drawn.legs.flatMap((leg, order) => leg.slice(1).flatMap((n, i) => [[`${leg[i].id}|${n.id}`, order], [`${n.id}|${leg[i].id}`, order]] as const)));
+    return drawn.links.map((e, i) => {
+      const leg = route.get(`${e.source}|${e.target}`);
+      const cited = !plain && leg !== undefined;
+      const related = e.source === highlighted || e.target === highlighted;
+      const glowing = litSet !== null && litSet.has(e.source) && litSet.has(e.target);
+      const faded = (highlighted !== null && !related) || (litSet !== null && !glowing);
+      return { ...e, id: `${e.source}-${e.type}-${e.target}-${i}`, type: "network", selectable: false,
+        className: [cited && "route-leg", related && "is-related", glowing && "is-lit", faded && "is-faded"].filter(Boolean).join(" ") || undefined,
+        data: { delay: cited ? 120 + Math.min(leg ?? 0, 16) * 70 : undefined, sourceRadius: labelled ? 17 : !plain && e.source === drawn.anchor ? 19 : !plain && drawn.present.includes(e.source) ? 17 : !plain && drawn.onRoute.has(e.source) ? 10 : 6, targetRadius: labelled ? 19 : !plain && e.target === drawn.anchor ? 21 : !plain && drawn.present.includes(e.target) ? 19 : !plain && drawn.onRoute.has(e.target) ? 12 : 8 },
+        label: edgeLabels || related ? verbOf(e.type) : undefined,
+        labelStyle: { fontSize: 10.5, fontWeight: 500, fill: "var(--muted)" }, labelBgStyle: { fill: "var(--surface)", stroke: "var(--rule)", strokeWidth: 1 }, labelBgPadding: [6, 3],
+        style: { stroke: related || glowing ? "var(--ink)" : cited ? "var(--path)" : "var(--graph-edge)", strokeWidth: cited ? 1.8 : related || glowing ? 1.5 : 1 },
+      };
+    });
+  }, [drawn, highlighted, edgeLabels, plain, litSet, labelled]);
 
-  const onKey = (event: KeyboardEvent, id: string) => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      onSelect(id);
-    }
+  const cameraIntent = useRef<"all" | "sources" | "selected">(highlighted ? "selected" : dense && !preview ? "sources" : "all");
+  const lastSelection = useRef(highlighted);
+  const lastRevision = useRef(revision);
+  // Explicit bounds keep camera commands deterministic when selection and resize coincide.
+  // Include labels in the bounds; the library measures only the circular node itself.
+  const focus = useCallback((ids?: Set<string>, maxZoom = 1.05) => {
+    const targets = ids ? drawn.nodes.filter(n => ids.has(n.id)) : drawn.nodes;
+    if (!targets.length || !width || !height) return;
+    const left = Math.min(...targets.map(n => n.x)) - 85;
+    const top = Math.min(...targets.map(n => n.y)) - 70;
+    const right = Math.max(...targets.map(n => n.x)) + 85;
+    const bottom = Math.max(...targets.map(n => n.y)) + 90;
+    const viewport = getViewportForBounds({ x: left, y: top, width: right - left, height: bottom - top }, width, height, 0.15, maxZoom, 0.1);
+    void flow.setViewport(viewport, camera());
+  }, [drawn, width, height, flow]);
+  // The route, framed symmetrically around the anchor so the anchor lands in the middle.
+  const focusRoute = useCallback(() => {
+    const centre = drawn.placed.get(drawn.anchor ?? "");
+    const targets = drawn.nodes.filter(n => drawn.onRoute.has(n.id));
+    if (!centre || !targets.length || !width || !height) { focus(drawn.onRoute, 1.25); return; }
+    const halfX = Math.max(...targets.map(n => Math.abs(n.x - centre.x))) + 85;
+    const halfY = Math.max(...targets.map(n => Math.abs(n.y - centre.y))) + 90;
+    // Never so far out that nodes (kept about 128 apart) crowd below a 26px target.
+    const fit = getViewportForBounds({ x: centre.x - halfX, y: centre.y - halfY, width: halfX * 2, height: halfY * 2 }, width, height, 0.22, 1.25, 0.1);
+    const at = (zoom: number) => ({ x: width / 2 - centre.x * zoom, y: height / 2 - centre.y * zoom, zoom });
+    const cut = (zoom: number) => {
+      const r = Math.max(22, 13 / zoom), w = width / zoom / 2, h = height / zoom / 2;
+      return drawn.nodes.some(n => {
+        const dx = Math.abs(n.x - centre.x), dy = Math.abs(n.y - centre.y);
+        return dx - r < w && dy - r < h && (dx + r > w || dy + r > h);
+      });
+    };
+    // Step out from the route's own framing to the nearest zoom where no node is cut by the edge:
+    // a half-visible node is a target too small to hit. Usually a step or two is enough.
+    let zoom = fit.zoom;
+    for (let step = 1; cut(zoom) && step <= 30; step++) zoom = Math.max(fit.zoom * (1 - step * 0.03), 0.22);
+    const viewport = cut(zoom) ? fit : at(zoom);
+    void flow.setViewport(viewport, camera());
+  }, [drawn, width, height, flow, focus]);
+  useEffect(() => {
+    if (revision !== lastRevision.current) cameraIntent.current = dense && !preview ? "sources" : "all";
+    // Closing a node returns to the map's home view: the route when crowded, else everything.
+    else if (highlighted !== lastSelection.current) cameraIntent.current = highlighted ? "selected" : dense && !preview ? "sources" : "all";
+    lastRevision.current = revision;
+    lastSelection.current = highlighted;
+    // While an answer loads the camera holds still; it moves once, from here, when the answer lands.
+    if (busy) return;
+    if (cameraIntent.current === "selected" && highlighted) focus(new Set([highlighted, ...neighbours]), 1.35);
+    else if (cameraIntent.current === "sources") focusRoute();
+    else focus();
+  }, [revision, busy, highlighted, neighbours, drawn, focus, focusRoute, flow, dense, preview]);
+  useEffect(() => {
+    const update = () => setFullscreen(document.fullscreenElement === container.current);
+    document.addEventListener("fullscreenchange", update);
+    return () => document.removeEventListener("fullscreenchange", update);
+  }, []);
+  // The options card closes like any popover: a click elsewhere or Escape.
+  useEffect(() => {
+    if (!options) return;
+    const away = (event: PointerEvent) => { if (!optionsRef.current?.contains(event.target as Node)) setOptions(false); };
+    const escape = (event: KeyboardEvent) => { if (event.key === "Escape") setOptions(false); };
+    document.addEventListener("pointerdown", away);
+    document.addEventListener("keydown", escape);
+    return () => { document.removeEventListener("pointerdown", away); document.removeEventListener("keydown", escape); };
+  }, [options]);
+  const expand = async () => {
+    try {
+      if (document.fullscreenElement === container.current) await document.exitFullscreen();
+      else await container.current?.requestFullscreen();
+      setFullscreenError("");
+    } catch { setFullscreenError("Your browser blocked fullscreen. You can still pan and zoom the map here."); }
   };
+  const selected = evidence.nodes.find(n => n.id === highlighted);
+  const titles = useMemo(() => new Map(evidence.nodes.map(n => [n.id, n])), [evidence]);
+  const connections = useMemo(() => drawn.links.flatMap(e => {
+    if (e.source === highlighted) return [{ id: e.target, verb: verbOf(e.type), outgoing: true }];
+    if (e.target === highlighted) return [{ id: e.source, verb: verbOf(e.type), outgoing: false }];
+    return [];
+  }).filter(c => titles.has(c.id)), [drawn, highlighted, titles]);
+  const matches = search.trim() ? evidence.nodes.filter(n => `${n.title} ${n.label} ${n.id}`.toLowerCase().includes(search.trim().toLowerCase())) : [];
+  const types = [...new Set(evidence.nodes.map(n => n.label))];
 
-  if (evidence.nodes.length === 0) {
-    return <p className="p-6 text-sm text-muted">Nothing to map. This answer didn&apos;t use the graph.</p>;
-  }
-
+  if (!evidence.nodes.length) return <p className="p-6 text-sm text-muted">Nothing to map. This answer didn&apos;t use the graph.</p>;
   return (
-    <figure className="m-0 flex h-full flex-col">
-      <div ref={box} className="survey-grid relative min-h-0 flex-1 overflow-hidden border border-rule">
-        <svg
-          viewBox={viewBox}
-          preserveAspectRatio="xMidYMid meet"
-          role="group"
-          aria-label={`${label}: ${nodes.length} nodes and ${links.length} connections${legs.length ? `, with a route through ${present.length} cited sources` : ""}. The Path tab lists the same nodes as text.`}
-          className="absolute inset-0 h-full w-full"
-        >
-          <g aria-hidden>
-            {links.map((l, i) => {
-              const a = placed.get(l.source)!;
-              const b = placed.get(l.target)!;
-              const lit = highlighted !== null && (l.source === highlighted || l.target === highlighted);
-              return (
-                <line
-                  key={i}
-                  x1={a.x}
-                  y1={a.y}
-                  x2={b.x}
-                  y2={b.y}
-                  stroke={lit ? "var(--ink)" : "var(--rule)"}
-                  strokeWidth={(lit ? 1.5 : 1) * k}
-                />
-              );
-            })}
-            {legs.map((leg, i) => {
-              const length = leg.slice(1).reduce((sum, n, j) => sum + Math.hypot(n.x - leg[j].x, n.y - leg[j].y), 0);
-              return (
-                <polyline
-                  key={`leg-${i}`}
-                  className="route-leg"
-                  points={leg.map((n) => `${n.x},${n.y}`).join(" ")}
-                  fill="none"
-                  stroke="var(--path)"
-                  strokeWidth={3.5 * k}
-                  strokeLinecap="square"
-                  strokeLinejoin="miter"
-                  style={{ ["--len" as string]: `${Math.ceil(length) + 2}`, animationDelay: `${i * LEG_STAGGER_MS}ms` }}
-                />
-              );
-            })}
-          </g>
-          {nodes.map((n) => {
-            const isSelected = n.id === highlighted;
-            const dimmed = highlighted !== null && !isSelected && !neighbours.has(n.id) && !onRoute.has(n.id);
-            const text = shortLabel(n, max);
-            const showLabel = text && (ALWAYS_LABELLED.has(n.label) || onRoute.has(n.id) || isSelected);
-            const stop = stopNumber.get(n.id);
-            const name = NODE_TYPE_NAMES[n.label] ?? n.label;
-            const focusable = Boolean(showLabel || stop);
-            return (
-              <g
-                key={n.id}
-                role="button"
-                tabIndex={focusable ? 0 : -1}
-                aria-pressed={isSelected}
-                aria-label={`${stop ? `Source ${stop}, ` : ""}${name}: ${n.title}`}
-                onClick={() => onSelect(n.id)}
-                onKeyDown={(e) => onKey(e, n.id)}
-                transform={`translate(${n.x} ${n.y})`}
-                opacity={dimmed ? 0.3 : 1}
-                className="cursor-pointer outline-none transition-opacity duration-200 [&:focus-visible>rect.focus]:opacity-100"
-              >
-                <rect className="focus opacity-0" x={-G} y={-G} width={G * 2} height={G * 2} fill="none" stroke="var(--path)" strokeWidth={2 * k} />
-                {(isSelected || stop) && (
-                  <rect x={-G * 0.85} y={-G * 0.85} width={G * 1.7} height={G * 1.7} fill={isSelected ? "var(--path-soft)" : "var(--surface)"} stroke="var(--path)" strokeWidth={(stop ? 2 : 1.5) * k} />
-                )}
-                <g
-                  transform={`translate(${-G / 2} ${-G / 2}) scale(${G / 14})`}
-                  style={{ color: `var(--node-${n.label.toLowerCase()}, var(--muted))` }}
-                  fill={n.label === "Release" ? "none" : "currentColor"}
-                  stroke="currentColor"
-                  strokeWidth={n.label === "Release" ? 1.6 : 0}
-                >
-                  {NODE_SHAPES[n.label] ?? <circle cx="7" cy="7" r="4" />}
-                </g>
-                {stop && (
-                  <g transform={`translate(${G * 0.55} ${-G * 0.95})`} aria-hidden>
-                    <rect x={-7.5 * k} y={-7.5 * k} width={15 * k} height={15 * k} fill="var(--path)" />
-                    <text textAnchor="middle" y={3.4 * k} fontSize={9.5 * k} fontWeight={600} fill="var(--surface)" className="font-sans tabular-nums">
-                      {stop}
-                    </text>
-                  </g>
-                )}
-                {showLabel && (
-                  <text
-                    x={G * 0.85}
-                    y={4 * k}
-                    fontSize={12.5 * k}
-                    fontWeight={onRoute.has(n.id) ? 600 : 400}
-                    className="fill-ink font-sans"
-                    paintOrder="stroke"
-                    stroke="var(--surface)"
-                    strokeWidth={4 * k}
-                    strokeLinejoin="round"
-                  >
-                    {text}
-                  </text>
-                )}
-                <title>{`${name}: ${n.title}`}</title>
-              </g>
-            );
-          })}
-        </svg>
-
-        {selected && (
-          <div
-            key={selected.id}
-            className={`arrive absolute right-3 left-3 max-w-md border border-rule bg-surface/95 p-3 text-sm shadow-[0_6px_20px_-8px_rgb(0_0_0/0.25)] ${
-              cardTop ? "top-3" : "bottom-3"
-            } ${cardRight ? "sm:left-auto" : "sm:right-auto"}`}
-            aria-live="polite"
-          >
-            <p className="text-xs text-muted">{NODE_TYPE_NAMES[selected.label] ?? selected.label}</p>
-            <p className="mt-0.5 leading-snug text-ink">{selected.title}</p>
-            {selected.url && (
-              <a href={selected.url} target="_blank" rel="noreferrer" className="mt-1.5 inline-block text-path underline underline-offset-2">
-                Open on GitHub
-              </a>
-            )}
-          </div>
-        )}
+    <div ref={container} className="network-shell" data-preview={preview || undefined} data-dense={evidence.nodes.length > 30 || undefined} data-fullscreen={fullscreen || undefined} data-busy={busy || undefined} data-labelled={labelled || undefined}>
+      <div className="network-stage">
+      <div ref={canvas} className="network-canvas" onKeyDownCapture={(event) => { const id = (event.target as HTMLElement).closest(".react-flow__node")?.getAttribute("data-id"); if (id && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); event.stopPropagation(); onSelect(id); } }} role="group" aria-label={`${label}: ${nodes.length} nodes and ${edges.length} connections. The Path tab lists the same nodes as text.`}>
+        <NetworkFocus.Provider value={focusState}>
+        <ReactFlow<GraphNode> nodes={nodes} edges={edges} nodeTypes={nodeTypes} edgeTypes={edgeTypes} colorMode={theme} nodeOrigin={CENTRE}
+          minZoom={0.15} maxZoom={2.5}
+          nodesDraggable={false} nodesConnectable={false} edgesFocusable={false} deleteKeyCode={null}
+          onNodeClick={(_, node) => onSelect(node.id)} onNodeMouseEnter={(_, node) => onHover?.(node.id)} onNodeMouseLeave={() => onHover?.(null)} onPaneClick={() => { if (highlighted) onSelect(highlighted); }}
+          autoPanOnNodeFocus preventScrolling={false} zoomOnDoubleClick={false}>
+          <Background variant={BackgroundVariant.Dots} gap={24} size={1.2} color="var(--graph-grid)" />
+          <ZoomVariable target={canvas} />
+        </ReactFlow>
+        </NetworkFocus.Provider>
+        {busy && <span className="network-progress" aria-hidden="true" />}
       </div>
-
-      <figcaption className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted">
-        {legs.length > 0 && (
-          <span className="flex items-center gap-1.5">
-            <svg width="18" height="6" aria-hidden>
-              <line x1="1" y1="3" x2="17" y2="3" stroke="var(--path)" strokeWidth="3" />
-            </svg>
-            {routeLabel}
-          </span>
-        )}
-        {types.map((t) => (
-          <span key={t} className="flex items-center gap-1.5">
-            <svg viewBox="0 0 14 14" width="11" height="11" aria-hidden style={{ color: `var(--node-${t.toLowerCase()}, var(--muted))` }} fill={t === "Release" ? "none" : "currentColor"} stroke="currentColor" strokeWidth={t === "Release" ? 1.6 : 0}>
-              {NODE_SHAPES[t]}
-            </svg>
-            {NODE_TYPE_NAMES[t] ?? t}
-          </span>
-        ))}
-      </figcaption>
-    </figure>
+      <AnimatePresence>
+        {selected && <m.section key="inspector" className="network-inspector" aria-label="Selected node" aria-live="polite"
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, transition: { duration: 0.14 } }} transition={{ duration: 0.2 }}>
+          {/* Moving between nodes swaps only the contents, so the panel itself stays put. */}
+          <m.div key={selected.id} className="inspector-body" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.28, ease: [0.2, 0.7, 0.2, 1] }}>
+            {/* The type is carried by the glyph tile and a quiet meta line, not a label of its own. */}
+            <div className="inspector-head" style={{ "--node-color": `var(--node-${selected.label.toLowerCase()}, var(--muted))` } as CSSProperties}>
+              <span className="inspector-glyph" aria-hidden="true"><NodeGlyph label={selected.label} /></span>
+              <div className="inspector-heading">
+                <strong className="inspector-title">{selected.title}</strong>
+                <p className="inspector-meta">{NODE_TYPE_NAMES[selected.label] ?? selected.label} · {neighbours.size ? `${neighbours.size} connected ${neighbours.size === 1 ? "node" : "nodes"}` : "No connections returned for this node"}</p>
+              </div>
+              <button type="button" className="inspector-close" aria-label="Close node details" onClick={() => onSelect(selected.id)}><CloseIcon /></button>
+            </div>
+            {selected.url && <a className="inspector-link" href={selected.url} target="_blank" rel="noreferrer"><GitHubMark size={13} />Open on GitHub<ExternalIcon /></a>}
+            {connections.length > 0 && <div className="inspector-connections">
+              <h3>Connected</h3>
+              <ul>
+                {connections.map((c, i) => {
+                  const node = titles.get(c.id)!;
+                  return <li key={`${c.id}-${i}`}>
+                    <button type="button" aria-label={`${node.title}, ${c.outgoing ? c.verb : `${c.verb} this`}`} onClick={() => onSelect(c.id)}
+                      onMouseEnter={() => onHover?.(c.id)} onMouseLeave={() => onHover?.(null)} onFocus={() => onHover?.(c.id)} onBlur={() => onHover?.(null)}>
+                      <NodeGlyph label={node.label} />
+                      <span className="inspector-connection-text">
+                        <span className="inspector-connection-verb">{c.outgoing ? c.verb : `${c.verb} this`}</span>
+                        <span className="inspector-connection-title">{node.title}</span>
+                      </span>
+                    </button>
+                  </li>;
+                })}
+              </ul>
+            </div>}
+          </m.div>
+        </m.section>}
+      </AnimatePresence>
+      </div>
+      <div className="network-tools">
+        <div className="network-search">
+          <SearchIcon />
+          <input type="search" aria-label="Find a node" placeholder="Find a person, PR, file…" value={search} onChange={e => setSearch(e.target.value)} onKeyDown={e => { if (e.key === "Escape") setSearch(""); }} />
+          <AnimatePresence>
+            {search.trim() && <m.div className="network-search-results" initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 4, transition: { duration: 0.12 } }} transition={{ duration: 0.2, ease: [0.2, 0.7, 0.2, 1] }}>
+              {matches.length === 0 ? <p>No matching nodes in this answer.</p> : matches.map(n => <button type="button" key={n.id} aria-label={`Find ${NODE_TYPE_NAMES[n.label] ?? n.label}: ${n.title}`} onClick={() => { onSelect(n.id); setSearch(""); }}><NodeGlyph label={n.label} /><span>{n.title}</span></button>)}
+            </m.div>}
+          </AnimatePresence>
+        </div>
+        <div className="network-navigation" aria-label="Graph navigation">
+          <button type="button" title="Zoom in" aria-label="Zoom in" onClick={() => void flow.zoomIn(nudge())}><PlusIcon /></button>
+          <button type="button" title="Zoom out" aria-label="Zoom out" onClick={() => void flow.zoomOut(nudge())}><MinusIcon /></button>
+          <span className="network-navigation-rule" aria-hidden="true" />
+          <button type="button" aria-label="Fit all nodes" onClick={() => { cameraIntent.current = "all"; focus(); }}>Fit all</button>
+          {!preview && <button type="button" aria-label="Focus cited sources" disabled={!drawn.onRoute.size} onClick={() => { cameraIntent.current = "sources"; focusRoute(); }}>Focus sources</button>}
+        </div>
+        <button type="button" className="network-control" onClick={() => void expand()} aria-label={fullscreen ? "Exit fullscreen graph" : "Fullscreen graph"} title={fullscreen ? "Exit fullscreen" : "Fullscreen"}>{fullscreen ? <CollapseIcon /> : <ExpandIcon />}</button>
+        <div className="network-options-anchor" ref={optionsRef}>
+          <button type="button" className="network-control" aria-label="Graph options" title="Legend and labels" aria-expanded={options} aria-controls="graph-options" data-open={options || undefined} onClick={() => setOptions(v => !v)}><LayersIcon /></button>
+          <AnimatePresence>
+            {options && <m.div className="network-options" id="graph-options" initial={{ opacity: 0, y: 6, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 4, scale: 0.98, transition: { duration: 0.12 } }} transition={{ duration: 0.22, ease: [0.2, 0.7, 0.2, 1] }}>
+              <p className="network-count">{nodes.length} nodes · {edges.length} connections</p>
+              <div className="network-legend">
+                {types.map(t => <span key={t}><NodeGlyph label={t} /><span>{NODE_TYPE_NAMES[t] ?? t}</span></span>)}
+              </div>
+              <label className="network-switch"><span>Edge labels</span><input type="checkbox" checked={edgeLabels} onChange={e => setEdgeLabels(e.target.checked)} /></label>
+              <div className="network-help"><span>{drawn.legs.length ? routeLabel : "All evidence returned for this answer"}</span><span>All nodes shown · zoom for labels</span></div>
+            </m.div>}
+          </AnimatePresence>
+        </div>
+      </div>
+      {fullscreenError && <p role="status" className="px-3 pb-3 text-sm text-danger">{fullscreenError}</p>}
+    </div>
   );
 }

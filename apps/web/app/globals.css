@@ -1,21 +1,42 @@
 @import "tailwindcss";
+@import "@xyflow/react/dist/style.css";
 
-/* Survey sheet (AEV-43, frontend-design + ui-ux-pro-max). The org is a map; an answer's
-   evidence is a route across it. Components use these names, never raw hex.
-   Amber still means one thing: the traced evidence path. */
+/* Shared workspace colours. The graph keeps its own evidence-route accent. */
 :root {
   color-scheme: light;
-  --paper: #eef1ec; /* chart paper: cool, not cream */
-  --surface: #f8f9f6;
+  --paper: #ffffff; /* chart paper: cool, not cream */
+  --surface: #ffffff;
   --ink: #1a2433;
   --muted: #546070; /* 5.7:1 on paper */
-  --grid: #dfe5e0; /* survey grid lines */
-  --rule: #c9d1cb;
+  --grid: #e4e7ec; /* survey grid lines */
+  --rule: #dde2e8;
   --rule-strong: #7d8882; /* control borders: 3.2:1 on paper (WCAG 1.4.11) */
   --path: #8a560f; /* the route: 5.3:1 on paper */
   --path-soft: #f1e3cc;
+  --on-accent: #ffffff;
+  --accent-hover: #74480c;
+  --hover: #f3f5f7;
+  --subtle: #fafbfc;
+  --suggestion-hover: #f7f9fc;
+  --timeline-rule: #d5dfeb;
+  --success: #216452;
+  --graph-grid: #becad8;
+  --graph-edge: #b9c5c3;
+  --node-halo: #ffffffc9;
+  --popover-shadow: #1a243312;
   --danger: #a3271a;
   --danger-soft: #f7e3df;
+  --segment-track: #f1f3f6;
+  --segment-thumb: #ffffff;
+  --card-border-hover: #c9d2dd;
+  --field-border-focus: #a9b8ca;
+  --shadow-soft: 0 1px 2px #1a24330d, 0 1px 1px #1a243308;
+  --shadow-raised: 0 1px 2px #1a24330d, 0 6px 20px -8px #1a24331f;
+  --code-keyword: #3b5bab;
+  --code-param: #8a3f8f;
+  --code-string: #216452;
+  --skeleton: #eef1f4;
+  --skeleton-shine: #f9fafb;
 
   /* Node types. Each also has its own glyph, so colour is never the only cue. */
   --node-person: #2c6e63;
@@ -31,43 +52,68 @@
   --dur-fast: 160ms;
   --dur-base: 240ms;
   --dur-route: 1100ms;
+  /* Hover fills: an even ease-in-out, a touch slower on the way out. */
+  --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
+  --hover-in: 260ms;
+  --hover-out: 420ms;
 }
 
-/* Light for everyone: the sheet is designed to be read in daylight, whatever the system
-   setting. The night chart is kept, off, behind data-theme="dark" for a future toggle. */
+
+/* Neutral charcoal surfaces, soft text and restrained blue controls. */
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --paper: #121a23;
-  --surface: #18222d;
-  --ink: #e3e8ee;
-  --muted: #9aa6b4;
-  --grid: #1b2631;
-  --rule: #2a3747;
-  --rule-strong: #64768a; /* 3.4:1 on surface */
+  --paper: #181a1d;
+  --surface: #1d2024;
+  --ink: #e5e7eb;
+  --muted: #a5adb8;
+  --grid: #30353b;
+  --rule: #343a42;
+  --rule-strong: #737c88;
   --path: #e2a447;
   --path-soft: #3a2c16;
-  --danger: #f08b7d;
-  --danger-soft: #3a1d1a;
-
-  --node-person: #6fc2b2;
-  --node-pullrequest: #8ea9ef;
-  --node-issue: #d39ad7;
-  --node-component: #e3e8ee;
-  --node-file: #9aa6b4;
-  --node-decision: #e2a447;
-  --node-comment: #a9c46f;
-  --node-release: #f08b7d;
+  --on-accent: #181a1d;
+  --accent-hover: #ebb867;
+  --hover: #282d33;
+  --subtle: #202429;
+  --suggestion-hover: #202429;
+  --timeline-rule: #3e4b5c;
+  --success: #90bca9;
+  --danger: #e4a099;
+  --danger-soft: #392925;
+  --segment-track: #131518;
+  --segment-thumb: #2a2f36;
+  --card-border-hover: #4a525d;
+  --field-border-focus: #58626f;
+  --shadow-soft: 0 1px 2px #00000059;
+  --shadow-raised: 0 1px 2px #00000059, 0 8px 24px -10px #00000080;
+  --code-keyword: #8fa9d7;
+  --code-param: #bc9abd;
+  --code-string: #90bca9;
+  --skeleton: #262a30;
+  --skeleton-shine: #323840;
+  --graph-grid: #3b424b;
+  --graph-edge: #626b76;
+  --node-halo: #1d2024d9;
+  --popover-shadow: #00000033;
+  --node-person: #79ac9d;
+  --node-pullrequest: #8fa9d7;
+  --node-issue: #bc9abd;
+  --node-component: #d3d8df;
+  --node-file: #a5adb7;
+  --node-decision: #c5a475;
+  --node-comment: #a5b980;
+  --node-release: #dca29a;
 }
 
-/* Square corners everywhere (AEV-43): the survey sheet is ruled, not rounded. */
+/* Consistent corner sizes for workspace controls. */
 @theme {
-  --radius-xs: 0;
-  --radius-sm: 0;
-  --radius-md: 0;
-  --radius-lg: 0;
-  --radius-xl: 0;
-  --radius-2xl: 0;
-  --radius-full: 0;
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-full: 9999px;
 
   /* Type scale, by role. Tailwind's own text-xs/sm/base/lg/xl/2xl cover 12–24 px; these name
      the in-between sizes the survey sheet uses, so no component picks a pixel size of its own.
@@ -78,7 +124,7 @@
   --text-lead: 1.0625rem; /* 17 px: serif starter questions and the drafted reply */
   --text-answer: 1.125rem; /* 18 px: the answer itself */
   --text-title: 1.375rem; /* 22 px: the question above its answer */
-  --text-display: clamp(2.25rem, 4.4vw, 3.5rem); /* page headings before the first question */
+  --text-display: clamp(1.75rem, 3vw, 2.5rem); /* page headings before the first question */
 }
 
 @theme inline {
@@ -105,35 +151,9 @@ body {
   font-size: 16px;
 }
 
-/* Scrollbars: thin, with a square thumb in the rule colour, on the page and in every inner
-   scroll area (Path and Cypher tabs, the question box). scrollbar-color inherits;
-   scrollbar-width doesn't, so it goes on every element. */
-:root {
-  scrollbar-color: var(--rule-strong) transparent;
-}
-* {
-  scrollbar-width: thin;
-}
-/* Browsers without the standard properties (older Safari) use the WebKit pseudo-elements.
-   Where scrollbar-width works, Chrome ignores these, so they only apply as a fallback. */
-@supports not (scrollbar-width: thin) {
-  ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: var(--rule-strong);
-    border: 2px solid transparent;
-    background-clip: padding-box;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: var(--muted);
-    background-clip: padding-box;
-  }
-}
+/* Keep every pane scrollable without visible scrollbar tracks or thumbs. */
+* { scrollbar-width:none; }
+*::-webkit-scrollbar { display:none; width:0; height:0; }
 
 /* Tailwind v4 no longer sets a pointer on buttons. */
 button:not(:disabled),
@@ -159,16 +179,18 @@ summary {
 /* The one orchestrated moment: the route draws itself, leg by leg, in citation order. */
 @keyframes route-draw {
   from {
-    stroke-dashoffset: var(--len);
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
   }
   to {
+    stroke-dasharray: 1000;
     stroke-dashoffset: 0;
   }
 }
-.route-leg {
-  stroke-dasharray: var(--len);
-  stroke-dashoffset: var(--len);
-  animation: route-draw var(--dur-route) var(--ease-out) forwards;
+/* Route edges carry a fixed path length (1000), so one dash draws any leg end to end.
+   The dash lives only in the animation: Chrome can drop a dashed path's paint after zooming. */
+.route-leg .react-flow__edge-path {
+  animation: route-draw var(--dur-route) var(--ease-out) 120ms backwards;
 }
 
 /* Reveals that answer a state change: a step arriving, a panel opening. */
@@ -203,7 +225,467 @@ summary {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  .route-leg {
-    stroke-dashoffset: 0;
+  .route-leg .react-flow__edge-path {
+    animation: none;
   }
 }
+
+
+/* A white workspace with a continuous, navigable evidence network. */
+.network-shell { display:flex; flex-direction:column; height:100%; min-height:640px; border:1px solid var(--rule); border-radius:12px; overflow:hidden; background:var(--surface); }
+.network-shell:fullscreen { width:100vw; height:100dvh; border:0; border-radius:0; padding:16px; }
+.network-toolbar { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 16px; border-bottom:1px solid var(--rule); }
+.network-toolbar strong { font-size:13px; font-weight:600; }
+.network-toolbar span { display:block; font-size:11px; color:var(--muted); margin-top:3px; }
+.network-canvas { position:relative; flex:1; min-height:300px; }
+.workspace-form { padding:20px; border:1px solid var(--rule); border-radius:10px; background:var(--subtle); }
+.workspace-form textarea { border-radius:6px; background:var(--surface); font-size:15px; }
+.workspace-form button[type=submit] { border-radius:6px; }
+.workspace-starters { border:1px solid var(--rule); border-radius:10px; overflow:hidden; }
+.workspace-starters button { padding:14px; align-items:center; }
+.workspace-starters button:hover { background:var(--hover); }
+.workspace-starters button > span:first-child { font-size:11px; font-weight:600; }
+.workspace-starters button > span:last-child { font-size:14px; }
+.workspace-status { display:inline-flex; align-items:center; gap:7px; padding:6px 9px; border:1px solid var(--rule); border-radius:5px; font-size:11px; color:var(--muted); background:var(--subtle); }
+.workspace-status::before { content:""; width:6px; height:6px; border-radius:50%; background:var(--path); }
+@media (max-width:640px) { .network-shell { min-height:680px; } .network-toolbar { padding:8px 12px; } .network-help span:last-child { display:none; } .workspace-form { padding:14px; } }
+.triage-summary { padding:18px; border:1px solid var(--rule); border-radius:10px; background:var(--subtle); }
+.triage-focus { border:1px solid var(--rule-strong); border-radius:6px; padding:10px 12px; text-align:left; font-size:12px; background:var(--surface); overflow-wrap:anywhere; }
+.triage-focus:hover { border-color:var(--path); background:var(--path-soft); }
+.triage-focus:disabled { opacity:.5; cursor:default; }
+.network-shell { min-height:560px; }
+
+@media (max-width:640px) { .network-shell[data-dense] .network-canvas { min-height:520px; } }
+
+/* Ask, explore, inspect: context is revealed when requested. */
+.app-frame { width:100%; max-width:1920px; margin:0 auto; display:flex; flex:1; flex-direction:column; }
+.app-header { height:72px; flex-shrink:0; display:flex; align-items:center; justify-content:space-between; padding:0 32px; border-bottom:1px solid var(--rule); }
+.icon-button { width:40px; height:40px; display:inline-grid; place-items:center; flex-shrink:0; font-size:20px; color:var(--muted); border-radius:6px; }
+.icon-button:hover { background:var(--hover); color:var(--ink); }
+
+/* Wider reading pane; the graph keeps its existing visual system. */
+.evidence-workspace { display:grid; grid-template-columns:clamp(420px,36vw,560px) minmax(0,1fr); height:calc(100dvh - 72px); min-height:640px; }
+.workspace-sidebar { min-width:0; padding:28px 36px 0; border-right:1px solid var(--rule); display:grid; grid-template-areas:"screen"; grid-template-rows:minmax(0,1fr); overflow:hidden; }
+.workspace-sidebar.is-start { padding-top:28px; }
+.workspace-screen { grid-area:screen; min-width:0; min-height:0; display:flex; flex-direction:column; }
+.workspace-screen[data-screen=start] { overflow:auto; margin:0 -36px; padding:24px 36px 32px; }
+.workspace-screen[inert] { pointer-events:none; }
+.question-entry h1 { font-family:var(--font-newsreader), Georgia, serif; font-size:24px; font-weight:600; letter-spacing:-.025em; line-height:1.25; margin:0; }
+.workspace-panels { display:grid; grid-template-areas:"tab"; grid-template-rows:minmax(0,1fr); min-height:0; flex:1; margin:0 -36px; overflow:hidden; }
+.workspace-content { grid-area:tab; min-height:0; min-width:0; overflow:auto; padding:24px 36px 36px; }
+.workspace-content[inert] { pointer-events:none; }
+.workspace-content:focus-visible { outline-offset:-2px; }
+.workspace-map { min-width:0; min-height:0; }
+.evidence-panel { height:100%; min-height:0; display:flex; flex-direction:column; }
+.evidence-map-slot { flex:1; min-width:0; min-height:0; }
+.answer-result .text-answer { font-size:16px; line-height:1.75; }
+.answer-result .text-answer > p + p { margin-top:20px; }
+.answer-meta { margin-top:28px; padding-top:16px; border-top:1px solid var(--rule); font-size:12px; line-height:1.6; color:var(--muted); }
+.text-action { min-height:40px; display:inline-flex; align-items:center; gap:8px; color:var(--path); font-size:13px; text-align:left; }
+.text-action:hover { text-decoration:underline; text-underline-offset:3px; }
+.sandbox-link { display:inline-block; margin-top:20px; padding:10px 0; font-size:13px; color:var(--path); text-decoration:underline; text-underline-offset:4px; }
+/* Triage mode: two quiet inline radios; only the chosen dot carries colour. */
+.mode-switch { margin-top:12px; display:flex; flex-direction:column; align-items:flex-start; gap:6px; }
+.mode-track { display:flex; flex-wrap:wrap; gap:4px 18px; }
+.mode-option { position:relative; display:inline-flex; align-items:center; gap:8px; min-height:28px; font-size:13px; line-height:16px; color:var(--muted); cursor:pointer; transition:color var(--hover-out) var(--ease-soft); }
+.mode-option input { position:absolute; inset:0; margin:0; opacity:0; cursor:inherit; }
+.mode-dot { position:relative; flex-shrink:0; box-sizing:border-box; width:16px; height:16px; border:1px solid var(--rule-strong); border-radius:50%; background:var(--surface); transition:border-color var(--hover-out) var(--ease-soft), background-color var(--hover-out) var(--ease-soft); }
+.mode-dot::after { content:""; position:absolute; inset:4px; border-radius:50%; background:var(--on-accent); opacity:0; transform:scale(.4); transition:transform var(--hover-out) var(--ease-soft), opacity var(--hover-out) var(--ease-soft); }
+.mode-option:hover { color:var(--ink); transition-duration:var(--hover-in); }
+.mode-option:hover .mode-dot { border-color:var(--ink); transition-duration:var(--hover-in); }
+.mode-option:has(input:checked) { color:var(--ink); }
+.mode-option:has(input:checked) .mode-dot { border-color:var(--path); background:var(--path); }
+.mode-option:has(input:checked) .mode-dot::after { opacity:1; transform:none; transition-duration:var(--hover-in); }
+.mode-option:has(input:disabled) { opacity:.45; cursor:not-allowed; }
+.mode-option:has(input:disabled):hover { color:var(--muted); }
+.mode-option:has(input:disabled):hover .mode-dot { border-color:var(--rule-strong); }
+.mode-option:has(input:focus-visible) .mode-dot { outline:2px solid var(--path); outline-offset:2px; }
+.mode-hint { font-size:12px; line-height:1.5; color:var(--muted); opacity:.8; }
+.triage-timeline { margin:0; }
+.triage-step { display:grid; grid-template-columns:24px minmax(0,1fr); gap:16px; }
+.timeline-track { position:relative; display:flex; flex-direction:column; align-items:center; }
+.timeline-number { position:relative; z-index:1; display:grid; place-items:center; width:24px; height:24px; flex-shrink:0; border-radius:50%; background:var(--path-soft); color:var(--path); font-size:11px; font-weight:600; margin-top:2px; }
+.timeline-line { width:1px; background:var(--timeline-rule); flex:1; min-height:24px; margin-top:6px; margin-bottom:6px; }
+.timeline-content { min-width:0; padding-bottom:32px; }
+.timeline-content h3 { font-size:15px; line-height:1.6; font-weight:600; color:var(--ink); }
+.timeline-body { margin-top:10px; font-size:14px; line-height:1.65; }
+.timeline-body .text-xl { font-size:17px; line-height:1.5; font-weight:400; }
+.timeline-body .font-mono { font-size:13px; }
+.timeline-body .text-ui { font-size:14px; }
+.timeline-body .text-xs { font-size:12px; line-height:1.6; }
+.triage-step.is-pending .timeline-number { background:var(--hover); color:var(--muted); }
+.triage-step.is-pending h3 { color:var(--muted); font-weight:400; }
+/* Small status pills: component strength and likely duplicates. */
+.triage-pill { display:inline-flex; align-items:center; height:18px; margin-left:8px; padding:0 7px; border-radius:999px; font-size:11px; font-weight:500; vertical-align:1px; background:var(--hover); color:var(--muted); }
+.triage-pill.is-strong { background:color-mix(in srgb, var(--success) 14%, transparent); color:var(--success); }
+.triage-pill.is-moderate { background:var(--path-soft); color:var(--path); }
+.triage-pill.is-duplicate { margin-left:0; background:color-mix(in srgb, var(--node-decision) 16%, transparent); color:var(--node-decision); }
+.triage-key { font-family:var(--font-plex-mono), monospace; font-size:13px; color:var(--ink); text-decoration:underline; text-decoration-color:transparent; text-underline-offset:3px; transition:text-decoration-color var(--hover-out) var(--ease-soft), color var(--hover-out) var(--ease-soft); }
+.triage-key.is-muted { color:var(--muted); }
+.triage-key:hover { color:var(--ink); text-decoration-color:var(--rule-strong); transition-duration:var(--hover-in); }
+.triage-action-list { margin-top:4px; }
+.triage-action { display:grid; grid-template-columns:84px minmax(0,1fr); align-items:start; gap:12px; padding:10px 0; font-size:14px; line-height:1.5; }
+.triage-action + .triage-action { border-top:1px solid var(--rule); }
+.action-status { justify-self:start; display:inline-flex; align-items:center; gap:5px; height:20px; margin-top:1px; padding:0 8px; border-radius:999px; font-size:11px; font-weight:500; background:var(--hover); color:var(--muted); }
+.action-text { display:flex; flex-direction:column; gap:2px; min-width:0; }
+.action-detail { font-size:12.5px; line-height:1.5; color:var(--muted); }
+.action-link { align-self:flex-start; font-size:12.5px; color:var(--path); text-decoration:underline; text-decoration-color:transparent; text-underline-offset:3px; transition:text-decoration-color var(--hover-out) var(--ease-soft); }
+.action-link:hover { text-decoration-color:currentColor; transition-duration:var(--hover-in); }
+.action-status.is-done { background:color-mix(in srgb, var(--success) 14%, transparent); color:var(--success); }
+.action-status.is-failed { background:var(--danger-soft); color:var(--danger); }
+/* The drafted reply as a quoted message: a soft card with a faint opening quote mark. */
+.reply-card { position:relative; margin:2px 0 0; padding:16px 44px 16px 42px; border:1px solid var(--rule); border-radius:14px; background:var(--subtle); }
+.reply-card::before { content:"“"; position:absolute; left:13px; top:8px; font:600 40px/1 Georgia, "Times New Roman", serif; color:var(--rule-strong); opacity:.45; pointer-events:none; }
+.reply-copy { position:absolute; top:8px; right:8px; display:grid; place-items:center; width:28px; height:28px; border-radius:7px; color:var(--muted); opacity:0; transition:opacity var(--hover-out) var(--ease-soft), background-color var(--hover-out) var(--ease-soft), color var(--hover-out) var(--ease-soft); }
+.reply-card:hover .reply-copy, .reply-copy:focus-visible, .reply-copy[data-copied] { opacity:1; transition-duration:var(--hover-in); }
+.reply-copy:hover { background:var(--hover); color:var(--ink); }
+.reply-copy[data-copied] { color:var(--success); }
+@media (hover: none) { .reply-copy { opacity:1; } }
+.reply-text { font-family:var(--font-newsreader), Georgia, serif; display:flex; flex-direction:column; gap:10px; font-size:14.5px; line-height:1.65; color:var(--ink); }
+.reply-text code { background:var(--hover); border-radius:4px; }
+.notice-starters { display:flex; flex-direction:column; margin-top:12px; }
+.evidence-map-slot .network-shell { min-height:0; border:0; border-radius:0; }
+.network-stage { display:flex; flex:1; min-height:0; }
+.network-stage .network-canvas { min-width:0; min-height:360px; }
+
+.network-shell { --path:#8a560f; --path-soft:#f1e3cc; }
+@media (max-width:700px) { .evidence-workspace { display:flex; flex-direction:column; height:auto; } .workspace-sidebar { min-height:600px; padding:24px; } .workspace-map { height:70dvh; min-height:560px; } .workspace-content { overflow:visible; } }
+
+:root[data-theme="dark"] .network-shell { --path:#c5a475; --path-soft:#373024; }
+
+.network-shell .react-flow { --xy-background-color:var(--surface); --xy-attribution-background-color:var(--surface); }
+.network-shell .react-flow__attribution a { color:var(--muted); }
+
+/* Header: a segmented section switch and a one-button theme toggle. */
+.section-nav { display:flex; gap:2px; padding:3px; border:1px solid var(--rule); border-radius:10px; background:var(--segment-track); }
+.section-nav a { display:inline-flex; align-items:center; height:32px; padding:0 14px; border-radius:7px; font-size:14px; font-weight:500; color:var(--muted); transition:color var(--dur-fast), background-color var(--dur-fast), box-shadow var(--dur-fast); }
+.section-nav a:hover { color:var(--ink); }
+.section-nav a[aria-current=page] { color:var(--ink); background:var(--segment-thumb); box-shadow:var(--shadow-soft), 0 0 0 1px var(--rule); }
+.theme-toggle { display:inline-flex; align-items:center; gap:8px; height:36px; padding:0 14px 0 11px; border:1px solid var(--rule); border-radius:10px; background:var(--surface); color:var(--ink); font-size:13px; font-weight:500; transition:background-color var(--dur-fast), border-color var(--dur-fast), transform var(--dur-fast); }
+.theme-toggle:hover { background:var(--hover); border-color:var(--card-border-hover); }
+.theme-toggle:active { transform:scale(.97); }
+.theme-toggle-icon { position:relative; display:grid; place-items:center; width:16px; height:16px; color:var(--muted); }
+.theme-toggle-icon > span { display:grid; place-items:center; }
+.theme-toggle-label { min-width:34px; text-align:left; }
+
+/* Question entry: a quiet field that lifts on focus instead of drawing a ring. */
+.question-form { display:flex; flex-direction:column; gap:10px; margin-top:16px; padding:14px 12px 10px 16px; border:1px solid var(--rule); border-radius:14px; background:var(--surface); box-shadow:var(--shadow-soft); transition:border-color var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out); }
+.question-form:hover { border-color:var(--card-border-hover); }
+.question-form:focus-within { border-color:var(--field-border-focus); box-shadow:var(--shadow-raised); }
+.question-form textarea { font-family:var(--font-newsreader), Georgia, serif; width:100%; min-width:0; resize:none; padding:0 4px 0 0; background:transparent; font-size:15px; line-height:1.6; color:var(--ink); outline:0; }
+.question-form textarea::placeholder { font-family:var(--font-plex-condensed), system-ui, sans-serif; color:var(--muted); opacity:.85; }
+.question-form-footer { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+/* As faint as AA contrast allows (4.5:1); opacity alone dropped it below that. */
+.question-form-hint { align-self:flex-end; padding-bottom:4px; font-size:11.5px; color:color-mix(in srgb, var(--muted) 88%, var(--surface)); transition:color var(--hover-out) var(--ease-soft); }
+.question-form:focus-within .question-form-hint { color:var(--muted); transition-duration:var(--hover-in); }
+.question-form-hint kbd { display:inline-block; padding:0 5px; border:1px solid color-mix(in srgb, var(--rule) 70%, transparent); border-radius:4px; background:transparent; font-family:inherit; font-size:11px; line-height:1.5; }
+.send-button { width:36px; height:36px; flex-shrink:0; display:grid; place-items:center; border-radius:10px; color:var(--paper); background:var(--ink); transition:background-color var(--dur-fast), color var(--dur-fast), transform var(--dur-fast) var(--ease-out); }
+.send-button:hover { background:color-mix(in srgb, var(--ink) 90%, var(--paper)); }
+.send-button:active { transform:scale(.92); }
+.send-button svg { transition:transform var(--dur-base) var(--ease-out); }
+.send-button:hover svg { transform:translateY(-1px); }
+.send-button[data-empty] { color:var(--muted); background:var(--hover); }
+.send-button[data-empty]:hover svg { transform:none; }
+
+/* Starters: soft cards that arrive one after another. */
+.suggestions { margin-top:32px; }
+.suggestions h2 { margin-bottom:10px; font-size:13px; font-weight:500; color:var(--muted); }
+.question-suggestions { display:grid; gap:8px; margin:0; padding:0; }
+.question-suggestions > li { animation:arrive 360ms var(--ease-out) both; animation-delay:calc(var(--i, 0) * 45ms + 80ms); }
+.question-suggestions button { width:100%; display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:3px 16px; padding:12px 14px 12px 16px; text-align:left; border:1px solid var(--rule); border-radius:12px; background:var(--surface); transition:border-color var(--hover-out) var(--ease-soft), background-color var(--hover-out) var(--ease-soft), transform 160ms var(--ease-soft); }
+/* The card stays where it is on hover: only its border and fill change, and they ease in. */
+.question-suggestions button:hover:not(:disabled) { border-color:var(--card-border-hover); background:var(--subtle); transition-duration:var(--hover-in), var(--hover-in), 160ms; }
+.question-suggestions button:active:not(:disabled) { transform:scale(.995); }
+.question-suggestions button:disabled { opacity:.55; cursor:default; }
+.question-kind { grid-column:1; font-size:11px; font-weight:600; letter-spacing:.03em; color:var(--path); }
+.question-label { grid-column:1; font-size:14px; line-height:1.5; color:var(--ink); }
+.question-note { grid-column:1; font-size:13px; line-height:1.5; color:var(--muted); }
+.question-label.font-mono { font-size:13px; }
+/* Starter questions read in the serif; issue keys keep the mono face. */
+.question-label:not(.font-mono) { font-family:var(--font-newsreader), Georgia, serif; }
+.question-chevron { grid-column:2; grid-row:1 / span 2; display:grid; place-items:center; width:28px; height:28px; border-radius:8px; color:var(--muted); opacity:.6; transition:opacity var(--hover-out) var(--ease-soft), color var(--hover-out) var(--ease-soft), transform var(--hover-out) var(--ease-soft), background-color var(--hover-out) var(--ease-soft); }
+.question-suggestions button:hover:not(:disabled) .question-chevron { opacity:1; color:var(--path); background:var(--path-soft); transform:translateX(2px); transition-duration:var(--hover-in); }
+
+/* Answer header: a back arrow, and the question beside it as the title. */
+.answer-header { flex-shrink:0; display:grid; grid-template-columns:auto minmax(0, 1fr); align-items:start; gap:8px; margin:0 0 18px -8px; }
+.answer-header .back-button { width:32px; padding:0; justify-content:center; }
+/* Centre the arrow optically on the title's first line: between its cap-height and x-height
+   middles, which sit a little below the line box's middle. */
+.answer-header .back-button { margin-top:1px; }
+.answer-header:has(.is-key) .back-button { margin-top:-3px; }
+.ghost-button { display:inline-flex; align-items:center; gap:6px; height:32px; padding:0 10px; border-radius:8px; font-size:13px; font-weight:500; color:var(--muted); transition:background-color var(--dur-fast), color var(--dur-fast); }
+.ghost-button:hover { background:var(--hover); color:var(--ink); }
+.ghost-button svg { transition:transform var(--dur-base) var(--ease-out); }
+.back-button:hover svg { transform:translateX(-2px); }
+.copy-link[data-copied] { color:var(--success); }
+.answer-title { font-family:var(--font-newsreader), Georgia, serif; font-size:22px; font-weight:600; letter-spacing:-.022em; line-height:1.35; text-wrap:balance; overflow-wrap:anywhere; color:var(--ink); }
+.answer-title.is-key { font-family:var(--font-plex-mono), monospace; font-size:18px; font-weight:500; letter-spacing:-.01em; }
+
+/* Answer / Path / Cypher: underline tabs with an indicator that slides between them. */
+.workspace-tabs { flex-shrink:0; display:flex; align-items:center; gap:12px; margin:0 -36px; padding:0 30px; border-bottom:1px solid var(--rule); }
+.workspace-tablist { display:flex; gap:4px; min-width:0; }
+.workspace-tab-actions { margin-left:auto; display:flex; align-items:center; margin-right:-4px; }
+.workspace-tabs [role=tab] { position:relative; display:inline-flex; align-items:center; gap:7px; height:42px; padding:0 8px; font-size:14px; font-weight:500; color:var(--muted); transition:color var(--dur-fast); }
+.workspace-tabs [role=tab]:hover { color:var(--ink); }
+.workspace-tabs [role=tab][aria-selected=true] { color:var(--ink); }
+.workspace-tabs [role=tab]:focus-visible { outline-offset:-4px; border-radius:8px; }
+.workspace-tab-count { min-width:20px; height:18px; padding:0 6px; display:inline-grid; place-items:center; border-radius:999px; background:var(--hover); font-size:11px; font-weight:500; font-variant-numeric:tabular-nums; color:var(--muted); transition:background-color var(--dur-fast), color var(--dur-fast); }
+.workspace-tabs [role=tab][aria-selected=true] .workspace-tab-count { background:var(--path-soft); color:var(--path); }
+.workspace-tab-indicator { position:absolute; left:6px; right:6px; bottom:-1px; height:2px; border-radius:2px; background:var(--ink); }
+
+/* What Aevion did: a compact chip above the answer. */
+.answer-progress { margin-bottom:20px; }
+.answer-progress.is-after { margin:16px 0 0; }
+.answer-progress ol { width:fit-content; max-width:100%; padding:8px 12px; border:1px solid var(--rule); border-radius:10px; background:var(--subtle); font-size:12.5px; line-height:1.5; }
+.answer-progress ol > li + li { margin-top:4px; }
+.progress-step { display:flex; flex-wrap:wrap; align-items:center; gap:2px 8px; }
+.progress-marker { display:inline-grid; place-items:center; width:16px; height:16px; flex-shrink:0; border-radius:50%; }
+.progress-marker.is-done { color:var(--on-accent); background:var(--success); }
+.progress-marker.is-empty { border:1.5px solid var(--rule-strong); transform:scale(.7); }
+.progress-marker.is-working { width:13px; height:13px; margin:1.5px; border:1.5px solid var(--rule); border-top-color:var(--path); animation:spin 700ms linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* Triage entry matches the question field. */
+/* Heading and field read as one unit on both entry screens. */
+.triage-form { margin-top:16px; }
+.triage-form input:not([type]), .triage-form input[type=text] { width:100%; min-width:0; padding:0 14px; font-size:13px; border:1px solid var(--rule); border-radius:10px; background:var(--surface); box-shadow:var(--shadow-soft); transition:border-color var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out); }
+.triage-form input:not([type]):hover, .triage-form input[type=text]:hover { border-color:var(--card-border-hover); }
+.triage-form input:not([type]):focus, .triage-form input[type=text]:focus { border-color:var(--field-border-focus); box-shadow:var(--shadow-raised); outline:0; }
+.triage-form input[aria-invalid=true] { border-color:var(--danger); }
+.triage-form button[type=submit] { min-width:96px; padding:0 18px; border-radius:10px; font-size:14px; font-weight:500; color:var(--paper); background:var(--ink); transition:background-color var(--dur-fast), transform var(--dur-fast); }
+.triage-form button[type=submit]:hover:not(:disabled) { background:color-mix(in srgb, var(--ink) 90%, var(--paper)); }
+.triage-form button[type=submit]:active:not(:disabled) { transform:scale(.97); }
+.triage-form button[type=submit]:disabled { color:var(--muted); background:var(--hover); opacity:1; }
+.triage-sidebar .question-suggestions button { padding-block:11px; }
+
+/* Theme flips happen in one frame, not as a ripple of per-control colour fades. */
+:root[data-theme-switching] *, :root[data-theme-switching] *::before, :root[data-theme-switching] *::after { transition:none !important; }
+
+/* Citations: one quiet pill per group of sources, named like the map names them. */
+.cite-pill { display:inline-flex; align-items:center; margin-left:5px; vertical-align:1px; border-radius:999px; background:var(--hover); color:var(--muted); transition:background-color var(--hover-out) var(--ease-soft), color var(--hover-out) var(--ease-soft); }
+.cite-pill:hover { transition-duration:var(--hover-in); }
+.cite-pill-main { position:relative; display:inline-flex; align-items:center; gap:4px; height:20px; padding:0 8px; border-radius:inherit; font-family:var(--font-plex-condensed), system-ui, sans-serif; font-size:11.5px; font-weight:500; line-height:1; color:inherit; }
+.cite-pill-main::after { content:""; position:absolute; inset:-5px -2px; }
+.cite-pill-more { padding-left:4px; border-left:1px solid var(--rule); }
+.cite-pill:hover, .cite-pill.is-active { background:var(--path-soft); color:var(--path); }
+.cite-pill:hover .cite-pill-more, .cite-pill.is-active .cite-pill-more { border-color:color-mix(in srgb, var(--path) 25%, transparent); }
+.cite-pill.is-lit { background:var(--path); color:var(--on-accent); }
+.cite-pill.is-lit .cite-pill-more { border-color:color-mix(in srgb, var(--on-accent) 35%, transparent); }
+
+/* The source card: a short list of what the pill stands for; each row opens its node. */
+/* Only the visible card takes the pointer; the anchor box sits under it, over the text. */
+.cite-card-anchor { position:fixed; left:0; top:0; z-index:60; transform-origin:0 0; pointer-events:none; }
+.cite-card-anchor .cite-card { pointer-events:auto; }
+.cite-card { transform:translateY(-100%); padding:4px; border:1px solid var(--rule); border-radius:12px; background:var(--surface); box-shadow:var(--shadow-raised); font-family:var(--font-plex-condensed), system-ui, sans-serif; }
+.cite-card[data-below] { transform:none; }
+.cite-card > div { display:flex; flex-direction:column; gap:2px; }
+.cite-card-row { width:100%; display:grid; grid-template-columns:14px minmax(0,1fr); gap:10px; align-items:start; padding:8px 10px; border-radius:8px; text-align:left; transition:background-color var(--hover-out) var(--ease-soft); }
+.cite-card-row:hover { background:var(--hover); transition-duration:var(--hover-in); }
+.cite-card-row.is-lit { background:var(--path-soft); }
+.cite-card-row svg { margin-top:2px; }
+.cite-card-text { min-width:0; display:flex; flex-direction:column; gap:2px; }
+.cite-card-meta { font-size:11px; color:var(--muted); }
+.cite-card-meta::first-letter { text-transform:uppercase; }
+.cite-card-title { font-size:13px; line-height:1.45; color:var(--ink); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; overflow-wrap:anywhere; }
+
+/* The map answers a hovered source with a ring, without moving the camera. */
+
+/* Path: the evidence as a tree, with file-tree guides and the relationship above each title. */
+.trail { margin:0; padding:0; }
+.trail-item { display:flex; align-items:stretch; padding-top:3px; }
+.trail-item.is-root:not(:first-child) { margin-top:10px; }
+.trail-guide { position:relative; flex:0 0 20px; }
+.trail-guide.is-pass::before, .trail-guide.is-tee::before { content:""; position:absolute; left:9px; top:0; bottom:0; border-left:1px solid var(--timeline-rule); }
+.trail-guide.is-tee::after { content:""; position:absolute; left:9px; top:22px; width:19px; border-top:1px solid var(--timeline-rule); }
+.trail-guide.is-elbow::before { content:""; position:absolute; left:9px; top:0; width:19px; height:22px; border-left:1px solid var(--timeline-rule); border-bottom:1px solid var(--timeline-rule); border-bottom-left-radius:7px; }
+/* No card: the row is quiet, and only the title links to the map. */
+.trail-row { flex:1; min-width:0; display:flex; align-items:flex-start; gap:10px; padding:6px 8px; }
+.trail-glyph { flex-shrink:0; width:26px; height:26px; display:grid; place-items:center; border:1px solid var(--rule); border-radius:8px; background:var(--surface); transition:border-color var(--hover-out) var(--ease-soft), background-color var(--hover-out) var(--ease-soft); }
+.trail-glyph svg { width:12px; height:12px; }
+.trail-item.is-lit .trail-glyph { border-color:var(--path); background:var(--path-soft); transition-duration:var(--hover-in); }
+.trail-text { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; padding-top:4px; }
+.trail-main { display:flex; align-items:flex-start; gap:8px; min-width:0; }
+.trail-via { font-size:11px; line-height:1.3; color:var(--muted); }
+.trail-title { flex:0 1 auto; min-width:0; max-width:100%; text-align:left; font-size:13.5px; line-height:1.45; color:var(--ink); text-decoration:underline; text-decoration-color:transparent; text-decoration-thickness:1px; text-underline-offset:3px; transition:color var(--hover-out) var(--ease-soft), text-decoration-color var(--hover-out) var(--ease-soft); }
+.trail-title > span { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; overflow-wrap:anywhere; }
+button.trail-title:hover { text-decoration-color:var(--rule-strong); transition-duration:var(--hover-in); }
+button.trail-title:focus-visible { outline-offset:2px; border-radius:4px; }
+.trail-item.is-lit .trail-title { color:var(--path); text-decoration-color:var(--path); transition-duration:var(--hover-in); }
+.trail-gh { margin:0 0 0 auto; flex-shrink:0; display:inline-flex; align-items:center; gap:5px; height:20px; padding:0 8px 0 6px; border:1px solid var(--rule); border-radius:999px; font-size:11px; font-weight:500; color:var(--muted); transition:color var(--hover-out) var(--ease-soft), border-color var(--hover-out) var(--ease-soft), background-color var(--hover-out) var(--ease-soft); }
+.trail-gh:hover { color:var(--ink); border-color:var(--card-border-hover); background:var(--hover); transition-duration:var(--hover-in); }
+
+/* Cypher: tool calls as a quiet list, each query in a soft block with gentle syntax colour. */
+.cypher { display:flex; flex-direction:column; gap:24px; }
+.cypher-intro { font-size:13px; line-height:1.6; color:var(--muted); }
+.cypher-heading { margin-bottom:10px; font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+.cypher-calls { display:flex; flex-direction:column; gap:8px; margin:0; padding:0; }
+.cypher-calls li { display:flex; align-items:baseline; flex-wrap:wrap; gap:4px 10px; font-size:13px; line-height:1.5; color:var(--ink); }
+.cypher-tool { flex-shrink:0; padding:1px 7px; border-radius:6px; background:var(--hover); font-family:var(--font-plex-mono), monospace; font-size:11.5px; color:var(--muted); }
+/* Queries in run order: a dashed connector with an arrowhead leads from each card into the next. */
+.cypher-steps { margin:0; padding:0; }
+.cypher-step { position:relative; padding-bottom:26px; }
+.cypher-step:last-child { padding-bottom:0; }
+.cypher-step:not(:last-child)::after { content:""; position:absolute; left:27px; bottom:7px; width:2px; height:19px; border-radius:1px; background:repeating-linear-gradient(to bottom, var(--rule-strong) 0 4px, transparent 4px 7px); opacity:.8; }
+.cypher-step:not(:last-child)::before { content:""; position:absolute; left:24px; bottom:2px; border-left:4px solid transparent; border-right:4px solid transparent; border-top:5px solid var(--rule-strong); opacity:.8; }
+.cypher-block { position:relative; margin:0; border:1px solid var(--rule); border-radius:12px; background:var(--subtle); }
+/* Copy floats in the block's corner; the query keeps clear of it. */
+.cypher-copy { position:absolute; top:8px; right:8px; display:grid; place-items:center; width:28px; height:28px; border-radius:7px; color:var(--muted); opacity:.55; transition:opacity var(--hover-out) var(--ease-soft), background-color var(--hover-out) var(--ease-soft), color var(--hover-out) var(--ease-soft); }
+.cypher-block:hover .cypher-copy, .cypher-copy:focus-visible { opacity:1; transition-duration:var(--hover-in); }
+.cypher-copy:hover { background:var(--hover); color:var(--ink); transition-duration:var(--hover-in); }
+.cypher-copy[data-copied] { color:var(--success); opacity:1; }
+.cypher-code { margin:0; padding:14px 44px 14px 16px; font-family:var(--font-plex-mono), monospace; font-size:12.5px; line-height:1.7; white-space:pre-wrap; overflow-wrap:anywhere; color:var(--ink); }
+.cy-keyword { color:var(--code-keyword); font-weight:500; }
+.cy-param { color:var(--code-param); }
+.cy-string { color:var(--code-string); }
+.cy-note { color:var(--muted); font-style:italic; }
+
+/* While an answer streams: lines in the shape of the answer, with a shimmer passing down them. */
+.answer-loading { display:flex; flex-direction:column; gap:22px; margin-top:4px; animation:arrive var(--dur-base) var(--ease-out) both; }
+.answer-loading-para { display:flex; flex-direction:column; gap:14px; }
+.skeleton-line { display:block; height:11px; border-radius:6px; background:linear-gradient(90deg, var(--skeleton) 30%, var(--skeleton-shine) 50%, var(--skeleton) 70%); background-size:250% 100%; animation:shimmer 1.6s var(--ease-soft) infinite; animation-delay:calc(var(--i, 0) * 90ms); }
+@keyframes shimmer { from { background-position:100% 0; } to { background-position:-50% 0; } }
+
+/* Triage waiting state: one band of brightness sweeps down the pending steps, top to bottom, on a loop. */
+.triage-timeline.is-waiting { -webkit-mask-image:linear-gradient(to bottom, #00000059 0%, #00000059 30%, #000 50%, #00000059 70%, #00000059 100%); mask-image:linear-gradient(to bottom, #00000059 0%, #00000059 30%, #000 50%, #00000059 70%, #00000059 100%); -webkit-mask-size:100% 300%; mask-size:100% 300%; animation:steps-sweep 3.6s cubic-bezier(0.45, 0, 0.55, 1) infinite; }
+@keyframes steps-sweep { from { -webkit-mask-position:0 100%; mask-position:0 100%; } to { -webkit-mask-position:0 0; mask-position:0 0; } }
+@media (prefers-reduced-motion: reduce) { .triage-timeline.is-waiting { -webkit-mask-image:none; mask-image:none; } }
+
+/* The map: round tiles on a light dot grid, a route that draws itself, calm hover and selection. */
+@keyframes node-in { from { opacity:0; transform:scale(.6); } to { opacity:1; transform:none; } }
+@keyframes ring-out { from { opacity:.55; transform:scale(1); } to { opacity:0; transform:scale(1.9); } }
+@keyframes tip-in { from { opacity:0; transform:translateY(4px) scale(.97); } to { opacity:1; transform:none; } }
+@keyframes fade-in { from { opacity:0; } to { opacity:1; } }
+@keyframes progress-sweep { from { left:-35%; } to { left:100%; } }
+
+.network-shell { position:relative; }
+.network-shell .react-flow__viewport { transition:opacity var(--hover-out) var(--ease-soft), filter var(--hover-out) var(--ease-soft); }
+.network-shell[data-busy] .react-flow__viewport { opacity:.45; filter:saturate(.5); }
+.network-progress { position:absolute; inset:0 0 auto; z-index:5; height:2px; overflow:hidden; pointer-events:none; }
+.network-progress::after { content:""; position:absolute; top:0; bottom:0; width:35%; background:linear-gradient(90deg, transparent, var(--path), transparent); animation:progress-sweep 1.6s var(--ease-soft) infinite; }
+.network-shell .react-flow__attribution { background:transparent; opacity:.55; font-size:9px; }
+
+/* At overview zoom a 44-unit node is only a few pixels wide; it grows to keep 26px on screen. */
+.react-flow__node-evidence { width:max(44px, calc(26px / var(--zoom, 1))); height:max(44px, calc(26px / var(--zoom, 1))); border-radius:50%; }
+.react-flow__node-evidence:focus-visible { outline:0; }
+.react-flow__node-evidence:focus-visible .network-node-disc { box-shadow:0 0 0 2px var(--surface), 0 0 0 4px var(--path); }
+/* backwards, not both: once a node has arrived, dimming must be free to change its opacity. */
+.network-node { position:relative; width:100%; height:100%; transition:opacity var(--hover-out) var(--ease-soft); animation:node-in 520ms var(--ease-out) backwards; animation-delay:calc(min(var(--i, 0), 30) * 16ms); }
+.network-node.is-dimmed { opacity:.3; }
+.network-node .react-flow__handle { top:50%; left:50%; right:auto; transform:translate(-50%,-50%); opacity:0; pointer-events:none; }
+.network-node-disc { position:absolute; left:50%; top:50%; translate:-50% -50%; display:grid; place-items:center; width:12px; height:12px; border-radius:50%; background:var(--surface); transition:transform var(--hover-out) var(--ease-soft), box-shadow var(--hover-out) var(--ease-soft), background-color var(--hover-out) var(--ease-soft), border-color var(--hover-out) var(--ease-soft); }
+.network-node-disc svg { width:10px; height:10px; }
+.network-node.is-route .network-node-disc { width:20px; height:20px; border:1px solid color-mix(in srgb, var(--node-color) 30%, var(--rule)); }
+.network-node.is-cited .network-node-disc { width:32px; height:32px; border:1px solid color-mix(in srgb, var(--node-color) 38%, transparent); background:color-mix(in srgb, var(--node-color) 9%, var(--surface)); }
+.network-node.is-cited .network-node-disc svg { width:14px; height:14px; }
+.react-flow__node-evidence:hover .network-node-disc { transform:scale(1.1); box-shadow:0 0 0 4px color-mix(in srgb, var(--node-color) 14%, transparent); transition-duration:var(--hover-in); }
+.network-node.is-linked { opacity:1; }
+.network-node.is-linked .network-node-disc { transform:scale(1.12); box-shadow:0 0 0 5px color-mix(in srgb, var(--node-color) 20%, transparent); transition-duration:var(--hover-in); }
+.network-node.is-selected .network-node-disc { transform:scale(1.1); background:color-mix(in srgb, var(--node-color) 14%, var(--surface)); border-color:var(--node-color); box-shadow:0 0 0 3px var(--surface), 0 0 0 4.5px var(--node-color); }
+/* One soft ring leaves the node when it is picked, so the eye finds it after the camera moves. */
+.network-node.is-selected .network-node-disc::after { content:""; position:absolute; inset:-1px; border:1.5px solid var(--node-color); border-radius:50%; pointer-events:none; animation:ring-out 900ms var(--ease-out) 200ms both; }
+.network-node-label { display:block; position:absolute; top:calc(50% + 15px); left:50%; transform:translateX(-50%); width:150px; text-align:center; font-size:11.5px; font-weight:500; line-height:1.3; color:var(--ink); pointer-events:none; text-shadow:0 1px var(--surface),1px 0 var(--surface),-1px 0 var(--surface),0 -1px var(--surface),0 0 4px var(--surface); transition:opacity var(--hover-out) var(--ease-soft), visibility var(--hover-out) var(--ease-soft); }
+/* Labels fade instead of popping; visibility keeps them out of the accessibility tree. */
+.network-node-label[hidden] { display:block; opacity:0; visibility:hidden; }
+.network-node.is-cited .network-node-label { top:calc(50% + 21px); }
+.network-node.is-background .network-node-label { top:calc(50% + 10px); font-size:10.5px; color:var(--muted); }
+.network-node.is-selected .network-node-label, .network-node.is-linked .network-node-label { font-weight:600; }
+/* The anchor: the node the map is built around. A steady halo, not the selection ring. */
+.network-node.is-anchor .network-node-disc { width:36px; height:36px; border-color:color-mix(in srgb, var(--node-color) 55%, transparent); background:color-mix(in srgb, var(--node-color) 14%, var(--surface)); box-shadow:0 0 0 6px color-mix(in srgb, var(--node-color) 11%, transparent); }
+.network-node.is-anchor .network-node-disc svg { width:16px; height:16px; }
+.network-node.is-anchor .network-node-label { top:calc(50% + 24px); font-weight:600; }
+.network-node.is-anchor .network-node-citation { left:calc(50% + 10px); top:calc(50% - 23px); }
+.network-node.is-anchor.is-selected .network-node-disc { box-shadow:0 0 0 3px var(--surface), 0 0 0 4.5px var(--node-color); }
+.network-node-citation { position:absolute; left:calc(50% + 8px); top:calc(50% - 21px); min-width:15px; height:15px; padding:0 4px; border-radius:999px; background:var(--path); color:var(--on-accent); font-size:9.5px; font-weight:600; line-height:15px; text-align:center; font-variant-numeric:tabular-nums; box-shadow:0 0 0 2px var(--surface); }
+
+.network-shell .react-flow__edge-path { transition:stroke var(--hover-out) var(--ease-soft), stroke-width var(--hover-out) var(--ease-soft), opacity var(--hover-out) var(--ease-soft); }
+.network-shell .react-flow__edge.is-faded .react-flow__edge-path { opacity:.3; }
+.network-shell .react-flow__edge.is-faded.route-leg .react-flow__edge-path { opacity:.45; }
+@keyframes arrow-in { from { opacity:0; transform:scale(.3); } to { opacity:1; transform:none; } }
+.network-arrow { transform-box:fill-box; transform-origin:center; transition:fill var(--hover-out) var(--ease-soft), opacity var(--hover-out) var(--ease-soft); }
+/* The arrowhead lands as its line arrives, instead of waiting at the end of an empty edge. */
+.route-leg .network-arrow { animation:arrow-in 280ms var(--ease-out) backwards; }
+.network-shell .react-flow__edge.is-faded .network-arrow { opacity:.3; }
+.network-shell .react-flow__edge.is-faded.route-leg .network-arrow { opacity:.45; }
+.network-shell .react-flow__edge-textwrapper { animation:fade-in 220ms var(--ease-soft) both; }
+
+.network-tooltip { max-width:240px; padding:8px 11px 9px; border:1px solid var(--rule); border-radius:10px; background:var(--surface); box-shadow:var(--shadow-raised); color:var(--ink); font-size:12.5px; line-height:1.4; pointer-events:none; transform-origin:50% 100%; animation:tip-in 200ms var(--ease-out) both; }
+.network-tooltip strong { display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; font-weight:600; overflow-wrap:anywhere; }
+.network-tooltip-type { display:flex; align-items:center; gap:6px; font-size:11px; color:var(--muted); }
+.network-tooltip-type { margin-bottom:3px; }
+.network-tooltip-type > span, .network-legend > span > span, .network-help span { display:block; }
+.network-tooltip-type > span::first-letter, .network-legend > span > span::first-letter, .network-help span::first-letter { text-transform:uppercase; }
+.network-tooltip-type svg { width:10px; height:10px; }
+
+/* Tools: a search field, a segmented camera control and two quiet icon buttons. */
+.network-tools { position:relative; z-index:6; flex-shrink:0; display:flex; flex-wrap:wrap; align-items:center; justify-content:flex-end; gap:8px; padding:10px 14px; border-top:1px solid var(--rule); background:var(--surface); }
+.network-search { position:relative; flex:1; min-width:180px; max-width:240px; margin-right:auto; }
+.network-search > svg { position:absolute; left:11px; top:50%; translate:0 -50%; color:var(--muted); pointer-events:none; }
+.network-search input { width:100%; height:36px; padding:0 10px 0 31px; border:1px solid var(--rule); border-radius:10px; background:var(--subtle); font-size:12.5px; color:var(--ink); outline:0; transition:border-color var(--hover-out) var(--ease-soft), background-color var(--hover-out) var(--ease-soft), box-shadow var(--hover-out) var(--ease-soft); }
+.network-search input::placeholder { color:var(--muted); opacity:.85; }
+.network-search input:hover { border-color:var(--card-border-hover); transition-duration:var(--hover-in); }
+.network-search input:focus { border-color:var(--field-border-focus); background:var(--surface); box-shadow:var(--shadow-soft); }
+.network-search-results { position:absolute; left:0; bottom:calc(100% + 6px); width:max(100%, 280px); max-height:260px; overflow:auto; padding:4px; border:1px solid var(--rule); border-radius:12px; background:var(--surface); box-shadow:var(--shadow-raised); }
+.network-search-results button { width:100%; display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:8px; text-align:left; font-size:12.5px; line-height:1.4; color:var(--ink); transition:background-color var(--hover-out) var(--ease-soft); }
+.network-search-results button:hover, .network-search-results button:focus-visible { background:var(--hover); outline:0; transition-duration:var(--hover-in); }
+.network-search-results span { overflow-wrap:anywhere; }
+.network-search-results p { padding:10px; font-size:12.5px; color:var(--muted); }
+.network-navigation { display:flex; align-items:center; gap:2px; flex-shrink:0; padding:3px; border:1px solid var(--rule); border-radius:10px; background:var(--segment-track); }
+.network-navigation button { display:inline-grid; place-items:center; height:28px; min-width:28px; padding:0 10px; border-radius:7px; font-size:12px; font-weight:500; color:var(--muted); transition:background-color var(--hover-out) var(--ease-soft), color var(--hover-out) var(--ease-soft), box-shadow var(--hover-out) var(--ease-soft), transform 160ms var(--ease-soft); }
+.network-navigation button:has(svg) { padding:0; }
+.network-navigation button:hover:not(:disabled) { background:var(--segment-thumb); color:var(--ink); box-shadow:var(--shadow-soft), 0 0 0 1px var(--rule); transition-duration:var(--hover-in); }
+.network-navigation button:active:not(:disabled) { transform:scale(.95); }
+.network-navigation button:disabled { opacity:.45; cursor:default; }
+.network-navigation-rule { width:1px; height:16px; margin:0 3px; background:var(--rule); }
+.network-control { flex-shrink:0; display:grid; place-items:center; width:36px; height:36px; border:1px solid var(--rule); border-radius:10px; background:var(--surface); color:var(--muted); transition:background-color var(--hover-out) var(--ease-soft), border-color var(--hover-out) var(--ease-soft), color var(--hover-out) var(--ease-soft), transform 160ms var(--ease-soft); }
+.network-control:hover, .network-control[data-open] { color:var(--ink); border-color:var(--card-border-hover); background:var(--hover); transition-duration:var(--hover-in); }
+.network-control:active { transform:scale(.95); }
+
+/* Options: a small card above its button, so opening it never resizes the map. */
+.network-options-anchor { position:relative; }
+.network-options { position:absolute; right:0; bottom:calc(100% + 8px); z-index:8; width:288px; padding:6px; border:1px solid var(--rule); border-radius:14px; background:var(--surface); box-shadow:var(--shadow-raised); transform-origin:100% 100%; }
+.network-count { padding:8px 10px 6px; font-size:12.5px; font-weight:500; color:var(--ink); }
+.network-legend { display:grid; grid-template-columns:1fr 1fr; gap:2px 10px; padding:2px 10px 10px; font-size:12px; color:var(--muted); }
+.network-legend > span { display:flex; align-items:center; gap:8px; min-height:24px; }
+.network-switch { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:0 4px; padding:10px 6px; border-top:1px solid var(--rule); font-size:12.5px; color:var(--ink); cursor:pointer; }
+.network-switch input { appearance:none; position:relative; flex-shrink:0; width:30px; height:18px; margin:0; border-radius:999px; background:var(--rule-strong); cursor:pointer; transition:background-color var(--hover-out) var(--ease-soft); }
+.network-switch input::after { content:""; position:absolute; top:2px; left:2px; width:14px; height:14px; border-radius:50%; background:#fff; box-shadow:0 1px 2px #0000002e; transition:transform 280ms var(--ease-soft); }
+.network-switch input:checked { background:var(--path); }
+.network-switch input:checked::after { transform:translateX(12px); }
+.network-switch input:focus-visible { outline:2px solid var(--path); outline-offset:2px; }
+.network-help { display:flex; flex-direction:column; gap:2px; margin:0 4px; padding:10px 6px 6px; border-top:1px solid var(--rule); font-size:11.5px; line-height:1.5; color:var(--muted); }
+
+/* The selected node: what it is, where it lives, and what it touches, each one step away. */
+.network-inspector { width:280px; flex:0 0 280px; min-height:0; overflow:auto; border-left:1px solid var(--rule); background:var(--surface); }
+.inspector-body { display:flex; flex-direction:column; padding:16px 18px 24px; }
+.inspector-head { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:start; gap:12px; }
+.inspector-glyph { display:grid; place-items:center; width:36px; height:36px; border:1px solid color-mix(in srgb, var(--node-color) 30%, var(--rule)); border-radius:10px; background:color-mix(in srgb, var(--node-color) 9%, var(--surface)); }
+.inspector-glyph svg { width:15px; height:15px; }
+.inspector-heading { min-width:0; padding-top:1px; }
+.inspector-title { display:block; font-size:15px; font-weight:600; line-height:1.4; letter-spacing:-.01em; color:var(--ink); overflow-wrap:anywhere; }
+.inspector-meta { margin-top:2px; font-size:12px; color:var(--muted); }
+.inspector-meta::first-letter { text-transform:uppercase; }
+.inspector-close { display:grid; place-items:center; width:30px; height:30px; margin:-2px -8px 0 0; border-radius:8px; color:var(--muted); transition:background-color var(--hover-out) var(--ease-soft), color var(--hover-out) var(--ease-soft); }
+.inspector-close:hover { background:var(--hover); color:var(--ink); transition-duration:var(--hover-in); }
+.inspector-link { align-self:flex-start; display:inline-flex; align-items:center; gap:6px; height:30px; margin-top:14px; padding:0 10px 0 9px; border:1px solid var(--rule); border-radius:999px; font-size:12.5px; font-weight:500; color:var(--ink); transition:background-color var(--hover-out) var(--ease-soft), border-color var(--hover-out) var(--ease-soft); }
+.inspector-link svg:last-child { color:var(--muted); transition:transform var(--hover-out) var(--ease-soft), color var(--hover-out) var(--ease-soft); }
+.inspector-link:hover { border-color:var(--card-border-hover); background:var(--hover); transition-duration:var(--hover-in); }
+.inspector-link:hover svg:last-child { color:var(--ink); transform:translate(1px,-1px); transition-duration:var(--hover-in); }
+.inspector-connections { margin-top:22px; padding-top:16px; border-top:1px solid var(--rule); }
+.inspector-connections h3 { margin:0 0 6px; font-size:12px; font-weight:500; color:var(--muted); }
+.inspector-connections ul { display:flex; flex-direction:column; gap:1px; margin:0 -8px; padding:0; list-style:none; }
+.inspector-connections button { width:100%; display:grid; grid-template-columns:14px minmax(0,1fr); gap:10px; align-items:start; padding:7px 8px; border-radius:8px; text-align:left; transition:background-color var(--hover-out) var(--ease-soft); }
+.inspector-connections button:hover, .inspector-connections button:focus-visible { background:var(--hover); outline:0; transition-duration:var(--hover-in); }
+.inspector-connections button svg { margin-top:2px; }
+.inspector-connection-text { display:flex; flex-direction:column; gap:1px; min-width:0; }
+.inspector-connection-verb { font-size:11px; color:var(--muted); }
+.inspector-connection-verb::first-letter { text-transform:uppercase; }
+.inspector-connection-title { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; font-size:13px; line-height:1.4; color:var(--ink); overflow-wrap:anywhere; }
+@media (max-width:700px) {
+  .network-stage { flex-direction:column; }
+  .network-inspector { width:auto; flex:0 0 auto; max-height:45%; border-left:0; border-top:1px solid var(--rule); }
+}
+
+/* The graph model on the start screens: every type drawn at full size and named. */
+.network-shell[data-labelled] .network-node .network-node-disc { width:32px; height:32px; border:1px solid color-mix(in srgb, var(--node-color) 38%, transparent); background:color-mix(in srgb, var(--node-color) 9%, var(--surface)); }
+.network-shell[data-labelled] .network-node .network-node-disc svg { width:14px; height:14px; }
+.network-shell[data-labelled] .network-node .network-node-label { top:calc(50% + 22px); font-size:13px; color:var(--ink); }

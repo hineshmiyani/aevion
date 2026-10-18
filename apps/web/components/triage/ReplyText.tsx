@@ -26,7 +26,7 @@ export function inline(text: string): ReactNode[] {
 
 export function ReplyText({ text }: { text: string }) {
   return (
-    <div className="space-y-3 font-serif text-lead leading-[1.65] text-ink">
+    <div className="reply-text">
       {text.split(/\n{2,}/).map((block, i) => (
         <p key={i}>{inline(block.replace(/\n/g, " "))}</p>
       ))}

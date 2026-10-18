@@ -1,7 +1,7 @@
 // POST /api/ask: forwards to the Aevion API (AEVION_API_URL, read at request time), or
-// serves the built-in sample answer when no API is configured.
+// serves a saved production answer when no API is configured.
 import { visitorHeaders } from "@/lib/proxy";
-import { sampleAnswer } from "@/lib/sample-answer";
+import { recordedAnswer, OFFLINE_QUESTION_MESSAGE } from "@/lib/recorded-answers";
 import type { AskFailure, AskRequest } from "@/lib/types";
 
 const DEFAULT_ORG = "FalkorDB";
@@ -23,8 +23,8 @@ export async function POST(request: Request) {
 
   const api = process.env.AEVION_API_URL;
   if (!api) {
-    await new Promise((resolve) => setTimeout(resolve, 700)); // feel like a real round trip
-    return Response.json(sampleAnswer(question));
+    const answer = (!body?.org || body.org === DEFAULT_ORG) ? recordedAnswer(question) : null;
+    return answer ? Response.json(answer) : failure(400, OFFLINE_QUESTION_MESSAGE);
   }
 
   let upstream: Response;
