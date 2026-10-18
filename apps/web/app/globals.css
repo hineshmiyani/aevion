@@ -33,31 +33,30 @@
   --dur-route: 1100ms;
 }
 
-/* Night chart: the same map after dark. Lighter tonal variants, contrast checked separately. */
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
-    --paper: #121a23;
-    --surface: #18222d;
-    --ink: #e3e8ee;
-    --muted: #9aa6b4;
-    --grid: #1b2631;
-    --rule: #2a3747;
-    --rule-strong: #64768a; /* 3.4:1 on surface */
-    --path: #e2a447;
-    --path-soft: #3a2c16;
-    --danger: #f08b7d;
-    --danger-soft: #3a1d1a;
+/* Light for everyone: the sheet is designed to be read in daylight, whatever the system
+   setting. The night chart is kept, off, behind data-theme="dark" for a future toggle. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #121a23;
+  --surface: #18222d;
+  --ink: #e3e8ee;
+  --muted: #9aa6b4;
+  --grid: #1b2631;
+  --rule: #2a3747;
+  --rule-strong: #64768a; /* 3.4:1 on surface */
+  --path: #e2a447;
+  --path-soft: #3a2c16;
+  --danger: #f08b7d;
+  --danger-soft: #3a1d1a;
 
-    --node-person: #6fc2b2;
-    --node-pullrequest: #8ea9ef;
-    --node-issue: #d39ad7;
-    --node-component: #e3e8ee;
-    --node-file: #9aa6b4;
-    --node-decision: #e2a447;
-    --node-comment: #a9c46f;
-    --node-release: #f08b7d;
-  }
+  --node-person: #6fc2b2;
+  --node-pullrequest: #8ea9ef;
+  --node-issue: #d39ad7;
+  --node-component: #e3e8ee;
+  --node-file: #9aa6b4;
+  --node-decision: #e2a447;
+  --node-comment: #a9c46f;
+  --node-release: #f08b7d;
 }
 
 /* Square corners everywhere (AEV-43): the survey sheet is ruled, not rounded. */

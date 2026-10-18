@@ -10,9 +10,16 @@ async function scan(page: Page) {
   expect(summary).toEqual([]);
 }
 
+// The site is light for everyone, so scan it as visitors on a dark-mode system see it too.
 for (const colorScheme of ["light", "dark"] as const) {
-  test.describe(`${colorScheme} theme`, () => {
+  test.describe(`system theme ${colorScheme}`, () => {
     test.use({ colorScheme });
+
+    test("the page stays light", async ({ page }) => {
+      await page.goto("/");
+      const background = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+      expect(background).toBe("rgb(238, 241, 236)"); // --paper, the light chart sheet
+    });
 
     test("the first screen", async ({ page }) => {
       await page.goto("/");
