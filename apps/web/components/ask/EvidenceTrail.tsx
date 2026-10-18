@@ -97,7 +97,7 @@ export function EvidenceTrail({ evidence, citations, highlighted }: EvidenceTrai
             style={{ paddingLeft: `${depth * 14}px` }}
           >
             {via && (
-              <span className="flex items-center gap-2 py-0.5 pl-[6px] text-[11px] text-muted">
+              <span className="flex items-center gap-2 py-0.5 pl-[6px] text-micro text-muted">
                 <span aria-hidden className={`h-3 w-px ${lit ? "bg-path" : "bg-rule-strong"}`} />
                 {EDGE_VERBS[via] ?? via.toLowerCase()}
               </span>

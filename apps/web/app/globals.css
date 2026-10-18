@@ -68,6 +68,17 @@
   --radius-xl: 0;
   --radius-2xl: 0;
   --radius-full: 0;
+
+  /* Type scale, by role. Tailwind's own text-xs/sm/base/lg/xl/2xl cover 12–24 px; these name
+     the in-between sizes the survey sheet uses, so no component picks a pixel size of its own.
+     No line heights here: each use sets leading where it matters, as before. */
+  --text-micro: 0.6875rem; /* 11 px: tags on citations and duplicate badges */
+  --text-code: 0.8125rem; /* 13 px: issue keys and other mono identifiers in running text */
+  --text-ui: 0.9375rem; /* 15 px: nav, list rows and inputs */
+  --text-lead: 1.0625rem; /* 17 px: serif starter questions and the drafted reply */
+  --text-answer: 1.125rem; /* 18 px: the answer itself */
+  --text-title: 1.375rem; /* 22 px: the question above its answer */
+  --text-display: clamp(2.25rem, 4.4vw, 3.5rem); /* page headings before the first question */
 }
 
 @theme inline {

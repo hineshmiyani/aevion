@@ -68,7 +68,7 @@ export function CypherList({ cypher, calls = [], params = {} }: { cypher: string
         <ol className="space-y-1 border-l-[3px] border-path pl-3 text-sm">
           {calls.map((call, i) => (
             <li key={i}>
-              <span className="font-mono text-[13px] text-ink">{call.tool}</span>
+              <span className="font-mono text-code text-ink">{call.tool}</span>
               <span className="text-muted">: {describe(call.tool, call.args)}</span>
             </li>
           ))}
@@ -80,7 +80,7 @@ export function CypherList({ cypher, calls = [], params = {} }: { cypher: string
             Query {i + 1} of {cypher.length}
             <CopyButton text={query} />
           </figcaption>
-          <pre className="p-3 font-mono text-[12px] leading-relaxed whitespace-pre-wrap text-ink">
+          <pre className="p-3 font-mono text-xs leading-relaxed whitespace-pre-wrap text-ink">
             <Highlighted query={query} params={values} />
           </pre>
         </figure>

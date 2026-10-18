@@ -44,7 +44,7 @@ export function TriageForm({ busy, onTriage, idle }: TriageFormProps) {
     <section aria-labelledby="triage-heading">
       <h1
         id="triage-heading"
-        className={`font-serif leading-[1.04] font-semibold tracking-[-0.015em] text-balance ${idle ? "text-[clamp(2.25rem,4.4vw,3.5rem)]" : "text-2xl"}`}
+        className={`font-serif leading-[1.04] font-semibold tracking-[-0.015em] text-balance ${idle ? "text-display" : "text-2xl"}`}
       >
         Triage an issue.
       </h1>
@@ -70,7 +70,7 @@ export function TriageForm({ busy, onTriage, idle }: TriageFormProps) {
               spellCheck={false}
               aria-describedby="issue-key-hint"
               aria-invalid={key.length > 0 && !valid}
-              className="min-h-12 flex-1 border border-rule-strong bg-surface px-3 font-mono text-[15px] text-ink transition-colors placeholder:text-muted focus:border-path focus:outline-none"
+              className="min-h-12 flex-1 border border-rule-strong bg-surface px-3 font-mono text-ui text-ink transition-colors placeholder:text-muted focus:border-path focus:outline-none"
             />
             <button
               type="submit"
@@ -123,7 +123,7 @@ export function TriageForm({ busy, onTriage, idle }: TriageFormProps) {
                   className="group flex min-h-12 w-full flex-wrap items-baseline gap-x-4 gap-y-0.5 py-2.5 text-left transition-colors hover:bg-surface disabled:opacity-50"
                 >
                   <span className="font-mono text-sm text-ink">{starter.key}</span>
-                  <span className="text-[15px] text-muted group-hover:text-ink">{starter.note}</span>
+                  <span className="text-ui text-muted group-hover:text-ink">{starter.note}</span>
                 </button>
               </li>
             ))}

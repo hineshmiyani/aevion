@@ -44,16 +44,16 @@ function Similar({ issue }: { issue: SimilarIssue }) {
   return (
     <li className="py-2">
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
-        <a href={issue.url} target="_blank" rel="noreferrer" className="font-mono text-[13px] text-ink underline decoration-rule-strong underline-offset-2 hover:decoration-path">
+        <a href={issue.url} target="_blank" rel="noreferrer" className="font-mono text-code text-ink underline decoration-rule-strong underline-offset-2 hover:decoration-path">
           {issue.key}
         </a>
         <span className="text-xs text-muted">
           {issue.state.toLowerCase()}
           {issue.fixed_by.length > 0 && `, fixed by ${issue.fixed_by[0]}`}
         </span>
-        {issue.likely_duplicate && <span className="border border-path px-1.5 text-[11px] font-medium text-path">likely duplicate</span>}
+        {issue.likely_duplicate && <span className="border border-path px-1.5 text-micro font-medium text-path">likely duplicate</span>}
       </div>
-      <p className="mt-0.5 text-[15px] leading-snug">
+      <p className="mt-0.5 text-ui leading-snug">
         <InlineText text={issue.title} />
       </p>
     </li>
@@ -107,7 +107,7 @@ export function TriageSteps({ data }: { data: TriageResponse }) {
   return (
     <ol aria-label="How Aevion triaged this issue" className="mt-2">
       <Step n={1} title="Read the issue">
-        <a href={data.issue.url} target="_blank" rel="noreferrer" className="font-mono text-[13px] text-muted underline decoration-rule-strong underline-offset-2 hover:decoration-path">
+        <a href={data.issue.url} target="_blank" rel="noreferrer" className="font-mono text-code text-muted underline decoration-rule-strong underline-offset-2 hover:decoration-path">
           {data.issue.key}
         </a>
         <p className="mt-1 font-serif text-xl leading-snug">
@@ -115,7 +115,7 @@ export function TriageSteps({ data }: { data: TriageResponse }) {
         </p>
         {context && (
           <p className="mt-1.5 text-sm text-muted">
-            Read as an issue about <span className="font-mono text-[13px] text-ink">{context}</span>
+            Read as an issue about <span className="font-mono text-code text-ink">{context}</span>
             {data.issue.context_reason?.length ? `: ${data.issue.context_reason.join("; ")}` : ""}
           </p>
         )}
@@ -133,7 +133,7 @@ export function TriageSteps({ data }: { data: TriageResponse }) {
         {data.component ? (
           <>
             <p>
-              <span className="font-mono text-[15px]">{data.component.name}</span>{" "}
+              <span className="font-mono text-ui">{data.component.name}</span>{" "}
               <span
                 title={data.component.strength === "weak" ? "Little in the graph points here, so treat it as a guess." : undefined}
                 className={`ml-1 border px-1.5 text-xs font-medium ${STRENGTH[data.component.strength].style}`}
@@ -179,7 +179,7 @@ export function TriageSteps({ data }: { data: TriageResponse }) {
             const status = STATUS[action.status];
             const link = action.type === "comment" && action.detail?.startsWith("https://") ? action.detail : null;
             return (
-              <li key={i} className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[15px]">
+              <li key={i} className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-ui">
                 <span className={`inline-flex min-w-[4.75rem] justify-center border px-1.5 text-xs font-medium ${status.style}`}>{status.label}</span>
                 <span>{ACTION_TEXT[action.type](action)}</span>
                 {link ? (

@@ -147,6 +147,15 @@ function layout(evidence: EvidencePath, stops: string[], aspect: number, boxWidt
     links = links.filter((l) => keptIds.has(l.source) && keptIds.has(l.target));
   }
 
+  // Clusters the route doesn't run through, and loose nodes, have nothing tying them to the
+  // rest, so charge alone pushes them to the edges. They get a stronger pull to the middle.
+  const degree = new Map<string, number>();
+  for (const l of links) for (const id of [l.source, l.target]) degree.set(id, (degree.get(id) ?? 0) + 1);
+  const mainGroup = group.get(present[0] ?? kept[0]?.id ?? "");
+  const loose = (d: Placed) => group.get(d.id) !== mainGroup || !degree.get(d.id);
+  const pullX = H > W ? 0.09 : 0.03;
+  const pullY = H > W ? 0.03 : 0.09;
+
   const nodes = kept.map((n) => ({ ...n })) as Placed[];
   const simulation = forceSimulation(nodes)
     .force("link", forceLink<Placed, { source: string | Placed; target: string | Placed }>(links.map((l) => ({ ...l }))).id((d) => d.id).distance(70))
@@ -155,8 +164,8 @@ function layout(evidence: EvidencePath, stops: string[], aspect: number, boxWidt
     .force("collide", forceCollide<Placed>((d) => (label(d) ? Math.min(14 + label(d).length * charWidth * 0.42, 96) : 16)))
     .force("center", forceCenter(W / 2, H / 2))
     // Pull harder along the box's short side, so the drawing fills its shape.
-    .force("x", forceX(W / 2).strength(H > W ? 0.09 : 0.03))
-    .force("y", forceY(H / 2).strength(H > W ? 0.03 : 0.09))
+    .force("x", forceX<Placed>(W / 2).strength((d) => (loose(d) ? 0.2 : pullX)))
+    .force("y", forceY<Placed>(H / 2).strength((d) => (loose(d) ? 0.2 : pullY)))
     .stop();
   simulation.tick(320);
 
@@ -215,6 +224,11 @@ export function EvidenceMap({ evidence, stops, highlighted, onSelect, label, rou
   const G = GLYPH * k;
   const stopNumber = new Map(present.map((id, i) => [id, i + 1]));
   const selected = highlighted ? placed.get(highlighted) : undefined;
+  // The detail card takes the corner (or, on phones, the edge) furthest from the selected node,
+  // so it never covers what it describes.
+  const [vbX, vbY] = viewBox.split(" ").map(Number);
+  const cardTop = selected ? (selected.y - vbY) / vbHeight > 0.55 : false;
+  const cardRight = selected ? (selected.x - vbX) / vbWidth < 0.45 : false;
   const neighbours = useMemo(() => {
     const set = new Set<string>();
     for (const l of links) {
@@ -344,7 +358,13 @@ export function EvidenceMap({ evidence, stops, highlighted, onSelect, label, rou
         </svg>
 
         {selected && (
-          <div className="arrive absolute right-3 bottom-3 left-3 max-w-md border border-rule bg-surface/95 p-3 text-sm shadow-[0_6px_20px_-8px_rgb(0_0_0/0.25)] sm:right-auto" aria-live="polite">
+          <div
+            key={selected.id}
+            className={`arrive absolute right-3 left-3 max-w-md border border-rule bg-surface/95 p-3 text-sm shadow-[0_6px_20px_-8px_rgb(0_0_0/0.25)] ${
+              cardTop ? "top-3" : "bottom-3"
+            } ${cardRight ? "sm:left-auto" : "sm:right-auto"}`}
+            aria-live="polite"
+          >
             <p className="text-xs text-muted">{NODE_TYPE_NAMES[selected.label] ?? selected.label}</p>
             <p className="mt-0.5 leading-snug text-ink">{selected.title}</p>
             {selected.url && (
