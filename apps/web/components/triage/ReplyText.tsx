@@ -10,7 +10,7 @@ export function inline(text: string): ReactNode[] {
       return <strong key={i} className="font-semibold">{part.slice(2, -2)}</strong>;
     }
     if (part.startsWith("`") && part.endsWith("`")) {
-      return <code key={i} className="rounded-sm bg-paper px-1 py-0.5 font-mono text-[0.8em]">{part.slice(1, -1)}</code>;
+      return <code key={i} className=" bg-paper px-1 py-0.5 font-mono text-[0.8em]">{part.slice(1, -1)}</code>;
     }
     const link = /^\[([^\]]+)\]\((https:\/\/[^)\s]+)\)$/.exec(part);
     if (link) {

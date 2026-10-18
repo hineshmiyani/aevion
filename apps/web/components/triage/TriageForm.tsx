@@ -70,12 +70,12 @@ export function TriageForm({ busy, onTriage, idle }: TriageFormProps) {
               spellCheck={false}
               aria-describedby="issue-key-hint"
               aria-invalid={key.length > 0 && !valid}
-              className="min-h-12 flex-1 rounded-md border border-rule-strong bg-surface px-3 font-mono text-[15px] text-ink transition-colors placeholder:text-muted focus:border-path focus:outline-none"
+              className="min-h-12 flex-1 border border-rule-strong bg-surface px-3 font-mono text-[15px] text-ink transition-colors placeholder:text-muted focus:border-path focus:outline-none"
             />
             <button
               type="submit"
               disabled={busy || !valid}
-              className="min-h-12 min-w-28 rounded-md bg-ink px-5 font-medium text-paper transition-[opacity,transform] duration-150 hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+              className="min-h-12 min-w-28 bg-ink px-5 font-medium text-paper transition-[opacity,transform] duration-150 hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
             >
               {busy ? "Triaging…" : effectiveMode === "apply" ? "Triage and act" : "Triage"}
             </button>

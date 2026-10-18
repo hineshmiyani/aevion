@@ -39,7 +39,7 @@ export function TriageExperience({ org }: { org: string }) {
         <section aria-label="Triage result" aria-live="polite" aria-busy={busy} className={idle ? "" : "mt-10"}>
           {state.status === "loading" && (
             <p className="flex items-center gap-2.5 text-sm text-muted">
-              <span aria-hidden className="working inline-block size-2 rounded-full bg-muted" />
+              <span aria-hidden className="working inline-block size-2 bg-muted" />
               {state.mode === "apply" ? `Triaging and acting on ${state.issueKey}…` : `Working through the graph for ${state.issueKey}…`}
             </p>
           )}
@@ -67,7 +67,7 @@ export function TriageExperience({ org }: { org: string }) {
             routeLabel="route from a similar issue, through the code its fix changed, to who knows it"
           />
         ) : (
-          <div className="survey-grid flex h-full min-h-[340px] items-center justify-center rounded-md border border-rule p-8 text-center" aria-hidden>
+          <div className="survey-grid flex h-full min-h-[340px] items-center justify-center border border-rule p-8 text-center" aria-hidden>
             <p className={`max-w-xs text-sm text-muted ${busy ? "working" : ""}`}>
               {busy ? "Tracing the route through the graph…" : "The route from similar issues to the code and the people who know it appears here."}
             </p>

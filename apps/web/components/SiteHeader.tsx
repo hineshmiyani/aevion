@@ -10,10 +10,10 @@ const PAGES = [
 function RouteMark() {
   return (
     <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden className="shrink-0">
-      <polyline points="4,17 10,8 20,13" fill="none" stroke="var(--path)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx="4" cy="17" r="2.6" fill="var(--ink)" />
-      <circle cx="10" cy="8" r="2.6" fill="var(--ink)" />
-      <circle cx="20" cy="13" r="2.6" fill="var(--ink)" />
+      <polyline points="4,17 10,8 20,13" fill="none" stroke="var(--path)" strokeWidth="2.5" strokeLinecap="square" />
+      <rect x="1.5" y="14.5" width="5" height="5" fill="var(--ink)" />
+      <rect x="7.5" y="5.5" width="5" height="5" fill="var(--ink)" />
+      <rect x="17.5" y="10.5" width="5" height="5" fill="var(--ink)" />
     </svg>
   );
 }
@@ -34,7 +34,7 @@ export function SiteHeader({ current }: { current: (typeof PAGES)[number]["href"
                 <Link
                   href={href}
                   aria-current={href === current ? "page" : undefined}
-                  className={`inline-flex min-h-11 items-center rounded-md px-3 transition-colors ${
+                  className={`inline-flex min-h-11 items-center px-3 transition-colors ${
                     href === current ? "bg-surface font-medium text-ink shadow-[inset_0_0_0_1px_var(--rule)]" : "text-muted hover:text-ink"
                   }`}
                 >

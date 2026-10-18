@@ -65,7 +65,7 @@ export function EvidencePanel({ evidence, citations, cypher, stops, highlighted,
 
       <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`} className="min-h-0 flex-1">
         {tab === "map" && (
-          <div className="flex h-full min-h-[340px] flex-col">
+          <div className="flex h-[min(105vw,560px)] flex-col lg:h-full lg:min-h-[340px]">
             <EvidenceMap evidence={evidence} stops={routeStops} highlighted={highlighted} onSelect={onSelect} label={label} routeLabel={routeLabel} />
           </div>
         )}
@@ -78,7 +78,7 @@ export function EvidencePanel({ evidence, citations, cypher, stops, highlighted,
           <div className="h-full space-y-3 overflow-y-auto pr-1">
             <p className="text-sm text-muted">The read-only queries that ran against FalkorDB for this answer.</p>
             {cypher.map((query, i) => (
-              <pre key={i} className="overflow-x-auto rounded-md border border-rule bg-surface p-3 font-mono text-[12px] leading-relaxed text-ink">
+              <pre key={i} className="overflow-x-auto border border-rule bg-surface p-3 font-mono text-[12px] leading-relaxed text-ink">
                 {query}
               </pre>
             ))}

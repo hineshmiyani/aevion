@@ -38,7 +38,7 @@ export function ProgressLog({ steps, working }: { steps: Step[]; working: boolea
               : describe(step.tool, step.args);
         return (
           <li key={i} className="arrive flex items-baseline gap-2.5">
-            <span aria-hidden className={`inline-block size-2 shrink-0 translate-y-[-1px] rounded-full ${done ? "bg-path" : "working bg-muted"}`} />
+            <span aria-hidden className={`inline-block size-2 shrink-0 translate-y-[-1px] ${done ? "bg-path" : "working bg-muted"}`} />
             <span className={done ? "text-ink" : "text-muted"}>{text}</span>
             {step.kind === "tool" && step.done && (
               <span className="text-muted tabular-nums">

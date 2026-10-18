@@ -31,7 +31,7 @@ export function AnswerText({ text, citations, nodes, onCite, highlighted }: Answ
       }
       if (part.startsWith("`") && part.endsWith("`")) {
         return (
-          <code key={i} className="rounded-sm bg-surface px-1 py-0.5 font-mono text-[0.8em]">
+          <code key={i} className=" bg-surface px-1 py-0.5 font-mono text-[0.8em]">
             {part.slice(1, -1)}
           </code>
         );
@@ -51,7 +51,7 @@ export function AnswerText({ text, citations, nodes, onCite, highlighted }: Answ
               onClick={() => onCite(nodeId)}
               aria-label={`Source ${n}: ${node.title}`}
               aria-pressed={lit}
-              className={`relative mx-px rounded-sm px-0.5 font-sans text-[11px] leading-none font-medium tabular-nums transition-colors after:absolute after:-inset-1.5 after:content-[""] ${lit ? "bg-path text-paper" : "text-path hover:bg-path-soft"}`}
+              className={`relative mx-px px-0.5 font-sans text-[11px] leading-none font-medium tabular-nums transition-colors after:absolute after:-inset-1.5 after:content-[""] ${lit ? "bg-path text-paper" : "text-path hover:bg-path-soft"}`}
             >
               {n}
             </button>

@@ -51,7 +51,7 @@ function Similar({ issue }: { issue: SimilarIssue }) {
           {issue.state.toLowerCase()}
           {issue.fixed_by.length > 0 && `, fixed by ${issue.fixed_by[0]}`}
         </span>
-        {issue.likely_duplicate && <span className="rounded-sm border border-path px-1.5 text-[11px] font-medium text-path">likely duplicate</span>}
+        {issue.likely_duplicate && <span className=" border border-path px-1.5 text-[11px] font-medium text-path">likely duplicate</span>}
       </div>
       <p className="mt-0.5 text-[15px] leading-snug">
         <InlineText text={issue.title} />
@@ -63,8 +63,8 @@ function Similar({ issue }: { issue: SimilarIssue }) {
 function Step({ n, title, children, last = false }: { n: number; title: string; children: ReactNode; last?: boolean }) {
   return (
     <li className="arrive relative grid grid-cols-[2rem_minmax(0,1fr)] gap-x-3" style={{ animationDelay: `${(n - 1) * 140}ms` }}>
-      {!last && <span aria-hidden className="absolute top-8 bottom-0 left-[15px] w-[3px] rounded-full bg-path/70" />}
-      <span aria-hidden className="relative z-10 flex size-8 items-center justify-center rounded-full border-2 border-path bg-surface text-sm font-semibold text-path tabular-nums">
+      {!last && <span aria-hidden className="absolute top-8 bottom-0 left-[15px] w-[3px] bg-path/70" />}
+      <span aria-hidden className="relative z-10 flex size-8 items-center justify-center border-2 border-path bg-surface text-sm font-semibold text-path tabular-nums">
         {n}
       </span>
       <div className={`min-w-0 ${last ? "" : "pb-7"}`}>
@@ -110,7 +110,7 @@ export function TriageSteps({ data }: { data: TriageResponse }) {
           <>
             <p>
               <span className="font-mono text-[15px]">{data.component.name}</span>{" "}
-              <span className={`ml-1 rounded-sm border px-1.5 text-xs font-medium ${STRENGTH[data.component.strength].style}`}>
+              <span className={`ml-1 border px-1.5 text-xs font-medium ${STRENGTH[data.component.strength].style}`}>
                 {STRENGTH[data.component.strength].label}
               </span>
             </p>
@@ -153,7 +153,7 @@ export function TriageSteps({ data }: { data: TriageResponse }) {
             const link = action.type === "comment" && action.detail?.startsWith("https://") ? action.detail : null;
             return (
               <li key={i} className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[15px]">
-                <span className={`inline-flex min-w-[4.75rem] justify-center rounded-sm border px-1.5 text-xs font-medium ${status.style}`}>{status.label}</span>
+                <span className={`inline-flex min-w-[4.75rem] justify-center border px-1.5 text-xs font-medium ${status.style}`}>{status.label}</span>
                 <span>{ACTION_TEXT[action.type](action)}</span>
                 {link ? (
                   <a href={link} target="_blank" rel="noreferrer" className="text-sm text-path underline underline-offset-2">

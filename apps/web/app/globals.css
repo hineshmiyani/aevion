@@ -60,6 +60,17 @@
   }
 }
 
+/* Square corners everywhere (AEV-43): the survey sheet is ruled, not rounded. */
+@theme {
+  --radius-xs: 0;
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+  --radius-2xl: 0;
+  --radius-full: 0;
+}
+
 @theme inline {
   --color-paper: var(--paper);
   --color-surface: var(--surface);
@@ -93,7 +104,6 @@ summary {
 :focus-visible {
   outline: 2px solid var(--path);
   outline-offset: 2px;
-  border-radius: 2px;
 }
 
 /* The survey grid, only where the map is drawn. */

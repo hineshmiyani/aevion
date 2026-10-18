@@ -29,7 +29,7 @@ type Placed = EvidenceNode & SimulationNodeDatum & { x: number; y: number };
 type Link = { source: string; target: string; type: string };
 
 /** A short map label: what a reader would call the node, not its full title. */
-export function shortLabel(node: EvidenceNode): string {
+export function shortLabel(node: EvidenceNode, max = 28): string {
   const key = node.id.split(":").slice(1).join(":");
   const trim = (s: string, n: number) => (s.length > n ? `${s.slice(0, n - 1)}…` : s);
   switch (node.label) {
@@ -39,11 +39,11 @@ export function shortLabel(node: EvidenceNode): string {
     case "File":
       return key.split("/").pop() ?? node.title;
     case "Component":
-      return node.title === "(root)" ? "repo root" : trim(node.title, 26);
+      return node.title === "(root)" ? "repo root" : trim(node.title, max - 2);
     case "Comment":
       return "";
     default:
-      return trim(node.title, 28);
+      return trim(node.title, max);
   }
 }
 
@@ -52,6 +52,7 @@ const EMPTY = {
   links: [] as Link[],
   viewBox: "0 0 1 1",
   vbWidth: 1,
+  max: 28,
   legs: [] as Placed[][],
   onRoute: new Set<string>(),
   present: [] as string[],
@@ -109,7 +110,11 @@ function shortestPath(from: string, to: string, links: Link[]): string[] | null 
   return path;
 }
 
-function layout(evidence: EvidencePath, stops: string[], aspect: number) {
+function layout(evidence: EvidencePath, stops: string[], aspect: number, boxWidth: number) {
+  // Narrow boxes (phones) get shorter labels; label width is budgeted at the zoom in use.
+  const max = boxWidth < 520 ? 14 : 28;
+  const label = (n: EvidenceNode) => shortLabel(n, max);
+  const charWidth = 6.6 * Math.min(Math.max(W / boxWidth, 0.7), 2.2);
   // Lay out for the box the map is drawn in, so a tall panel gets a tall map.
   const H = Math.round(W * Math.min(Math.max(aspect, 0.5), 1.6));
   const known = new Set(evidence.nodes.map((n) => n.id));
@@ -123,15 +128,30 @@ function layout(evidence: EvidencePath, stops: string[], aspect: number) {
     const largest = [...sizes.entries()].sort((a, b) => b[1] - a[1])[0]?.[0];
     if (largest !== undefined) stopGroups.add(largest);
   }
-  const kept = evidence.nodes.filter((n) => stopGroups.has(group.get(n.id)));
-  const keptIds = new Set(kept.map((n) => n.id));
+  let kept = evidence.nodes.filter((n) => stopGroups.has(group.get(n.id)));
+  let keptIds = new Set(kept.map((n) => n.id));
   links = links.filter((l) => keptIds.has(l.source) && keptIds.has(l.target));
+
+  // The route, from the graph's shape alone: consecutive stops joined by shortest paths.
+  const present = stops.filter((s) => keptIds.has(s));
+  const legIds: string[][] = [];
+  for (let i = 1; i < present.length; i++) {
+    const path = shortestPath(present[i - 1], present[i], links);
+    if (path && path.length > 1) legIds.push(path);
+  }
+  // A phone can't show 50 nodes legibly: draw the route itself; the Path tab lists the rest.
+  if (boxWidth < 520 && legIds.length > 0) {
+    keptIds = new Set([...legIds.flat(), ...present]);
+    kept = kept.filter((n) => keptIds.has(n.id));
+    links = links.filter((l) => keptIds.has(l.source) && keptIds.has(l.target));
+  }
 
   const nodes = kept.map((n) => ({ ...n })) as Placed[];
   const simulation = forceSimulation(nodes)
     .force("link", forceLink<Placed, { source: string | Placed; target: string | Placed }>(links.map((l) => ({ ...l }))).id((d) => d.id).distance(70))
     .force("charge", forceManyBody().strength(-420))
-    .force("collide", forceCollide<Placed>((d) => (shortLabel(d) ? 18 + Math.min(shortLabel(d).length, 28) * 2.2 : 14)))
+    // Room for each label at the zoom it will be drawn at (wider on phones).
+    .force("collide", forceCollide<Placed>((d) => (label(d) ? Math.min(14 + label(d).length * charWidth * 0.42, 96) : 16)))
     .force("center", forceCenter(W / 2, H / 2))
     // Pull harder along the box's short side, so the drawing fills its shape.
     .force("x", forceX(W / 2).strength(H > W ? 0.09 : 0.03))
@@ -142,21 +162,15 @@ function layout(evidence: EvidencePath, stops: string[], aspect: number) {
   const pad = 56;
   const minX = Math.min(...nodes.map((n) => n.x)) - pad;
   const minY = Math.min(...nodes.map((n) => n.y)) - pad;
-  const maxX = Math.max(...nodes.map((n) => n.x + (shortLabel(n) ? 12 + shortLabel(n).length * 6.2 : 0))) + pad / 2;
+  const maxX = Math.max(...nodes.map((n) => n.x + (label(n) ? 16 + label(n).length * charWidth : 0))) + pad / 2;
   const maxY = Math.max(...nodes.map((n) => n.y)) + pad;
   const vbWidth = Math.max(maxX - minX, 320);
   const viewBox = `${minX} ${minY} ${vbWidth} ${Math.max(maxY - minY, 240)}`;
 
-  // The route: consecutive stops joined by the graph's own shortest paths.
   const placed = new Map(nodes.map((n) => [n.id, n]));
-  const present = stops.filter((s) => placed.has(s));
-  const legs: Placed[][] = [];
-  for (let i = 1; i < present.length; i++) {
-    const path = shortestPath(present[i - 1], present[i], links);
-    if (path && path.length > 1) legs.push(path.map((id) => placed.get(id)!));
-  }
+  const legs = legIds.map((path) => path.map((id) => placed.get(id)!));
   const onRoute = new Set(legs.flat().map((n) => n.id).concat(present));
-  return { nodes, links, viewBox, vbWidth, legs, onRoute, present, placed };
+  return { nodes, links, viewBox, vbWidth, legs, onRoute, present, placed, max };
 }
 
 type EvidenceMapProps = {
@@ -181,7 +195,7 @@ export function EvidenceMap({ evidence, stops, highlighted, onSelect, label, rou
       const { width, height } = el.getBoundingClientRect();
       // Re-lay out only when the shape really changes, not on every pixel of a resize.
       if (width > 0 && height > 0) {
-        setBoxWidth(width);
+        setBoxWidth((prev) => (Math.abs(prev - width) > 60 ? width : prev));
         setAspect((prev) => (prev !== null && Math.abs(prev - height / width) <= 0.12 ? prev : height / width));
       }
     };
@@ -190,8 +204,8 @@ export function EvidenceMap({ evidence, stops, highlighted, onSelect, label, rou
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
-  const drawn = useMemo(() => (aspect === null ? null : layout(evidence, stops, aspect)), [evidence, stops, aspect]);
-  const { nodes, links, viewBox, vbWidth, legs, onRoute, present, placed } = drawn ?? EMPTY;
+  const drawn = useMemo(() => (aspect === null ? null : layout(evidence, stops, aspect, boxWidth)), [evidence, stops, aspect, boxWidth]);
+  const { nodes, links, viewBox, vbWidth, legs, onRoute, present, placed, max } = drawn ?? EMPTY;
   // SVG units per screen pixel: glyphs, labels and strokes keep their on-screen size at any zoom.
   const k = Math.min(Math.max(vbWidth / boxWidth, 0.7), 2.2);
   const G = GLYPH * k;
@@ -220,7 +234,7 @@ export function EvidenceMap({ evidence, stops, highlighted, onSelect, label, rou
 
   return (
     <figure className="m-0 flex h-full flex-col">
-      <div ref={box} className="survey-grid relative min-h-0 flex-1 overflow-hidden rounded-md border border-rule">
+      <div ref={box} className="survey-grid relative min-h-0 flex-1 overflow-hidden border border-rule">
         <svg
           viewBox={viewBox}
           preserveAspectRatio="xMidYMid meet"
@@ -255,8 +269,8 @@ export function EvidenceMap({ evidence, stops, highlighted, onSelect, label, rou
                   fill="none"
                   stroke="var(--path)"
                   strokeWidth={3.5 * k}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+                  strokeLinecap="square"
+                  strokeLinejoin="miter"
                   style={{ ["--len" as string]: `${Math.ceil(length) + 2}`, animationDelay: `${i * LEG_STAGGER_MS}ms` }}
                 />
               );
@@ -265,7 +279,7 @@ export function EvidenceMap({ evidence, stops, highlighted, onSelect, label, rou
           {nodes.map((n) => {
             const isSelected = n.id === highlighted;
             const dimmed = highlighted !== null && !isSelected && !neighbours.has(n.id) && !onRoute.has(n.id);
-            const text = shortLabel(n);
+            const text = shortLabel(n, max);
             const showLabel = text && (ALWAYS_LABELLED.has(n.label) || onRoute.has(n.id) || isSelected);
             const stop = stopNumber.get(n.id);
             const name = NODE_TYPE_NAMES[n.label] ?? n.label;
@@ -281,11 +295,11 @@ export function EvidenceMap({ evidence, stops, highlighted, onSelect, label, rou
                 onKeyDown={(e) => onKey(e, n.id)}
                 transform={`translate(${n.x} ${n.y})`}
                 opacity={dimmed ? 0.3 : 1}
-                className="cursor-pointer outline-none transition-opacity duration-200 [&:focus-visible>circle.focus]:opacity-100"
+                className="cursor-pointer outline-none transition-opacity duration-200 [&:focus-visible>rect.focus]:opacity-100"
               >
-                <circle className="focus opacity-0" r={G} fill="none" stroke="var(--path)" strokeWidth={2 * k} />
+                <rect className="focus opacity-0" x={-G} y={-G} width={G * 2} height={G * 2} fill="none" stroke="var(--path)" strokeWidth={2 * k} />
                 {(isSelected || stop) && (
-                  <circle r={G * 0.85} fill={isSelected ? "var(--path-soft)" : "var(--surface)"} stroke="var(--path)" strokeWidth={(stop ? 2 : 1.5) * k} />
+                  <rect x={-G * 0.85} y={-G * 0.85} width={G * 1.7} height={G * 1.7} fill={isSelected ? "var(--path-soft)" : "var(--surface)"} stroke="var(--path)" strokeWidth={(stop ? 2 : 1.5) * k} />
                 )}
                 <g
                   transform={`translate(${-G / 2} ${-G / 2}) scale(${G / 14})`}
@@ -298,7 +312,7 @@ export function EvidenceMap({ evidence, stops, highlighted, onSelect, label, rou
                 </g>
                 {stop && (
                   <g transform={`translate(${G * 0.55} ${-G * 0.95})`} aria-hidden>
-                    <circle r={7.5 * k} fill="var(--path)" />
+                    <rect x={-7.5 * k} y={-7.5 * k} width={15 * k} height={15 * k} fill="var(--path)" />
                     <text textAnchor="middle" y={3.4 * k} fontSize={9.5 * k} fontWeight={600} fill="var(--surface)" className="font-sans tabular-nums">
                       {stop}
                     </text>
@@ -326,7 +340,7 @@ export function EvidenceMap({ evidence, stops, highlighted, onSelect, label, rou
         </svg>
 
         {selected && (
-          <div className="arrive absolute right-3 bottom-3 left-3 max-w-md rounded-md border border-rule bg-surface/95 p-3 text-sm shadow-[0_6px_20px_-8px_rgb(0_0_0/0.25)] sm:right-auto" aria-live="polite">
+          <div className="arrive absolute right-3 bottom-3 left-3 max-w-md border border-rule bg-surface/95 p-3 text-sm shadow-[0_6px_20px_-8px_rgb(0_0_0/0.25)] sm:right-auto" aria-live="polite">
             <p className="text-xs text-muted">{NODE_TYPE_NAMES[selected.label] ?? selected.label}</p>
             <p className="mt-0.5 leading-snug text-ink">{selected.title}</p>
             {selected.url && (
@@ -342,7 +356,7 @@ export function EvidenceMap({ evidence, stops, highlighted, onSelect, label, rou
         {legs.length > 0 && (
           <span className="flex items-center gap-1.5">
             <svg width="18" height="6" aria-hidden>
-              <line x1="1" y1="3" x2="17" y2="3" stroke="var(--path)" strokeWidth="3" strokeLinecap="round" />
+              <line x1="1" y1="3" x2="17" y2="3" stroke="var(--path)" strokeWidth="3" />
             </svg>
             {routeLabel}
           </span>

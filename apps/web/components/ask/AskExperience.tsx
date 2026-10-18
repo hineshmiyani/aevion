@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type FormEvent, type KeyboardEvent } from "react";
+import { useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 
 import { EvidencePanel } from "@/components/map/EvidencePanel";
 import { useAskStream } from "@/hooks/use-ask-stream";
@@ -29,6 +29,7 @@ type Props = { org: string; stats: GraphStats; featured: { question: string; dat
 export function AskExperience({ org, stats, featured }: Props) {
   const { state, ask, show } = useAskStream(org);
   const [question, setQuestion] = useState("");
+  const box = useRef<HTMLTextAreaElement>(null);
   const [highlighted, setHighlighted] = useState<string | null>(null);
   const busy = state.status === "working";
   const idle = state.status === "idle";
@@ -39,7 +40,11 @@ export function AskExperience({ org, stats, featured }: Props) {
 
   const submit = (text: string) => {
     const trimmed = text.trim();
-    if (!trimmed || busy) return;
+    if (busy) return;
+    if (!trimmed) {
+      box.current?.focus(); // an empty ask points at the box instead of doing nothing
+      return;
+    }
     setHighlighted(null);
     setQuestion("");
     void ask(trimmed);
@@ -75,6 +80,7 @@ export function AskExperience({ org, stats, featured }: Props) {
           <div className="mt-1.5 flex items-stretch gap-2">
             <textarea
               id="question"
+              ref={box}
               rows={2}
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
@@ -82,12 +88,12 @@ export function AskExperience({ org, stats, featured }: Props) {
               maxLength={500}
               placeholder="Who knows the query planner? Why was this changed?"
               aria-describedby="question-hint"
-              className="min-h-14 flex-1 resize-y rounded-md border border-rule-strong bg-surface px-3 py-2.5 font-serif text-lg text-ink transition-colors placeholder:font-sans placeholder:text-base placeholder:text-muted focus:border-path focus:outline-none"
+              className="min-h-14 flex-1 resize-y border border-rule-strong bg-surface px-3 py-2.5 font-serif text-lg text-ink transition-colors placeholder:font-sans placeholder:text-base placeholder:text-muted focus:border-path focus:outline-none"
             />
             <button
               type="submit"
-              disabled={busy || !question.trim()}
-              className="min-w-20 rounded-md bg-ink px-5 font-medium text-paper transition-[opacity,transform] duration-150 hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+              disabled={busy}
+              className="min-w-20 bg-ink px-5 font-medium text-paper transition-[opacity,transform] duration-150 hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
             >
               {busy ? "Asking…" : "Ask"}
             </button>
@@ -176,7 +182,7 @@ export function AskExperience({ org, stats, featured }: Props) {
             }
           />
         ) : (
-          <div className="survey-grid flex h-full min-h-[340px] items-center justify-center rounded-md border border-rule" aria-hidden>
+          <div className="survey-grid flex h-full min-h-[340px] items-center justify-center border border-rule" aria-hidden>
             <p className="working text-sm text-muted">Tracing the route through the graph…</p>
           </div>
         )}

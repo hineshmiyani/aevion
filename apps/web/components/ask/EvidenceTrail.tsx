@@ -103,7 +103,7 @@ export function EvidenceTrail({ evidence, citations, highlighted }: EvidenceTrai
               </span>
             )}
             <div
-              className={`flex items-start gap-2 rounded-sm px-1 py-1 transition-colors duration-300 ${lit ? "bg-path-soft" : ""}`}
+              className={`flex items-start gap-2 px-1 py-1 transition-colors duration-300 ${lit ? "bg-path-soft" : ""}`}
             >
               <NodeGlyph label={node.label} className="mt-[3px]" />
               <div className="min-w-0 flex-1 text-sm leading-snug">
