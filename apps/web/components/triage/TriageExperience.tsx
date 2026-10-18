@@ -90,6 +90,7 @@ export function TriageExperience({ org }: { org: string }) {
             evidence={state.data.evidence}
             citations={[]}
             cypher={state.data.cypher}
+            params={{ key: state.data.issue.key, repo: state.data.issue.context_repo ?? state.data.issue.repo }}
             stops={routeStops(state.data)}
             highlighted={highlighted}
             onSelect={toggle}
