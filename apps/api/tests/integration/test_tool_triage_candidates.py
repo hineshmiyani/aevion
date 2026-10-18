@@ -42,6 +42,27 @@ def test_similar_issue_component_and_experts(fixture_graph: OrgGraph) -> None:
     assert (f"PullRequest:{REPO}#101", "FIXES", f"Issue:{REPO}#90") in edges
 
 
+def test_shown_similar_issues_back_the_pick(fixture_graph: OrgGraph) -> None:
+    # #99 shares one word ("reconnect") with the new issue and has no fix: it played no part in
+    # the pick, so it isn't shown. #90, whose fix changed the picked Component, comes first.
+    fixture_graph.query(
+        """
+        MATCH (r:Repo {full_name: $repo})
+        CREATE (:Issue {key: $new, title: 'Async query hangs forever after reconnect',
+                        state: 'OPEN', url: 'u', body_excerpt: ''})-[:IN_REPO]->(r),
+               (:Issue {key: $loose, title: 'Reconnect button label', state: 'OPEN', url: 'u',
+                        body_excerpt: ''})-[:IN_REPO]->(r)
+        """,
+        {"repo": REPO, "new": f"{REPO}#98", "loose": f"{REPO}#99"},
+    )
+    result = triage_candidates(fixture_graph, TriageCandidatesArgs(issue=f"{REPO}#98"))
+    (row,) = result.rows
+    shown = [s["key"] for s in row["similar"]]
+    assert shown[0] == f"{REPO}#90"
+    assert f"{REPO}#99" not in shown
+    assert row["components"][0]["key"] == f"{REPO}:falkordb"
+
+
 def test_a_file_named_in_the_issue_votes_for_its_component(fixture_graph: OrgGraph) -> None:
     fixture_graph.query(
         """
