@@ -3,7 +3,10 @@
 > Team **Aevion**'s entry for [Graph Hacks: Context for AI Agents](https://www.wemakedevs.org/hackathons/falkordb) (WeMakeDevs × FalkorDB, Oct 15–18, 2026).
 > **Tracks:** 03 Company Brain (main) · 01 Agents That Act on Connected Data.
 
-**Live app:** https://aevion-alpha.vercel.app · **API:** https://api-production-ae7a.up.railway.app/healthz · **Triage sandbox:** [hineshmiyani/aevion-sandbox](https://github.com/hineshmiyani/aevion-sandbox) · **Demo video:** _link added at submission_
+- **Demo video:** https://youtu.be/SOHatjGI8r8
+- **Live app:** https://aevion-alpha.vercel.app
+- **API:** https://api-production-ae7a.up.railway.app/healthz
+- **Triage sandbox:** [hineshmiyani/aevion-sandbox](https://github.com/hineshmiyani/aevion-sandbox)
 
 Aevion loads a GitHub organisation's public history into a FalkorDB graph and answers the questions people ask a senior colleague: *who knows this code? why was this decided? what changed while I was away?* Every answer carries the **evidence path**: the nodes and edges in the graph that produced it, each one a real GitHub link.
 
@@ -172,7 +175,12 @@ RETURN issue_key AS issue, pr.key AS pr, f.key AS file, c.key AS component, c.na
 
 ## Run it locally
 
-**Prerequisites:** Docker, [uv](https://docs.astral.sh/uv/) 0.13+, Node 22 with Corepack (pnpm 12), and for a fresh graph a GitHub token (or `gh auth login`) and an [OpenRouter](https://openrouter.ai) key.
+**Prerequisites:**
+
+- Docker
+- [uv](https://docs.astral.sh/uv/) 0.13+
+- Node 22 with Corepack (pnpm 12)
+- For a fresh graph: a GitHub token (or `gh auth login`) and an [OpenRouter](https://openrouter.ai) key
 
 ```bash
 cp .env.example .env    # then fill in OPENROUTER_API_KEY (and GITHUB_TOKEN if you don't use gh)
