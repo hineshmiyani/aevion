@@ -1,7 +1,7 @@
 import type { Step } from "@/hooks/use-ask-stream";
 
 // What each tool is doing, in words a reader would use.
-function describe(tool: string, args: Record<string, unknown>): string {
+export function describe(tool: string, args: Record<string, unknown>): string {
   const a = (k: string) => (typeof args[k] === "string" ? (args[k] as string) : "");
   switch (tool) {
     case "experts_for":

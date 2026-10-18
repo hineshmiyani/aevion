@@ -3,7 +3,9 @@
 import { useState, type ReactNode } from "react";
 
 import { EvidenceTrail } from "@/components/ask/EvidenceTrail";
-import type { Citation, EvidencePath } from "@/lib/types";
+import type { Citation, EvidencePath, ToolCall } from "@/lib/types";
+
+import { CypherList } from "./CypherList";
 
 import { EvidenceMap } from "./EvidenceMap";
 
@@ -13,6 +15,9 @@ type EvidencePanelProps = {
   evidence: EvidencePath;
   citations: Citation[];
   cypher: string[];
+  /** The tool calls behind the Cypher, and any other values its $parameters took. */
+  calls?: ToolCall[];
+  params?: Record<string, unknown>;
   /** Route stops in order; defaults to the citations. */
   stops?: string[];
   highlighted: string | null;
@@ -23,7 +28,7 @@ type EvidencePanelProps = {
 };
 
 /** The answer's evidence three ways: the map (default), the path as text, and the Cypher. */
-export function EvidencePanel({ evidence, citations, cypher, stops, highlighted, onSelect, label, routeLabel, caption }: EvidencePanelProps) {
+export function EvidencePanel({ evidence, citations, cypher, calls, params, stops, highlighted, onSelect, label, routeLabel, caption }: EvidencePanelProps) {
   const [tab, setTab] = useState<Tab>("map");
   const routeStops = stops ?? [...citations].sort((a, b) => a.n - b.n).map((c) => c.node_id);
   // An answer that didn't touch the graph has no path or queries: those tabs aren't offered.
@@ -76,13 +81,8 @@ export function EvidencePanel({ evidence, citations, cypher, stops, highlighted,
           </div>
         )}
         {tab === "cypher" && (
-          <div className="h-full space-y-3 overflow-y-auto pr-1">
-            <p className="text-sm text-muted">The read-only queries that ran against FalkorDB for this answer.</p>
-            {cypher.map((query, i) => (
-              <pre key={i} className="overflow-x-auto border border-rule bg-surface p-3 font-mono text-[12px] leading-relaxed text-ink">
-                {query}
-              </pre>
-            ))}
+          <div className="h-full overflow-y-auto pr-1">
+            <CypherList cypher={cypher} calls={calls} params={params} />
           </div>
         )}
       </div>

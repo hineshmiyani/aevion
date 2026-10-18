@@ -62,3 +62,39 @@ test("with reduced motion, the route is drawn at once", async ({ browser }) => {
   expect(parseFloat(offset)).toBe(0);
   await context.close();
 });
+
+test("a ?q= link asks that question, and each answer can be shared", async ({ page }) => {
+  const question = HERO_QUESTIONS[0].question;
+  await page.goto(`/?q=${encodeURIComponent(question)}`);
+  await expect(page.getByRole("heading", { level: 2, name: question })).toBeVisible();
+  await expect(page.getByRole("button", { name: /^Source 1: / })).toBeVisible();
+  expect(new URL(page.url()).searchParams.get("q")).toBe(question);
+  await expect(page.getByRole("button", { name: "Copy link to this answer" })).toBeVisible();
+});
+
+test("pressing / jumps to the question box", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("tab", { name: "Map" }).focus();
+  await page.keyboard.press("/");
+  await expect(page.getByRole("textbox", { name: "Your question" })).toBeFocused();
+  await expect(page.getByRole("textbox", { name: "Your question" })).toHaveValue("");
+});
+
+test("the Cypher tab names the tools and fills in the parameters", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("tab", { name: /^Cypher/ }).click();
+  const panel = page.getByRole("tabpanel");
+  await expect(panel.getByText("experts_for", { exact: true })).toBeVisible();
+  await expect(panel.locator("pre").first()).toContainText(/\$component \/\* '.+' \*\//);
+  // Highlighting must not change the text: every keyword appears once.
+  for (const pre of await panel.locator("pre").all()) await expect(pre).not.toContainText(/\b(MATCH|CALL|WITH|RETURN|WHERE)\1/);
+  await expect(panel.getByRole("button", { name: "Copy" }).first()).toBeVisible();
+});
+
+test("on a phone the map comes before the starter questions", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "mobile", "phone layout only");
+  await page.goto("/");
+  const map = await page.getByRole("group", { name: /Evidence map for a recent answer/ }).boundingBox();
+  const starters = await page.getByRole("heading", { name: "Try a question" }).boundingBox();
+  expect(map!.y).toBeLessThan(starters!.y);
+});

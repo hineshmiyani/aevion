@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 
 import { EvidencePanel } from "@/components/map/EvidencePanel";
 import { useAskStream } from "@/hooks/use-ask-stream";
@@ -62,9 +62,52 @@ export function AskExperience({ org, stats, featured }: Props) {
   };
   const toggle = (id: string) => setHighlighted((current) => (current === id ? null : id));
 
+  // A link with ?q= asks that question on arrival, and the address bar follows each question,
+  // so any answer can be shared. Read once on mount; replaceState keeps Back meaning "leave".
+  const asked = state.status === "idle" ? null : state.question;
+  const opened = useRef(false);
+  useEffect(() => {
+    if (opened.current) return;
+    opened.current = true;
+    const q = new URLSearchParams(window.location.search).get("q")?.trim();
+    // The URL is outside React, so asking from it once on mount is what an effect is for.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (q) submit(q.slice(0, 500));
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only the first render's URL counts
+  }, []);
+  useEffect(() => {
+    if (asked === null) return;
+    const url = new URL(window.location.href);
+    url.searchParams.set("q", asked);
+    window.history.replaceState(null, "", url);
+  }, [asked]);
+
+  // "/" jumps to the question box from anywhere on the page, as on GitHub.
+  useEffect(() => {
+    const onSlash = (event: globalThis.KeyboardEvent) => {
+      const target = event.target as HTMLElement;
+      const typing = target.closest("input, textarea, select, [contenteditable='true']");
+      if (event.key !== "/" || typing || event.metaKey || event.ctrlKey || event.altKey) return;
+      event.preventDefault();
+      box.current?.focus();
+    };
+    window.addEventListener("keydown", onSlash);
+    return () => window.removeEventListener("keydown", onSlash);
+  }, []);
+  const [linkCopied, setLinkCopied] = useState(false);
+  const copyLink = () => {
+    void navigator.clipboard?.writeText(window.location.href).then(() => {
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 1500);
+    });
+  };
+
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)] gap-x-12 gap-y-10 lg:grid-cols-[minmax(0,34rem)_minmax(0,1fr)]">
-      <div className="min-w-0">
+    // Three blocks so phones can put the map right under the form before anything is asked
+    // (the graph within the first scroll), and under the answer once there is one. On wide
+    // screens the map spans both rows of the right column, as before.
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-x-12 gap-y-10 lg:grid-cols-[minmax(0,34rem)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:gap-y-0">
+      <div className="order-1 min-w-0 lg:col-start-1 lg:row-start-1">
         <h1 className={`font-serif leading-[1.04] font-semibold tracking-[-0.015em] text-balance ${idle ? "text-[clamp(2.25rem,4.4vw,3.5rem)]" : "text-2xl"}`}>
           Ask how FalkorDB works.
         </h1>
@@ -100,13 +143,15 @@ export function AskExperience({ org, stats, featured }: Props) {
             </button>
           </div>
           <p id="question-hint" className="mt-1.5 text-xs text-muted">
-            Enter to ask, Shift+Enter for a new line.
+            Enter to ask, Shift+Enter for a new line. Press / to come back here.
           </p>
         </form>
+      </div>
 
+      <div className={`min-w-0 lg:order-none lg:col-start-1 lg:row-start-2 ${idle ? "order-3" : "order-2"}`}>
         {idle && (
           <>
-            <p className="mt-6 text-sm text-muted">
+            <p className="text-sm text-muted lg:mt-6">
               {stats.sample ? "The graph (recorded): " : "The graph right now: "}
               <strong className="font-semibold text-ink tabular-nums">{fmt.format(stats.nodes)}</strong> nodes and{" "}
               <strong className="font-semibold text-ink tabular-nums">{fmt.format(stats.edges)}</strong> edges from{" "}
@@ -135,7 +180,7 @@ export function AskExperience({ org, stats, featured }: Props) {
         )}
 
         {!idle && (
-          <article aria-live="polite" aria-busy={busy} className="mt-10">
+          <article aria-live="polite" aria-busy={busy} className="lg:mt-10">
             <h2 className="font-serif text-[22px] leading-snug text-muted">{state.question}</h2>
             <div className="mt-4">
               <ProgressLog steps={state.steps} working={busy} />
@@ -149,7 +194,12 @@ export function AskExperience({ org, stats, featured }: Props) {
                   highlighted={highlighted}
                   onCite={(id) => toggle(id)}
                 />
-                <p className="mt-6 border-t border-rule pt-3 text-sm text-muted">{answerMeta(state.data)}</p>
+                <div className="mt-6 flex flex-wrap items-baseline justify-between gap-x-4 border-t border-rule pt-3 text-sm text-muted">
+                  <p>{answerMeta(state.data)}</p>
+                  <button type="button" onClick={copyLink} className="min-h-11 font-medium text-ink underline decoration-rule-strong underline-offset-4 hover:decoration-path">
+                    <span aria-live="polite">{linkCopied ? "Link copied" : "Copy link to this answer"}</span>
+                  </button>
+                </div>
               </div>
             )}
             {state.status === "error" && (
@@ -161,13 +211,16 @@ export function AskExperience({ org, stats, featured }: Props) {
         )}
       </div>
 
-      <div className="min-w-0 lg:sticky lg:top-6 lg:h-[calc(100dvh-9rem)] lg:min-h-[520px] lg:self-start">
+      <div
+        className={`min-w-0 lg:sticky lg:top-6 lg:order-none lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:h-[calc(100dvh-9rem)] lg:min-h-[520px] lg:self-start ${idle ? "order-2" : "order-3"}`}
+      >
         {shown ? (
           <EvidencePanel
             key={state.status === "success" ? state.question : "featured"}
             evidence={shown.evidence}
             citations={shown.citations}
             cypher={shown.cypher}
+            calls={shown.tool_calls}
             highlighted={highlighted}
             onSelect={toggle}
             label={idle ? "Evidence map for a recent answer" : "Evidence map for this answer"}
