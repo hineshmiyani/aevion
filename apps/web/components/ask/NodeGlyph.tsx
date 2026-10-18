@@ -20,6 +20,9 @@ export const NODE_TYPE_NAMES: Record<string, string> = {
   Decision: "decision",
   Comment: "comment",
   Release: "release",
+  Repo: "repository",
+  Label: "label",
+  Team: "team",
 };
 
 export function NodeGlyph({ label, className = "" }: { label: string; className?: string }) {

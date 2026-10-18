@@ -49,5 +49,11 @@ export function useTriage(org: string) {
     [org],
   );
 
-  return { state, triage };
+  const reset = useCallback(() => {
+    inFlight.current?.abort();
+    inFlight.current = null;
+    setState({ status: "idle" });
+  }, []);
+
+  return { state, triage, reset };
 }

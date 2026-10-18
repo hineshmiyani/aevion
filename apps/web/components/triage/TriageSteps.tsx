@@ -1,4 +1,6 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
+
+import { CheckIcon } from "@/components/WorkspaceIcons";
 
 import type { ComponentPick, SimilarIssue, TriageAction, TriageResponse } from "@/lib/types";
 
@@ -6,21 +8,12 @@ import { InlineText, ReplyText } from "./ReplyText";
 
 /*
  * The triage as the agent's steps, in the order it took them. The spine is a route: each
- * marker turns amber as its step arrives. The steps are the real results of one request,
+ * marker identifies a step in the timeline. The steps are the real results of one request,
  * revealed in sequence once it returns (the triage API doesn't stream).
  */
 
-const STRENGTH: Record<ComponentPick["strength"], { label: string; style: string }> = {
-  strong: { label: "strong", style: "border-ink text-ink" },
-  moderate: { label: "moderate", style: "border-rule-strong text-ink" },
-  weak: { label: "weak", style: "border-dashed border-rule-strong text-muted" },
-};
-
-const STATUS: Record<TriageAction["status"], { label: string; style: string }> = {
-  proposed: { label: "Proposed", style: "border-rule-strong text-ink" },
-  done: { label: "Done", style: "border-ink bg-ink text-paper" },
-  skipped: { label: "Skipped", style: "border-dashed border-rule-strong text-muted" },
-  failed: { label: "Failed", style: "border-danger text-danger" },
+const STATUS: Record<TriageAction["status"], string> = {
+  proposed: "Proposed", done: "Done", skipped: "Skipped", failed: "Failed",
 };
 
 const ACTION_TEXT: Record<TriageAction["type"], (a: TriageAction) => string> = {
@@ -44,14 +37,14 @@ function Similar({ issue }: { issue: SimilarIssue }) {
   return (
     <li className="py-2">
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
-        <a href={issue.url} target="_blank" rel="noreferrer" className="font-mono text-code text-ink underline decoration-rule-strong underline-offset-2 hover:decoration-path">
+        <a href={issue.url} target="_blank" rel="noreferrer" className="triage-key">
           {issue.key}
         </a>
         <span className="text-xs text-muted">
           {issue.state.toLowerCase()}
           {issue.fixed_by.length > 0 && `, fixed by ${issue.fixed_by[0]}`}
         </span>
-        {issue.likely_duplicate && <span className="border border-path px-1.5 text-micro font-medium text-path">likely duplicate</span>}
+        {issue.likely_duplicate && <span className="triage-pill is-duplicate">likely duplicate</span>}
       </div>
       <p className="mt-0.5 text-ui leading-snug">
         <InlineText text={issue.title} />
@@ -60,38 +53,37 @@ function Similar({ issue }: { issue: SimilarIssue }) {
   );
 }
 
+function CopyReply({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button type="button" className="reply-copy" data-copied={copied || undefined} aria-label={copied ? "Copied" : "Copy reply"} onClick={() => {
+      void navigator.clipboard?.writeText(text).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500); });
+    }}>
+      {copied ? <CheckIcon size={13} /> : <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V6a2 2 0 0 1 2-2h9" /></svg>}
+      <span className="sr-only" aria-live="polite">{copied ? "Copied" : ""}</span>
+    </button>
+  );
+}
+
 type StepProps = { n: number; title: string; children?: ReactNode; last?: boolean; pending?: boolean };
 
 function Step({ n, title, children, last = false, pending = false }: StepProps) {
-  return (
-    <li
-      className={`relative grid grid-cols-[2rem_minmax(0,1fr)] gap-x-3 ${pending ? "" : "arrive"}`}
-      style={pending ? undefined : { animationDelay: `${(n - 1) * 140}ms` }}
-    >
-      {!last && <span aria-hidden className={`absolute top-8 bottom-0 left-[15px] w-[3px] ${pending ? "bg-rule" : "bg-path/70"}`} />}
-      <span
-        aria-hidden
-        className={`relative z-10 flex size-8 items-center justify-center border-2 bg-surface text-sm font-semibold tabular-nums ${
-          pending ? "border-dashed border-rule-strong text-muted" : "border-path text-path"
-        }`}
-      >
-        {n}
-      </span>
-      <div className={`min-w-0 ${last ? "" : pending ? "pb-5" : "pb-7"}`}>
-        <h3 className={`pt-1 font-medium ${pending ? "text-muted" : ""}`}>{title}</h3>
-        {children && <div className="mt-2">{children}</div>}
-      </div>
-    </li>
-  );
+  return <li className={"triage-step " + (pending ? "is-pending" : "arrive")} style={pending ? undefined : { animationDelay: String((n - 1) * 100) + "ms" }}>
+    <div className="timeline-track" aria-hidden><span className="timeline-number">{n}</span>{!last && <span className="timeline-line" />}</div>
+    <div className="timeline-content"><h3>{title}</h3>{children && <div className="timeline-body">{children}</div>}</div>
+  </li>;
 }
 
 const PENDING = ["Read the issue", "Look for similar issues", "Follow their fixes to the code", "Find who knows it", "Draft a reply"];
 
-/** The same six steps, not yet taken: shown while the triage runs, so the wait has a shape. */
+/**
+ * The same six steps, not yet taken: shown while the triage runs, so the wait has a shape.
+ * The API answers in one go, so no step is marked as running; a fade sweeps down them instead.
+ */
 export function PendingSteps({ applying }: { applying: boolean }) {
   const titles = [...PENDING, applying ? "Act on the sandbox issue" : "Decide what it would do on the sandbox"];
   return (
-    <ol aria-label="Steps Aevion is working through" className="mt-2">
+    <ol aria-label="Steps Aevion is working through" aria-busy="true" className="triage-timeline is-waiting">
       {titles.map((title, i) => (
         <Step key={title} n={i + 1} title={title} last={i === titles.length - 1} pending />
       ))}
@@ -107,7 +99,7 @@ export function TriageSteps({ data }: { data: TriageResponse }) {
   return (
     <ol aria-label="How Aevion triaged this issue" className="mt-2">
       <Step n={1} title="Read the issue">
-        <a href={data.issue.url} target="_blank" rel="noreferrer" className="font-mono text-code text-muted underline decoration-rule-strong underline-offset-2 hover:decoration-path">
+        <a href={data.issue.url} target="_blank" rel="noreferrer" className="triage-key is-muted">
           {data.issue.key}
         </a>
         <p className="mt-1 font-serif text-xl leading-snug">
@@ -136,9 +128,9 @@ export function TriageSteps({ data }: { data: TriageResponse }) {
               <span className="font-mono text-ui">{data.component.name}</span>{" "}
               <span
                 title={data.component.strength === "weak" ? "Little in the graph points here, so treat it as a guess." : undefined}
-                className={`ml-1 border px-1.5 text-xs font-medium ${STRENGTH[data.component.strength].style}`}
+                className={"triage-pill is-" + data.component.strength}
               >
-                {STRENGTH[data.component.strength].label}
+                {data.component.strength}
               </span>
             </p>
             <p className="mt-1 text-sm text-muted">{reasons(data.component)}</p>
@@ -164,9 +156,10 @@ export function TriageSteps({ data }: { data: TriageResponse }) {
       </Step>
 
       <Step n={5} title={applied ? "Wrote the reply" : "Drafted a reply"}>
-        <blockquote className="border-l-[3px] border-path pl-4">
+        <figure className="reply-card">
+          <CopyReply text={data.draft_reply} />
           <ReplyText text={data.draft_reply} />
-        </blockquote>
+        </figure>
         <p className="mt-2 text-xs text-muted">
           {data.model ? `Written by ${data.model} from these facts only.` : "Written from a template."} People are named by profile link,
           never @-mentioned.
@@ -174,21 +167,21 @@ export function TriageSteps({ data }: { data: TriageResponse }) {
       </Step>
 
       <Step n={6} title={applied ? "Acted on the sandbox issue" : "What it would do on the sandbox"} last>
-        <ul className="space-y-2">
+        <ul className="triage-action-list">
           {data.actions.map((action, i) => {
             const status = STATUS[action.status];
             const link = action.type === "comment" && action.detail?.startsWith("https://") ? action.detail : null;
             return (
-              <li key={i} className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-ui">
-                <span className={`inline-flex min-w-[4.75rem] justify-center border px-1.5 text-xs font-medium ${status.style}`}>{status.label}</span>
-                <span>{ACTION_TEXT[action.type](action)}</span>
-                {link ? (
-                  <a href={link} target="_blank" rel="noreferrer" className="text-sm text-path underline underline-offset-2">
-                    View on GitHub
-                  </a>
-                ) : (
-                  action.detail && action.type !== "comment" && <span className="text-sm text-muted">{action.detail}</span>
-                )}
+              <li key={i} className="triage-action">
+                <span className={"action-status is-" + action.status}>{status}</span>
+                <span className="action-text">
+                  <span>{ACTION_TEXT[action.type](action)}</span>
+                  {link ? (
+                    <a href={link} target="_blank" rel="noreferrer" className="action-link">View on GitHub ↗</a>
+                  ) : (
+                    action.detail && action.type !== "comment" && <span className="action-detail">{action.detail}</span>
+                  )}
+                </span>
               </li>
             );
           })}

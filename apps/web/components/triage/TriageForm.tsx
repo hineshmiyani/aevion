@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, type CSSProperties, type FormEvent } from "react";
+
+import { ArrowIcon } from "@/components/WorkspaceIcons";
 
 import type { TriageMode } from "@/lib/types";
 
@@ -20,9 +22,11 @@ type TriageFormProps = {
   busy: boolean;
   onTriage: (issueKey: string, mode: TriageMode) => void;
   idle: boolean;
+  /** The starter being pointed at, so the map can light where it lands. */
+  onPreview?: (issueKey: string | null) => void;
 };
 
-export function TriageForm({ busy, onTriage, idle }: TriageFormProps) {
+export function TriageForm({ busy, onTriage, idle, onPreview }: TriageFormProps) {
   const [issueKey, setIssueKey] = useState("");
   const [mode, setMode] = useState<TriageMode>("dry_run");
   const key = issueKey.trim();
@@ -46,21 +50,15 @@ export function TriageForm({ busy, onTriage, idle }: TriageFormProps) {
         id="triage-heading"
         className={`font-serif leading-[1.04] font-semibold tracking-[-0.015em] text-balance ${idle ? "text-display" : "text-2xl"}`}
       >
-        Triage an issue.
+        Which issue needs attention?
       </h1>
-      {idle && (
-        <p className="mt-4 max-w-[42ch] font-serif text-xl leading-snug text-muted">
-          Aevion finds issues like it, follows the pull requests that fixed them to the code they changed, and names who
-          knows that code.
-        </p>
-      )}
 
-      <form onSubmit={submit} className="mt-7 space-y-3">
+      <form onSubmit={submit} className="triage-form mt-7 space-y-3">
         <div>
-          <label htmlFor="issue-key" className="text-sm font-medium">
+          <label htmlFor="issue-key" className="sr-only">
             Issue
           </label>
-          <div className="mt-1.5 flex flex-col gap-2 sm:flex-row sm:items-stretch">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-stretch">
             <input
               id="issue-key"
               value={issueKey}
@@ -80,66 +78,61 @@ export function TriageForm({ busy, onTriage, idle }: TriageFormProps) {
               {busy ? "Triaging…" : effectiveMode === "apply" ? "Triage and act" : "Triage"}
             </button>
           </div>
-          <p id="issue-key-hint" className="mt-1.5 text-xs text-muted">
+          <p id="issue-key-hint" className="sr-only">
             An issue key, owner/repo#number. On FalkorDB&apos;s repos Aevion only shows what it would do.
           </p>
         </div>
 
-        <fieldset className="flex flex-wrap gap-x-6 gap-y-1 text-sm">
+        {/* Quiet custom radios over the real inputs, so keyboard and screen readers still get radios. */}
+        <fieldset className="mode-switch">
           <legend className="sr-only">What Aevion should do</legend>
-          <label className="inline-flex min-h-11 items-center gap-2">
-            <input type="radio" name="mode" value="dry_run" checked={effectiveMode === "dry_run"} onChange={() => setMode("dry_run")} className="accent-[var(--path)]" />
-            Show what it would do
-          </label>
-          <label className={`inline-flex min-h-11 items-center gap-2 ${onSandbox ? "" : "text-muted"}`}>
-            <input
-              type="radio"
-              name="mode"
-              value="apply"
-              checked={effectiveMode === "apply"}
-              disabled={!onSandbox}
-              onChange={() => setMode("apply")}
-              aria-describedby="apply-hint"
-              className="accent-[var(--path)]"
-            />
-            Act on the issue
-          </label>
-          <span id="apply-hint" className="inline-flex items-center text-xs text-muted">
+          <div className="mode-track">
+            <label className="mode-option">
+              <input type="radio" name="mode" value="dry_run" checked={effectiveMode === "dry_run"} onChange={() => setMode("dry_run")} />
+              <span className="mode-dot" aria-hidden /><span>Show what it would do</span>
+            </label>
+            <label className="mode-option">
+              <input
+                type="radio"
+                name="mode"
+                value="apply"
+                checked={effectiveMode === "apply"}
+                disabled={!onSandbox}
+                onChange={() => setMode("apply")}
+                aria-describedby="apply-hint"
+              />
+              <span className="mode-dot" aria-hidden /><span>Act on the issue</span>
+            </label>
+          </div>
+          <p id="apply-hint" className="mode-hint">
             {onSandbox ? "Labels it and posts the reply, once per issue." : "Only on the sandbox repo. FalkorDB's repos are read-only."}
-          </span>
+          </p>
         </fieldset>
       </form>
 
       {idle && (
-        <div className="mt-9">
-          <h2 className="mb-2 text-sm font-medium">Try an issue</h2>
-          <ul className="divide-y divide-rule border-y border-rule">
-            {STARTERS.map((starter) => (
-              <li key={starter.key}>
+        <div className="suggestions">
+          <h2>Try an issue</h2>
+          <ul className="question-suggestions">
+            {STARTERS.slice(0, 3).map((starter, i) => (
+              <li key={starter.key} style={{ "--i": i } as CSSProperties}>
                 <button
                   type="button"
                   disabled={busy}
                   onClick={() => start(starter.key, "mode" in starter ? starter.mode : "dry_run")}
-                  className="group flex min-h-12 w-full flex-wrap items-baseline gap-x-4 gap-y-0.5 py-2.5 text-left transition-colors hover:bg-surface disabled:opacity-50"
+                  onMouseEnter={() => onPreview?.(starter.key)}
+                  onMouseLeave={() => onPreview?.(null)}
+                  onFocus={() => onPreview?.(starter.key)}
+                  onBlur={() => onPreview?.(null)}
                 >
-                  <span className="font-mono text-sm text-ink">{starter.key}</span>
-                  <span className="text-ui text-muted group-hover:text-ink">{starter.note}</span>
+                  <span className="question-label font-mono">{starter.key}</span>
+                  <span className="question-note">{starter.note}</span>
+                  <span className="question-chevron"><ArrowIcon /></span>
                 </button>
               </li>
             ))}
           </ul>
-          <p className="mt-4 text-sm text-muted">
-            Or{" "}
-            <a
-              href={`https://github.com/${SANDBOX}/issues/new`}
-              target="_blank"
-              rel="noreferrer"
-              className="text-ink underline decoration-rule-strong underline-offset-4 hover:decoration-path"
-            >
-              open a new issue on the sandbox
-            </a>
-            . Aevion triages it on its own within about ten seconds.
-          </p>
+          <a href={"https://github.com/" + SANDBOX + "/issues/new"} target="_blank" rel="noreferrer" className="sandbox-link">Open a new issue on the sandbox ↗</a>
         </div>
       )}
     </section>

@@ -1,7 +1,7 @@
 // POST /api/ask/stream: pipes the Aevion API's Server-Sent Events through (each real tool
-// call, then the answer). Without an API it replays the recorded sample as a cached answer.
+// call, then the answer). Without an API it replays the matching saved production answer.
 import { apiBase, visitorHeaders } from "@/lib/proxy";
-import { sampleAnswer } from "@/lib/sample-answer";
+import { recordedAnswer, OFFLINE_QUESTION_MESSAGE } from "@/lib/recorded-answers";
 import type { AskFailure, AskRequest } from "@/lib/types";
 
 const DEFAULT_ORG = "FalkorDB";
@@ -25,7 +25,8 @@ export async function POST(request: Request) {
 
   const api = apiBase();
   if (!api) {
-    const answer = { ...sampleAnswer(question), elapsed_ms: 9 };
+    const answer = (!body?.org || body.org === DEFAULT_ORG) ? recordedAnswer(question) : null;
+    if (!answer) return failure(400, OFFLINE_QUESTION_MESSAGE);
     return new Response(sse({ type: "cached" }) + sse({ type: "answer", answer }), {
       headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-store" },
     });

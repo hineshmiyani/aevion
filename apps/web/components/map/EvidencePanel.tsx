@@ -1,91 +1,16 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
-
-import { EvidenceTrail } from "@/components/ask/EvidenceTrail";
-import type { Citation, EvidencePath, ToolCall } from "@/lib/types";
-
-import { CypherList } from "./CypherList";
-
+import type { Citation, EvidencePath } from "@/lib/types";
 import { EvidenceMap } from "./EvidenceMap";
 
-type Tab = "map" | "path" | "cypher";
-
-type EvidencePanelProps = {
-  evidence: EvidencePath;
-  citations: Citation[];
-  cypher: string[];
-  /** The tool calls behind the Cypher, and any other values its $parameters took. */
-  calls?: ToolCall[];
-  params?: Record<string, unknown>;
-  /** Route stops in order; defaults to the citations. */
-  stops?: string[];
-  highlighted: string | null;
-  onSelect: (nodeId: string) => void;
-  label: string;
-  routeLabel?: string;
-  caption?: ReactNode;
+type Props = {
+  evidence: EvidencePath; citations: Citation[]; stops?: string[];
+  highlighted: string | null; onSelect: (id: string) => void; label: string;
+  hovered?: string | null; onHover?: (id: string | null) => void;
+  routeLabel?: string; anchor?: string; revision?: string; busy?: boolean; preview?: boolean; lit?: string[]; labelled?: boolean; positions?: Record<string, [number, number]>; caption?: string;
 };
 
-/** The answer's evidence three ways: the map (default), the path as text, and the Cypher. */
-export function EvidencePanel({ evidence, citations, cypher, calls, params, stops, highlighted, onSelect, label, routeLabel, caption }: EvidencePanelProps) {
-  const [tab, setTab] = useState<Tab>("map");
-  const routeStops = stops ?? [...citations].sort((a, b) => a.n - b.n).map((c) => c.node_id);
-  // An answer that didn't touch the graph has no path or queries: those tabs aren't offered.
-  const tabs: { id: Tab; name: string }[] = [
-    { id: "map", name: "Map" },
-    ...(evidence.nodes.length ? [{ id: "path" as const, name: `Path (${evidence.nodes.length})` }] : []),
-    ...(cypher.length ? [{ id: "cypher" as const, name: `Cypher (${cypher.length})` }] : []),
-  ];
-
-  return (
-    <section aria-label={label} className="flex h-full min-h-0 flex-col">
-      {caption && <div className="mb-3">{caption}</div>}
-      <div role="tablist" aria-label="Evidence views" className="mb-3 flex gap-1 border-b border-rule">
-        {tabs.map(({ id, name }) => (
-          <button
-            key={id}
-            role="tab"
-            id={`tab-${id}`}
-            aria-selected={tab === id}
-            aria-controls={`panel-${id}`}
-            tabIndex={tab === id ? 0 : -1}
-            onClick={() => setTab(id)}
-            onKeyDown={(e) => {
-              const i = tabs.findIndex((t) => t.id === tab);
-              if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
-                e.preventDefault();
-                const next = tabs[(i + (e.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length].id;
-                setTab(next);
-                document.getElementById(`tab-${next}`)?.focus();
-              }
-            }}
-            className={`-mb-px min-h-11 border-b-2 px-3 text-sm transition-colors ${
-              tab === id ? "border-path font-medium text-ink" : "border-transparent text-muted hover:text-ink"
-            }`}
-          >
-            {name}
-          </button>
-        ))}
-      </div>
-
-      <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`} className="min-h-0 flex-1">
-        {tab === "map" && (
-          <div className="flex h-[min(105vw,560px)] flex-col lg:h-full lg:min-h-[340px]">
-            <EvidenceMap evidence={evidence} stops={routeStops} highlighted={highlighted} onSelect={onSelect} label={label} routeLabel={routeLabel} />
-          </div>
-        )}
-        {tab === "path" && (
-          <div className="h-full overflow-y-auto pr-1">
-            <EvidenceTrail evidence={evidence} citations={citations} highlighted={highlighted} />
-          </div>
-        )}
-        {tab === "cypher" && (
-          <div className="h-full overflow-y-auto pr-1">
-            <CypherList cypher={cypher} calls={calls} params={params} />
-          </div>
-        )}
-      </div>
-    </section>
-  );
+export function EvidencePanel({ evidence, citations, stops, highlighted, hovered, onHover, onSelect, label, routeLabel, anchor, revision, busy, preview, lit, labelled, positions, caption }: Props) {
+  const routeStops = stops ?? [...citations].sort((a, b) => a.n - b.n).map(c => c.node_id);
+  return <section aria-label={label} className="evidence-panel"><div className="evidence-map-slot"><EvidenceMap evidence={evidence} stops={routeStops} highlighted={highlighted} hovered={hovered} onHover={onHover} onSelect={onSelect} label={label} routeLabel={routeLabel} anchor={anchor} revision={revision} busy={busy} preview={preview} lit={lit} labelled={labelled} positions={positions} caption={caption} /></div></section>;
 }

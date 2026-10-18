@@ -1,5 +1,8 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
+import { graphSchema } from "../lib/graph-schema";
+
+const SCHEMA_NODES = graphSchema().nodes.length;
 
 // WCAG 2.2 AA, scanned with axe on each view in both themes, with real content on screen.
 async function scan(page: Page) {
@@ -7,23 +10,27 @@ async function scan(page: Page) {
   await page.waitForFunction(() => document.getAnimations().every((a) => a.playState !== "running"));
   const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
   const summary = results.violations.map((v) => `${v.id}: ${v.nodes.length} × ${v.help}`);
-  expect(summary).toEqual([]);
+  expect(summary, JSON.stringify(results.violations.map(v => ({ rule: v.id, nodes: v.nodes.map(n => ({ target: n.target, reason: n.failureSummary })) })), null, 2)).toEqual([]);
 }
 
-// The site is light for everyone, so scan it as visitors on a dark-mode system see it too.
+// Both themes must stay readable and usable. Light is the default; dark is the visitor's
+// choice, so the dark pass sets it the way the switch does.
 for (const colorScheme of ["light", "dark"] as const) {
   test.describe(`system theme ${colorScheme}`, () => {
     test.use({ colorScheme });
+    test.beforeEach(async ({ page }) => {
+      if (colorScheme === "dark") await page.addInitScript(() => localStorage.setItem("aevion-theme", "dark"));
+    });
 
-    test("the page stays light", async ({ page }) => {
+    test("the page shows the chosen theme", async ({ page }) => {
       await page.goto("/");
       const background = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-      expect(background).toBe("rgb(238, 241, 236)"); // --paper, the light chart sheet
+      expect(background).toBe(colorScheme === "light" ? "rgb(255, 255, 255)" : "rgb(24, 26, 29)");
     });
 
     test("the first screen", async ({ page }) => {
       await page.goto("/");
-      await expect(page.locator(".route-leg").first()).toBeAttached();
+      await expect(page.locator(".react-flow__node")).toHaveCount(SCHEMA_NODES);
       await scan(page);
     });
 

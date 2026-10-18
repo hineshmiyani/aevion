@@ -1,17 +1,19 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 // Loading and error states for the ask view. (The empty state is the starter list.)
 
-export function AnswerSkeleton({ question }: { question: string }) {
+// Two short paragraphs' worth of lines: the shape of an answer, not a spinner in a void.
+const PLACEHOLDER = [[100, 94, 97, 58], [96, 89, 42]];
+
+export function AnswerPlaceholder() {
+  let line = 0;
   return (
-    <div aria-busy="true" className="max-w-[68ch]">
-      <p className="mb-5 font-serif text-xl leading-snug text-muted">{question}</p>
-      <p className="mb-4 text-sm text-muted">Following the graph…</p>
-      <div className="space-y-3">
-        {[96, 88, 92, 64].map((w) => (
-          <div key={w} className="h-3.5 animate-pulse bg-rule" style={{ width: `${w}%` }} />
-        ))}
-      </div>
+    <div className="answer-loading" aria-hidden="true">
+      {PLACEHOLDER.map((widths, p) => (
+        <div key={p} className="answer-loading-para">
+          {widths.map((w) => <span key={line} className="skeleton-line" style={{ width: `${w}%`, "--i": line++ } as CSSProperties} />)}
+        </div>
+      ))}
     </div>
   );
 }
