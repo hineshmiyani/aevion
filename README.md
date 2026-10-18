@@ -244,6 +244,7 @@ The API suite (157 tests) needs the local FalkorDB from Docker for its integrati
 | Read decisions we've locked | [docs/adr/](docs/adr/) |
 | See the graph model and every query | [docs/architecture/](docs/architecture/) |
 | See how it's deployed | [docs/architecture/deployment.md](docs/architecture/deployment.md) |
+| Test the app by hand | [docs/process/manual-testing.md](docs/process/manual-testing.md) |
 | Learn our domain vocabulary | [GLOSSARY.md](GLOSSARY.md) |
 | See the build plan | [tasks/plan.md](tasks/plan.md) |
 | Learn our branch and commit conventions | [CONTRIBUTING.md](CONTRIBUTING.md) |
