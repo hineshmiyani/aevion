@@ -26,15 +26,33 @@ const EDGE_VERBS: Record<string, string> = {
 
 type Stop = { id: string; depth: number; via: string | null };
 
-/** Walk the evidence path as a forest: start at nodes nothing points to, follow edges. */
-function trailStops(evidence: EvidencePath): Stop[] {
+/** Walk the evidence path as a forest: start at nodes nothing points to, follow edges.
+ * Roots that lead to the answer's first citations come first, so the trail opens with what
+ * the answer actually cites rather than, say, a later Decision that superseded it. */
+function trailStops(evidence: EvidencePath, citedOrder: Map<string, number>): Stop[] {
   const out = new Map<string, { target: string; type: string }[]>();
   const hasIncoming = new Set<string>();
   for (const e of evidence.edges) {
     out.set(e.source, [...(out.get(e.source) ?? []), { target: e.target, type: e.type }]);
     hasIncoming.add(e.target);
   }
-  const roots = evidence.nodes.filter((n) => !hasIncoming.has(n.id) && out.has(n.id));
+  const firstCitation = (root: string) => {
+    let best = Infinity;
+    const seen = new Set<string>();
+    const walk = (id: string) => {
+      if (seen.has(id)) return;
+      seen.add(id);
+      best = Math.min(best, citedOrder.get(id) ?? Infinity);
+      for (const edge of out.get(id) ?? []) walk(edge.target);
+    };
+    walk(root);
+    return best;
+  };
+  const roots = evidence.nodes
+    .filter((n) => !hasIncoming.has(n.id) && out.has(n.id))
+    .map((n) => ({ n, first: firstCitation(n.id) }))
+    .sort((a, b) => a.first - b.first)
+    .map(({ n }) => n);
   const seen = new Set<string>();
   const stops: Stop[] = [];
   const visit = (id: string, depth: number, via: string | null) => {
@@ -56,9 +74,9 @@ type EvidenceTrailProps = {
 };
 
 export function EvidenceTrail({ evidence, citations, highlighted }: EvidenceTrailProps) {
-  const stops = useMemo(() => trailStops(evidence), [evidence]);
+  const citedAs = useMemo(() => new Map(citations.map((c) => [c.node_id, c.n])), [citations]);
+  const stops = useMemo(() => trailStops(evidence, citedAs), [evidence, citedAs]);
   const nodes = useMemo(() => new Map(evidence.nodes.map((n) => [n.id, n])), [evidence]);
-  const citedAs = new Map(citations.map((c) => [c.node_id, c.n]));
 
   if (stops.length === 0) {
     return <p className="text-sm text-muted">This answer didn&apos;t need graph evidence.</p>;

@@ -2,35 +2,63 @@ import { expect, test } from "@playwright/test";
 
 import { HERO_QUESTIONS } from "../lib/hero-questions";
 
-test("a starter question yields a cited answer whose sources light up the graph", async ({ page }) => {
-  await page.goto("/");
-  await page.getByRole("button", { name: new RegExp(HERO_QUESTIONS[0].question.replace("?", "\\?")) }).click();
+const starter = (i: number) => new RegExp(HERO_QUESTIONS[i].question.replace("?", "\\?"));
 
+test("the first screen says what Aevion is and shows the graph working", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByRole("heading", { level: 1, name: "Ask how FalkorDB works." })).toBeVisible();
+  await expect(page.getByText(/nodes and .* edges from \d+ repositories/)).toBeVisible();
+  // A real answer's evidence is already on the map, with the route drawn through its sources.
+  await expect(page.getByRole("group", { name: /Evidence map for a recent answer/ })).toBeVisible();
+  await expect(page.locator(".route-leg").first()).toBeAttached();
+  await expect(page.getByRole("button", { name: "Read the answer" })).toBeVisible();
+});
+
+test("a starter question shows its steps, a cited answer, and sources that light up the map", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: starter(0) }).click();
+
+  await expect(page.getByRole("list", { name: "What Aevion did" })).toContainText("Found this answer already in the graph");
   const firstSource = page.getByRole("button", { name: /^Source 1: / });
   await expect(firstSource).toBeVisible();
   const title = (await firstSource.getAttribute("aria-label"))!.replace(/^Source 1: /, "");
 
-  // The citation, the trail row and the graph node all name the same evidence node.
+  // The citation and the map node name the same evidence node.
   await firstSource.click();
   await expect(firstSource).toHaveAttribute("aria-pressed", "true");
-  const graphNode = page.getByRole("button", { name: new RegExp(`: ${title}$`) }).and(page.locator("g"));
-  await expect(graphNode).toHaveAttribute("aria-pressed", "true");
+  const mapNode = page.getByRole("button", { name: new RegExp(`: ${title}$`) }).and(page.locator("g"));
+  await expect(mapNode).toHaveAttribute("aria-pressed", "true");
 
-  // Selecting from the graph by keyboard clears the citation again.
-  await graphNode.focus();
+  // Selecting on the map by keyboard clears the citation again.
+  await mapNode.focus();
   await page.keyboard.press("Enter");
   await expect(firstSource).toHaveAttribute("aria-pressed", "false");
 
-  // The Cypher behind the answer is one click away.
-  await page.getByText(/How this was answered/).click();
-  await page.getByText(/Show Cypher \(\d+ quer/).click();
+  // The Cypher is one tab away, and the tabs work with arrow keys.
+  const mapTab = page.getByRole("tab", { name: "Map" });
+  await mapTab.focus();
+  await page.keyboard.press("ArrowLeft");
+  await expect(page.getByRole("tab", { name: /^Cypher/ })).toHaveAttribute("aria-selected", "true");
   await expect(page.locator("pre").first()).toContainText("MATCH");
+  await expect(page.getByText(/recorded sample answer|Answered/)).toBeVisible();
 });
 
 test("the page never scrolls sideways", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: new RegExp(HERO_QUESTIONS[0].question.replace("?", "\\?")) }).click();
+  await page.getByRole("button", { name: starter(0) }).click();
   await expect(page.getByRole("button", { name: /^Source 1: / })).toBeVisible();
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   expect(overflow).toBeLessThanOrEqual(0);
+});
+
+test("with reduced motion, the route is drawn at once", async ({ browser }) => {
+  const context = await browser.newContext({ reducedMotion: "reduce" });
+  const page = await context.newPage();
+  await page.goto("/");
+  const leg = page.locator(".route-leg").first();
+  await expect(leg).toBeAttached();
+  await page.waitForTimeout(100);
+  const offset = await leg.evaluate((el) => getComputedStyle(el).strokeDashoffset);
+  expect(parseFloat(offset)).toBe(0);
+  await context.close();
 });

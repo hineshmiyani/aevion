@@ -1,38 +1,49 @@
 @import "tailwindcss";
 
-/* Design tokens (frontend-design plan, AEV-28). Components use these names, never raw hex.
-   Amber means one thing: a traced evidence path. */
+/* Survey sheet (AEV-43, frontend-design + ui-ux-pro-max). The org is a map; an answer's
+   evidence is a route across it. Components use these names, never raw hex.
+   Amber still means one thing: the traced evidence path. */
 :root {
-  --paper: #f2f3ef;
-  --surface: #fbfbf9;
-  --ink: #17202b;
-  --muted: #5a6472;
-  --rule: #d3d7db;
-  --rule-strong: #b9bfc5;
-  --path: #8a560f; /* 5.5:1 on paper, for 11px citation text */
-  --path-soft: #f6ead6;
+  color-scheme: light;
+  --paper: #eef1ec; /* chart paper: cool, not cream */
+  --surface: #f8f9f6;
+  --ink: #1a2433;
+  --muted: #546070; /* 5.7:1 on paper */
+  --grid: #dfe5e0; /* survey grid lines */
+  --rule: #c9d1cb;
+  --rule-strong: #7d8882; /* control borders: 3.2:1 on paper (WCAG 1.4.11) */
+  --path: #8a560f; /* the route: 5.3:1 on paper */
+  --path-soft: #f1e3cc;
   --danger: #a3271a;
   --danger-soft: #f7e3df;
 
-  /* Node types. Each also has its own glyph shape, so colour is never the only cue. */
+  /* Node types. Each also has its own glyph, so colour is never the only cue. */
   --node-person: #2c6e63;
   --node-pullrequest: #3b5bab;
   --node-issue: #8a3f8f;
-  --node-component: #17202b;
+  --node-component: #1a2433;
   --node-file: #6d747d;
   --node-decision: #8a560f;
   --node-comment: #5f7a2e;
   --node-release: #a3271a;
+
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur-fast: 160ms;
+  --dur-base: 240ms;
+  --dur-route: 1100ms;
 }
 
+/* Night chart: the same map after dark. Lighter tonal variants, contrast checked separately. */
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: #141b24;
-    --surface: #1a2330;
-    --ink: #e4e8ee;
-    --muted: #9aa5b3;
-    --rule: #2b3646;
-    --rule-strong: #3d4a5c;
+    color-scheme: dark;
+    --paper: #121a23;
+    --surface: #18222d;
+    --ink: #e3e8ee;
+    --muted: #9aa6b4;
+    --grid: #1b2631;
+    --rule: #2a3747;
+    --rule-strong: #64768a; /* 3.4:1 on surface */
     --path: #e2a447;
     --path-soft: #3a2c16;
     --danger: #f08b7d;
@@ -41,8 +52,8 @@
     --node-person: #6fc2b2;
     --node-pullrequest: #8ea9ef;
     --node-issue: #d39ad7;
-    --node-component: #e4e8ee;
-    --node-file: #9aa5b3;
+    --node-component: #e3e8ee;
+    --node-file: #9aa6b4;
     --node-decision: #e2a447;
     --node-comment: #a9c46f;
     --node-release: #f08b7d;
@@ -54,21 +65,23 @@
   --color-surface: var(--surface);
   --color-ink: var(--ink);
   --color-muted: var(--muted);
+  --color-grid: var(--grid);
   --color-rule: var(--rule);
   --color-rule-strong: var(--rule-strong);
   --color-path: var(--path);
   --color-path-soft: var(--path-soft);
   --color-danger: var(--danger);
   --color-danger-soft: var(--danger-soft);
-  --font-sans: var(--font-plex-sans);
-  --font-serif: var(--font-source-serif);
+  --font-sans: var(--font-plex-condensed);
+  --font-serif: var(--font-newsreader);
   --font-mono: var(--font-plex-mono);
 }
 
 body {
   background: var(--paper);
   color: var(--ink);
-  font-family: var(--font-plex-sans), system-ui, sans-serif;
+  font-family: var(--font-plex-condensed), system-ui, sans-serif;
+  font-size: 16px;
 }
 
 /* Tailwind v4 no longer sets a pointer on buttons. */
@@ -83,11 +96,64 @@ summary {
   border-radius: 2px;
 }
 
+/* The survey grid, only where the map is drawn. */
+.survey-grid {
+  background-color: var(--surface);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+  background-position: -1px -1px;
+}
+
+/* The one orchestrated moment: the route draws itself, leg by leg, in citation order. */
+@keyframes route-draw {
+  from {
+    stroke-dashoffset: var(--len);
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.route-leg {
+  stroke-dasharray: var(--len);
+  stroke-dashoffset: var(--len);
+  animation: route-draw var(--dur-route) var(--ease-out) forwards;
+}
+
+/* Reveals that answer a state change: a step arriving, a panel opening. */
+@keyframes arrive {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.arrive {
+  animation: arrive var(--dur-base) var(--ease-out) both;
+}
+
+@keyframes working {
+  50% {
+    opacity: 0.35;
+  }
+}
+.working {
+  animation: working 1.2s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+  .route-leg {
+    stroke-dashoffset: 0;
   }
 }
