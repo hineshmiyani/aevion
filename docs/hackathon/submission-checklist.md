@@ -26,4 +26,4 @@ Tick items off as they're done, and put the owner's name next to each.
 ## Optional
 
 - [ ] Blog post for the side prize: owner ___
-- [ ] Decide on a fourth team member **before** submitting (the team locks on submission)
+- [x] Decide on a fourth team member **before** submitting (the team locks on submission): Het Thummar (@hetthummar) invited on WeMakeDevs and to the repo; both invites waiting for acceptance
