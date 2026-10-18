@@ -108,7 +108,7 @@ export function AskExperience({ org, stats, featured }: Props) {
     // screens the map spans both rows of the right column, as before.
     <div className="grid grid-cols-[minmax(0,1fr)] gap-x-12 gap-y-10 lg:grid-cols-[minmax(0,34rem)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:gap-y-0">
       <div className="order-1 min-w-0 lg:col-start-1 lg:row-start-1">
-        <h1 className={`font-serif leading-[1.04] font-semibold tracking-[-0.015em] text-balance ${idle ? "text-[clamp(2.25rem,4.4vw,3.5rem)]" : "text-2xl"}`}>
+        <h1 className={`font-serif leading-[1.04] font-semibold tracking-[-0.015em] text-balance ${idle ? "text-display" : "text-2xl"}`}>
           Ask how FalkorDB works.
         </h1>
         {idle && (
@@ -169,7 +169,7 @@ export function AskExperience({ org, stats, featured }: Props) {
                     className="group flex min-h-12 w-full items-baseline gap-4 py-2.5 text-left transition-colors hover:bg-surface"
                   >
                     <span className="w-20 shrink-0 text-sm text-muted">{kind}</span>
-                    <span className="font-serif text-[17px] leading-snug text-ink decoration-path underline-offset-4 group-hover:underline">
+                    <span className="font-serif text-lead leading-snug text-ink decoration-path underline-offset-4 group-hover:underline">
                       {starter}
                     </span>
                   </button>
@@ -181,7 +181,7 @@ export function AskExperience({ org, stats, featured }: Props) {
 
         {!idle && (
           <article aria-live="polite" aria-busy={busy} className="lg:mt-10">
-            <h2 className="font-serif text-[22px] leading-snug text-muted">{state.question}</h2>
+            <h2 className="font-serif text-title leading-snug text-muted">{state.question}</h2>
             <div className="mt-4">
               <ProgressLog steps={state.steps} working={busy} />
             </div>

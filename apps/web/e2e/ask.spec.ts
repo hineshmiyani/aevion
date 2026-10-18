@@ -98,3 +98,18 @@ test("on a phone the map comes before the starter questions", async ({ page }, t
   const starters = await page.getByRole("heading", { name: "Try a question" }).boundingBox();
   expect(map!.y).toBeLessThan(starters!.y);
 });
+
+test("the detail card never covers the node it describes", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name === "mobile", "the phone card spans the width; checked on desktop");
+  await page.goto("/");
+  const map = page.getByRole("group", { name: /Evidence map for a recent answer/ });
+  const nodes = await map.locator("g[role=button]").all();
+  for (const node of nodes.slice(0, 10)) {
+    await node.click();
+    const card = page.locator("figure div.absolute").filter({ hasText: /\w/ });
+    const [a, c] = [await node.boundingBox(), await card.boundingBox()];
+    const overlap = !(a!.x + a!.width < c!.x || a!.x > c!.x + c!.width || a!.y + a!.height < c!.y || a!.y > c!.y + c!.height);
+    expect(overlap, `card covers ${await node.getAttribute("aria-label")}`).toBe(false);
+    await node.click();
+  }
+});

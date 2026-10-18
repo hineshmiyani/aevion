@@ -58,7 +58,7 @@ export function TriageExperience({ org }: { org: string }) {
                     <button
                       type="button"
                       onClick={() => triage(s.key, "mode" in s ? s.mode : "dry_run")}
-                      className="min-h-11 border border-rule-strong bg-paper px-2.5 font-mono text-[13px] text-ink transition-colors hover:border-path"
+                      className="min-h-11 border border-rule-strong bg-paper px-2.5 font-mono text-code text-ink transition-colors hover:border-path"
                     >
                       {s.key}
                     </button>

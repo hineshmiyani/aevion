@@ -28,7 +28,7 @@ export function SiteHeader({ current }: { current: (typeof PAGES)[number]["href"
           Aevion
         </Link>
         <nav aria-label="Sections">
-          <ul className="flex gap-1 text-[15px]">
+          <ul className="flex gap-1 text-ui">
             {PAGES.map(({ href, label }) => (
               <li key={href}>
                 <Link
