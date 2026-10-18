@@ -39,7 +39,12 @@ export function SiteHeader({ current }: { current: (typeof PAGES)[number]["href"
           </ul>
         </nav>
       </div>
-      <ThemeToggle />
+      <div className="flex items-center gap-5">
+        <p className="header-source">
+          Reading the <a href="https://github.com/FalkorDB" target="_blank" rel="noreferrer">FalkorDB organisation on GitHub</a>, last 12 months
+        </p>
+        <ThemeToggle />
+      </div>
     </header>
   );
 }

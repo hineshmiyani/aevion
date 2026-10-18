@@ -48,6 +48,8 @@ type Props = {
   labelled?: boolean;
   /** Hand-placed positions, for a drawing designed rather than found by the forces. */
   positions?: Record<string, [number, number]>;
+  /** One quiet line in the map's corner: how this drawing relates to the whole graph. */
+  caption?: string;
 };
 
 /** Writes the zoom to a CSS variable, so nodes can keep a 26px target at overview zoom without
@@ -62,7 +64,7 @@ export function EvidenceMap(props: Props) {
   return <ReactFlowProvider><Network {...props} /></ReactFlowProvider>;
 }
 
-function Network({ evidence, stops, highlighted, hovered = null, onHover, onSelect, label, routeLabel = "route through the cited sources", anchor, revision, busy, preview = false, lit, labelled = false, positions }: Props) {
+function Network({ evidence, stops, highlighted, hovered = null, onHover, onSelect, label, routeLabel = "route through the cited sources", anchor, revision, busy, preview = false, lit, labelled = false, positions, caption }: Props) {
   const theme = useTheme();
   const container = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLDivElement>(null);
@@ -223,6 +225,7 @@ function Network({ evidence, stops, highlighted, hovered = null, onHover, onSele
           <ZoomVariable target={canvas} />
         </ReactFlow>
         </NetworkFocus.Provider>
+        {caption && <p key={caption} className="network-caption">{caption}</p>}
         {busy && <span className="network-progress" aria-hidden="true" />}
       </div>
       <AnimatePresence>

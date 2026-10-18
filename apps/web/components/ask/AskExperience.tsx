@@ -6,7 +6,7 @@ import { WorkspaceScreen } from "@/components/WorkspaceScreen";
 import { WorkspaceViews, type WorkspaceView } from "@/components/WorkspaceViews";
 import { BackIcon, CheckIcon, LinkIcon, SendIcon } from "@/components/WorkspaceIcons";
 import { useAskStream } from "@/hooks/use-ask-stream";
-import { graphSchema, questionWalk, SCHEMA_ANCHOR, SCHEMA_POSITIONS } from "@/lib/graph-schema";
+import { graphSchema, mapCaption, questionWalk, SCHEMA_ANCHOR, SCHEMA_POSITIONS } from "@/lib/graph-schema";
 import type { AskResponse, Citation, EvidencePath, GraphStats } from "@/lib/types";
 import { AnswerResult } from "./AnswerResult";
 import { QuestionSuggestions } from "./QuestionSuggestions";
@@ -131,6 +131,6 @@ export function AskExperience({ org, featured, stats }: Props) {
         </WorkspaceViews>
       </>}</WorkspaceScreen>
     </aside>
-    <div className="workspace-map"><EvidencePanel preview={idle} revision={state.status === "success" ? state.question : idle ? "schema" : "pending"} busy={busy} evidence={map.evidence} citations={map.citations} anchor={onSchema ? SCHEMA_ANCHOR : undefined} labelled={onSchema} positions={onSchema ? SCHEMA_POSITIONS : undefined} lit={lit} highlighted={highlighted} hovered={idle ? null : hovered} onHover={setHovered} onSelect={toggle} label={onSchema ? "Graph model" : busy ? "Evidence map from the previous answer while loading" : state.status === "error" ? "Evidence map from the previous answer" : "Evidence map for this answer"} /></div>
+    <div className="workspace-map"><EvidencePanel preview={idle} revision={state.status === "success" ? state.question : idle ? "schema" : "pending"} busy={busy} evidence={map.evidence} citations={map.citations} anchor={onSchema ? SCHEMA_ANCHOR : undefined} labelled={onSchema} positions={onSchema ? SCHEMA_POSITIONS : undefined} caption={mapCaption(map.evidence, onSchema, stats, "answer")} lit={lit} highlighted={highlighted} hovered={idle ? null : hovered} onHover={setHovered} onSelect={toggle} label={onSchema ? "Graph model" : busy ? "Evidence map from the previous answer while loading" : state.status === "error" ? "Evidence map from the previous answer" : "Evidence map for this answer"} /></div>
   </div>;
 }

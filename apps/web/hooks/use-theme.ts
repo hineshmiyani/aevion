@@ -26,9 +26,8 @@ function applyTheme(theme: Theme) {
 }
 
 function subscribe(onChange: () => void) {
-  const media = window.matchMedia("(prefers-color-scheme: dark)");
   if (preference === undefined) preference = storedPreference();
-  const sync = () => applyTheme(preference ?? (media.matches ? "dark" : "light"));
+  const sync = () => applyTheme(preference ?? "light");
   const onStorage = (event: StorageEvent) => {
     if (event.key !== THEME_STORAGE_KEY && event.key !== null) return;
     preference = storedPreference();
@@ -36,12 +35,10 @@ function subscribe(onChange: () => void) {
   };
   window.addEventListener(THEME_EVENT, onChange);
   window.addEventListener("storage", onStorage);
-  media.addEventListener("change", sync);
   sync();
   return () => {
     window.removeEventListener(THEME_EVENT, onChange);
     window.removeEventListener("storage", onStorage);
-    media.removeEventListener("change", sync);
   };
 }
 

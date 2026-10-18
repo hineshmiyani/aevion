@@ -7,7 +7,7 @@ import { WorkspaceScreen } from "@/components/WorkspaceScreen";
 import { WorkspaceViews, type WorkspaceView } from "@/components/WorkspaceViews";
 import { BackIcon } from "@/components/WorkspaceIcons";
 import { useTriage } from "@/hooks/use-triage";
-import { graphSchema, SCHEMA_ANCHOR, SCHEMA_POSITIONS, triageWalk } from "@/lib/graph-schema";
+import { graphSchema, mapCaption, SCHEMA_ANCHOR, SCHEMA_POSITIONS, triageWalk } from "@/lib/graph-schema";
 import sample from "@/lib/triage-sample.json";
 import type { EvidencePath, GraphStats, TriageMode, TriageResponse } from "@/lib/types";
 import { STARTERS, TriageForm } from "./TriageForm";
@@ -68,6 +68,6 @@ export function TriageExperience({ org, stats }: { org: string; stats?: GraphSta
         </WorkspaceViews>
       </>}</WorkspaceScreen>
     </aside>
-    <div className="workspace-map"><EvidencePanel evidence={map.evidence} citations={[]} stops={map.stops} highlighted={highlighted} hovered={idle ? null : hovered} onHover={setHovered} onSelect={toggle} label={onSchema ? "Graph model" : "Evidence map for this triage"} labelled={onSchema} positions={onSchema ? SCHEMA_POSITIONS : undefined} routeLabel="route from a similar issue, through the code its fix changed, to who knows it" anchor={map.anchor} lit={lit} revision={state.status === "success" ? state.issueKey : idle ? "schema" : "pending"} busy={busy} preview={idle} /></div>
+    <div className="workspace-map"><EvidencePanel evidence={map.evidence} citations={[]} stops={map.stops} highlighted={highlighted} hovered={idle ? null : hovered} onHover={setHovered} onSelect={toggle} label={onSchema ? "Graph model" : "Evidence map for this triage"} labelled={onSchema} positions={onSchema ? SCHEMA_POSITIONS : undefined} caption={mapCaption(map.evidence, onSchema, stats, "triage")} routeLabel="route from a similar issue, through the code its fix changed, to who knows it" anchor={map.anchor} lit={lit} revision={state.status === "success" ? state.issueKey : idle ? "schema" : "pending"} busy={busy} preview={idle} /></div>
   </div>;
 }

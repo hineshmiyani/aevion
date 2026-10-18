@@ -10,7 +10,7 @@ const starter = (i: number) => new RegExp(HERO_QUESTIONS[i].question.replace("?"
 test("the first screen shows the question entry and graph", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1, name: "Ask about FalkorDB." })).toBeVisible();
-  await expect(page.getByRole("switch", { name: "Dark mode" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "FalkorDB organisation on GitHub" })).toBeVisible();
   // The graph model is already on the map: what Aevion can walk, before anything is asked.
   await expect(page.getByRole("group", { name: /Graph model/ })).toBeVisible();
   await expect(page.locator(".react-flow__node")).toHaveCount(SCHEMA_NODES);
@@ -80,7 +80,7 @@ test("a ?q= link asks that question, and each answer can be shared", async ({ pa
 test("pressing / jumps to the question box", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator(".react-flow__node")).toHaveCount(SCHEMA_NODES);
-  await page.getByRole("switch", { name: "Dark mode" }).focus();
+  await page.getByRole("link", { name: "Ask", exact: true }).focus();
   await page.keyboard.press("/");
   await expect(page.getByRole("textbox", { name: "Your question" })).toBeFocused();
   await expect(page.getByRole("textbox", { name: "Your question" })).toHaveValue("");

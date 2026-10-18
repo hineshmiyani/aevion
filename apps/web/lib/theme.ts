@@ -5,8 +5,7 @@ export const THEME_STORAGE_KEY = "aevion-theme";
 export const themeScript = `(() => {
   let theme;
   try { theme = localStorage.getItem("${THEME_STORAGE_KEY}"); } catch {}
-  if (theme !== "light" && theme !== "dark") {
-    theme = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  }
+  // Light unless the visitor chose dark; the system preference doesn't decide.
+  if (theme !== "dark") theme = "light";
   document.documentElement.dataset.theme = theme;
 })();`;

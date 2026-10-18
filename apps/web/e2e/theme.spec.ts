@@ -22,16 +22,15 @@ test("the header switch remembers the theme across sections and reloads", async 
   await expect(page.locator("body")).toHaveCSS("background-color", "rgb(255, 255, 255)");
 });
 
-test("the system preference applies until the visitor chooses a theme", async ({ page }) => {
+test("light is the default, even on a dark system, until the visitor chooses dark", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", error => errors.push(error.message));
   page.on("console", message => { if (message.type() === "error" && /hydrat/i.test(message.text())) errors.push(message.text()); });
   await page.emulateMedia({ colorScheme: "dark" });
   await page.goto("/");
   const toggle = page.getByRole("switch", { name: "Dark mode" });
-  await expect(toggle).toHaveAttribute("aria-checked", "true");
-  await page.emulateMedia({ colorScheme: "light" });
   await expect(toggle).toHaveAttribute("aria-checked", "false");
+  await expect(page.locator("body")).toHaveCSS("background-color", "rgb(255, 255, 255)");
   await toggle.click();
   await page.reload();
   await expect(toggle).toHaveAttribute("aria-checked", "true");

@@ -13,12 +13,16 @@ async function scan(page: Page) {
   expect(summary, JSON.stringify(results.violations.map(v => ({ rule: v.id, nodes: v.nodes.map(n => ({ target: n.target, reason: n.failureSummary })) })), null, 2)).toEqual([]);
 }
 
-// Both themes must retain readable content and usable controls.
+// Both themes must stay readable and usable. Light is the default; dark is the visitor's
+// choice, so the dark pass sets it the way the switch does.
 for (const colorScheme of ["light", "dark"] as const) {
   test.describe(`system theme ${colorScheme}`, () => {
     test.use({ colorScheme });
+    test.beforeEach(async ({ page }) => {
+      if (colorScheme === "dark") await page.addInitScript(() => localStorage.setItem("aevion-theme", "dark"));
+    });
 
-    test("the page follows the system preference", async ({ page }) => {
+    test("the page shows the chosen theme", async ({ page }) => {
       await page.goto("/");
       const background = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
       expect(background).toBe(colorScheme === "light" ? "rgb(255, 255, 255)" : "rgb(24, 26, 29)");

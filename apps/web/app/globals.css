@@ -60,6 +60,8 @@
 
 
 /* Neutral charcoal surfaces, soft text and restrained blue controls. */
+
+
 :root[data-theme="dark"] {
   color-scheme: dark;
   --paper: #181a1d;
@@ -104,7 +106,6 @@
   --node-comment: #a5b980;
   --node-release: #dca29a;
 }
-
 /* Consistent corner sizes for workspace controls. */
 @theme {
   --radius-xs: 2px;
@@ -238,6 +239,7 @@ summary {
 .network-toolbar strong { font-size:13px; font-weight:600; }
 .network-toolbar span { display:block; font-size:11px; color:var(--muted); margin-top:3px; }
 .network-canvas { position:relative; flex:1; min-height:300px; }
+.network-caption { position:absolute; top:14px; left:16px; z-index:5; max-width:calc(100% - 32px); font-size:13px; line-height:1.45; color:var(--muted); pointer-events:none; animation:fade-in 320ms var(--ease-soft) both; }
 .workspace-form { padding:20px; border:1px solid var(--rule); border-radius:10px; background:var(--subtle); }
 .workspace-form textarea { border-radius:6px; background:var(--surface); font-size:15px; }
 .workspace-form button[type=submit] { border-radius:6px; }
@@ -260,6 +262,11 @@ summary {
 /* Ask, explore, inspect: context is revealed when requested. */
 .app-frame { width:100%; max-width:1920px; margin:0 auto; display:flex; flex:1; flex-direction:column; }
 .app-header { height:72px; flex-shrink:0; display:flex; align-items:center; justify-content:space-between; padding:0 32px; border-bottom:1px solid var(--rule); }
+.header-source { font-size:13px; color:var(--muted); }
+.header-source a { color:var(--ink); text-decoration:underline; text-decoration-color:var(--rule-strong); text-underline-offset:3px; transition:text-decoration-color var(--hover-out) var(--ease-soft); }
+.header-source a:hover { text-decoration-color:var(--ink); transition-duration:var(--hover-in); }
+/* On phones the masthead keeps the logo and sections; the source line would crowd them. */
+@media (max-width:700px) { .header-source { display:none; } }
 .icon-button { width:40px; height:40px; display:inline-grid; place-items:center; flex-shrink:0; font-size:20px; color:var(--muted); border-radius:6px; }
 .icon-button:hover { background:var(--hover); color:var(--ink); }
 
@@ -411,7 +418,7 @@ summary {
 .answer-header .back-button { width:32px; padding:0; justify-content:center; }
 /* Centre the arrow optically on the title's first line: between its cap-height and x-height
    middles, which sit a little below the line box's middle. */
-.answer-header .back-button { margin-top:1px; }
+.answer-header .back-button { margin-top:-4px; }
 .answer-header:has(.is-key) .back-button { margin-top:-3px; }
 .ghost-button { display:inline-flex; align-items:center; gap:6px; height:32px; padding:0 10px; border-radius:8px; font-size:13px; font-weight:500; color:var(--muted); transition:background-color var(--dur-fast), color var(--dur-fast); }
 .ghost-button:hover { background:var(--hover); color:var(--ink); }

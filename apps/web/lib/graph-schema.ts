@@ -70,6 +70,14 @@ export function graphSchema(stats?: GraphStats): EvidencePath {
   };
 }
 
+const count = (n: number) => n.toLocaleString("en-US");
+
+/** The map's caption: the model stands for the whole graph; an answer is the slice it uses. */
+export function mapCaption(evidence: EvidencePath, onSchema: boolean, stats: GraphStats | undefined, what: "answer" | "triage"): string | undefined {
+  if (onSchema) return stats ? `This model covers ${count(stats.nodes)} nodes and ${count(stats.edges)} edges from ${count(stats.repos)} repositories.` : undefined;
+  return `This ${what} uses ${count(evidence.nodes.length)} nodes and ${count(evidence.edges.length)} edges.`;
+}
+
 /** The labels a recorded answer's evidence uses, as schema nodes: the part of the model it walks. */
 function walked(evidence: EvidencePath | undefined): string[] {
   return evidence ? [...new Set(evidence.nodes.map(n => idOf(n.label)))] : [];
