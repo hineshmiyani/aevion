@@ -263,3 +263,4 @@ The API suite (157 tests) needs the local FalkorDB from Docker for its integrati
 | Hinesh Miyani (lead) | [@hineshmiyani](https://github.com/hineshmiyani) |
 | Jignesh Dabhi | [@zephyr2e1](https://github.com/zephyr2e1) |
 | Jaydeep Prajapati | [@jaydeepprajapati123](https://github.com/jaydeepprajapati123) |
+| Het Thummar | [@hetthummar](https://github.com/hetthummar) |
