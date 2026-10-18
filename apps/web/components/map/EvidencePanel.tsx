@@ -26,10 +26,11 @@ type EvidencePanelProps = {
 export function EvidencePanel({ evidence, citations, cypher, stops, highlighted, onSelect, label, routeLabel, caption }: EvidencePanelProps) {
   const [tab, setTab] = useState<Tab>("map");
   const routeStops = stops ?? [...citations].sort((a, b) => a.n - b.n).map((c) => c.node_id);
+  // An answer that didn't touch the graph has no path or queries: those tabs aren't offered.
   const tabs: { id: Tab; name: string }[] = [
     { id: "map", name: "Map" },
-    { id: "path", name: `Path (${evidence.nodes.length})` },
-    { id: "cypher", name: `Cypher (${cypher.length})` },
+    ...(evidence.nodes.length ? [{ id: "path" as const, name: `Path (${evidence.nodes.length})` }] : []),
+    ...(cypher.length ? [{ id: "cypher" as const, name: `Cypher (${cypher.length})` }] : []),
   ];
 
   return (
