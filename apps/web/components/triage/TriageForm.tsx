@@ -7,7 +7,7 @@ import type { TriageMode } from "@/lib/types";
 export const SANDBOX = "hineshmiyani/aevion-sandbox";
 
 // Real open issues from the graph, plus a sandbox issue Aevion has already acted on.
-const STARTERS = [
+export const STARTERS = [
   { key: "FalkorDB/FalkorDB#3357", note: "UDF reload races concurrent queries" },
   { key: "FalkorDB/falkordb-py#306", note: "Python client errors during failovers" },
   { key: "FalkorDB/GraphRAG-SDK#344", note: "SDK incompatibilities with FalkorDB 6" },
@@ -105,7 +105,7 @@ export function TriageForm({ busy, onTriage, idle }: TriageFormProps) {
             Act on the issue
           </label>
           <span id="apply-hint" className="inline-flex items-center text-xs text-muted">
-            {onSandbox ? "Labels it and posts the reply, once per issue." : "Only on our sandbox repo."}
+            {onSandbox ? "Labels it and posts the reply, once per issue." : "Only on the sandbox repo. FalkorDB's repos are read-only."}
           </span>
         </fieldset>
       </form>

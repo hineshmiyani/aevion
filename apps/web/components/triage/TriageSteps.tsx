@@ -13,11 +13,11 @@ import { InlineText, ReplyText } from "./ReplyText";
 const STRENGTH: Record<ComponentPick["strength"], { label: string; style: string }> = {
   strong: { label: "strong", style: "border-ink text-ink" },
   moderate: { label: "moderate", style: "border-rule-strong text-ink" },
-  weak: { label: "weak, a guess", style: "border-dashed border-rule-strong text-muted" },
+  weak: { label: "weak", style: "border-dashed border-rule-strong text-muted" },
 };
 
 const STATUS: Record<TriageAction["status"], { label: string; style: string }> = {
-  proposed: { label: "Would do", style: "border-rule-strong text-ink" },
+  proposed: { label: "Proposed", style: "border-rule-strong text-ink" },
   done: { label: "Done", style: "border-ink bg-ink text-paper" },
   skipped: { label: "Skipped", style: "border-dashed border-rule-strong text-muted" },
   failed: { label: "Failed", style: "border-danger text-danger" },
@@ -51,7 +51,7 @@ function Similar({ issue }: { issue: SimilarIssue }) {
           {issue.state.toLowerCase()}
           {issue.fixed_by.length > 0 && `, fixed by ${issue.fixed_by[0]}`}
         </span>
-        {issue.likely_duplicate && <span className=" border border-path px-1.5 text-[11px] font-medium text-path">likely duplicate</span>}
+        {issue.likely_duplicate && <span className="border border-path px-1.5 text-[11px] font-medium text-path">likely duplicate</span>}
       </div>
       <p className="mt-0.5 text-[15px] leading-snug">
         <InlineText text={issue.title} />
@@ -60,18 +60,42 @@ function Similar({ issue }: { issue: SimilarIssue }) {
   );
 }
 
-function Step({ n, title, children, last = false }: { n: number; title: string; children: ReactNode; last?: boolean }) {
+type StepProps = { n: number; title: string; children?: ReactNode; last?: boolean; pending?: boolean };
+
+function Step({ n, title, children, last = false, pending = false }: StepProps) {
   return (
-    <li className="arrive relative grid grid-cols-[2rem_minmax(0,1fr)] gap-x-3" style={{ animationDelay: `${(n - 1) * 140}ms` }}>
-      {!last && <span aria-hidden className="absolute top-8 bottom-0 left-[15px] w-[3px] bg-path/70" />}
-      <span aria-hidden className="relative z-10 flex size-8 items-center justify-center border-2 border-path bg-surface text-sm font-semibold text-path tabular-nums">
+    <li
+      className={`relative grid grid-cols-[2rem_minmax(0,1fr)] gap-x-3 ${pending ? "" : "arrive"}`}
+      style={pending ? undefined : { animationDelay: `${(n - 1) * 140}ms` }}
+    >
+      {!last && <span aria-hidden className={`absolute top-8 bottom-0 left-[15px] w-[3px] ${pending ? "bg-rule" : "bg-path/70"}`} />}
+      <span
+        aria-hidden
+        className={`relative z-10 flex size-8 items-center justify-center border-2 bg-surface text-sm font-semibold tabular-nums ${
+          pending ? "border-dashed border-rule-strong text-muted" : "border-path text-path"
+        }`}
+      >
         {n}
       </span>
-      <div className={`min-w-0 ${last ? "" : "pb-7"}`}>
-        <h3 className="pt-1 font-medium">{title}</h3>
-        <div className="mt-2">{children}</div>
+      <div className={`min-w-0 ${last ? "" : pending ? "pb-5" : "pb-7"}`}>
+        <h3 className={`pt-1 font-medium ${pending ? "text-muted" : ""}`}>{title}</h3>
+        {children && <div className="mt-2">{children}</div>}
       </div>
     </li>
+  );
+}
+
+const PENDING = ["Read the issue", "Look for similar issues", "Follow their fixes to the code", "Find who knows it", "Draft a reply"];
+
+/** The same six steps, not yet taken: shown while the triage runs, so the wait has a shape. */
+export function PendingSteps({ applying }: { applying: boolean }) {
+  const titles = [...PENDING, applying ? "Act on the sandbox issue" : "Decide what it would do on the sandbox"];
+  return (
+    <ol aria-label="Steps Aevion is working through" className="mt-2">
+      {titles.map((title, i) => (
+        <Step key={title} n={i + 1} title={title} last={i === titles.length - 1} pending />
+      ))}
+    </ol>
   );
 }
 
@@ -110,7 +134,10 @@ export function TriageSteps({ data }: { data: TriageResponse }) {
           <>
             <p>
               <span className="font-mono text-[15px]">{data.component.name}</span>{" "}
-              <span className={`ml-1 border px-1.5 text-xs font-medium ${STRENGTH[data.component.strength].style}`}>
+              <span
+                title={data.component.strength === "weak" ? "Little in the graph points here, so treat it as a guess." : undefined}
+                className={`ml-1 border px-1.5 text-xs font-medium ${STRENGTH[data.component.strength].style}`}
+              >
                 {STRENGTH[data.component.strength].label}
               </span>
             </p>

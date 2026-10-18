@@ -19,6 +19,7 @@ function answerMeta(data: AskResponse): string {
   if (data.sample) return "A recorded sample answer. Set AEVION_API_URL to ask live.";
   if (data.cached) return time ? `Answered from the graph in ${time}, cached` : "Answered from the graph, cached";
   const calls = data.tool_calls.length;
+  if (calls === 0) return time ? `Answered in ${time} without the graph` : "Answered without the graph";
   return `Answered in ${time} with ${calls} graph ${calls === 1 ? "query" : "queries"}, tracing ${data.evidence.edges.length} edges`;
 }
 
@@ -183,7 +184,10 @@ export function AskExperience({ org, stats, featured }: Props) {
           />
         ) : (
           <div className="survey-grid flex h-full min-h-[340px] items-center justify-center border border-rule" aria-hidden>
-            <p className="working text-sm text-muted">Tracing the route through the graph…</p>
+            <p className="flex items-center gap-2.5 text-sm text-muted">
+              <span aria-hidden className="working inline-block size-2 bg-path" />
+              Tracing the route through the graph
+            </p>
           </div>
         )}
       </div>

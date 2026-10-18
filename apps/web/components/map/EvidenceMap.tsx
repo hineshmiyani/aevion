@@ -52,6 +52,7 @@ const EMPTY = {
   links: [] as Link[],
   viewBox: "0 0 1 1",
   vbWidth: 1,
+  vbHeight: 1,
   max: 28,
   legs: [] as Placed[][],
   onRoute: new Set<string>(),
@@ -165,12 +166,13 @@ function layout(evidence: EvidencePath, stops: string[], aspect: number, boxWidt
   const maxX = Math.max(...nodes.map((n) => n.x + (label(n) ? 16 + label(n).length * charWidth : 0))) + pad / 2;
   const maxY = Math.max(...nodes.map((n) => n.y)) + pad;
   const vbWidth = Math.max(maxX - minX, 320);
-  const viewBox = `${minX} ${minY} ${vbWidth} ${Math.max(maxY - minY, 240)}`;
+  const vbHeight = Math.max(maxY - minY, 240);
+  const viewBox = `${minX} ${minY} ${vbWidth} ${vbHeight}`;
 
   const placed = new Map(nodes.map((n) => [n.id, n]));
   const legs = legIds.map((path) => path.map((id) => placed.get(id)!));
   const onRoute = new Set(legs.flat().map((n) => n.id).concat(present));
-  return { nodes, links, viewBox, vbWidth, legs, onRoute, present, placed, max };
+  return { nodes, links, viewBox, vbWidth, vbHeight, legs, onRoute, present, placed, max };
 }
 
 type EvidenceMapProps = {
@@ -205,9 +207,11 @@ export function EvidenceMap({ evidence, stops, highlighted, onSelect, label, rou
     return () => observer.disconnect();
   }, []);
   const drawn = useMemo(() => (aspect === null ? null : layout(evidence, stops, aspect, boxWidth)), [evidence, stops, aspect, boxWidth]);
-  const { nodes, links, viewBox, vbWidth, legs, onRoute, present, placed, max } = drawn ?? EMPTY;
+  const { nodes, links, viewBox, vbWidth, vbHeight, legs, onRoute, present, placed, max } = drawn ?? EMPTY;
   // SVG units per screen pixel: glyphs, labels and strokes keep their on-screen size at any zoom.
-  const k = Math.min(Math.max(vbWidth / boxWidth, 0.7), 2.2);
+  // "meet" fits the tighter axis, so a tall layout in a wide box is scaled by its height.
+  const boxHeight = boxWidth * (aspect ?? 1);
+  const k = Math.min(Math.max(vbWidth / boxWidth, vbHeight / boxHeight, 0.7), 2.2);
   const G = GLYPH * k;
   const stopNumber = new Map(present.map((id, i) => [id, i + 1]));
   const selected = highlighted ? placed.get(highlighted) : undefined;
@@ -229,7 +233,7 @@ export function EvidenceMap({ evidence, stops, highlighted, onSelect, label, rou
   };
 
   if (evidence.nodes.length === 0) {
-    return <p className="p-6 text-sm text-muted">This answer didn&apos;t need the graph.</p>;
+    return <p className="p-6 text-sm text-muted">Nothing to map. This answer didn&apos;t use the graph.</p>;
   }
 
   return (

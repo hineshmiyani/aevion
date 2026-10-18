@@ -21,13 +21,20 @@ function describe(tool: string, args: Record<string, unknown>): string {
   }
 }
 
-/** The agent's real steps, as they happen: each tool call, then the writing. */
+/**
+ * The agent's real steps, as they happen: each tool call, then the writing. The model "writes"
+ * between tool rounds too, but only the last stretch, after every query, is the answer, so
+ * earlier ones aren't listed. A query that returned nothing says so instead of looking like a hit.
+ */
 export function ProgressLog({ steps, working }: { steps: Step[]; working: boolean }) {
-  const shown: Step[] = steps.length === 0 && working ? [{ kind: "writing", done: false }] : steps;
+  const lastTool = steps.findLastIndex((s) => s.kind === "tool");
+  const visible = steps.filter((s, i) => s.kind !== "writing" || i > lastTool);
+  const shown: Step[] = visible.length === 0 && working ? [{ kind: "writing", done: false }] : visible;
   return (
     <ol aria-label="What Aevion did" className="space-y-1.5 text-sm">
       {shown.map((step, i) => {
         const done = step.kind === "cached" || step.done;
+        const empty = step.kind === "tool" && step.done && step.rows === 0;
         const text =
           step.kind === "cached"
             ? "Found this answer already in the graph"
@@ -36,13 +43,14 @@ export function ProgressLog({ steps, working }: { steps: Step[]; working: boolea
                 ? "Reading the question"
                 : "Writing the answer from what the graph returned"
               : describe(step.tool, step.args);
+        const marker = empty ? "border border-rule-strong" : done ? "bg-path" : "working bg-muted";
         return (
-          <li key={i} className="arrive flex items-baseline gap-2.5">
-            <span aria-hidden className={`inline-block size-2 shrink-0 translate-y-[-1px] ${done ? "bg-path" : "working bg-muted"}`} />
-            <span className={done ? "text-ink" : "text-muted"}>{text}</span>
+          <li key={i} className="arrive flex flex-wrap items-baseline gap-x-2.5">
+            <span aria-hidden className={`inline-block size-2 shrink-0 translate-y-[-1px] ${marker}`} />
+            <span className={done && !empty ? "text-ink" : "text-muted"}>{text}</span>
             {step.kind === "tool" && step.done && (
               <span className="text-muted tabular-nums">
-                {step.rows} {step.rows === 1 ? "node" : "nodes"} in {step.ms} ms
+                {empty ? `found nothing, ${step.ms} ms` : `${step.rows} ${step.rows === 1 ? "node" : "nodes"} in ${step.ms} ms`}
               </span>
             )}
             <span className="sr-only">{done ? "done" : "in progress"}</span>
