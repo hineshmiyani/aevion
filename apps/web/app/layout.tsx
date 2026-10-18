@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Mono, IBM_Plex_Sans_Condensed, Newsreader } from "next/font/google";
 import "./globals.css";
 
@@ -22,6 +22,12 @@ export const metadata: Metadata = {
   title: "Aevion · Company brain on FalkorDB",
   description:
     "Ask how the FalkorDB project works: who knows what, why it was decided, what changed. Every answer shows the path through the graph that proves it.",
+};
+
+// Light for everyone, whatever the system theme (globals.css keeps the night chart, off).
+export const viewport: Viewport = {
+  colorScheme: "light",
+  themeColor: "#eef1ec",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
